@@ -2,4 +2,5 @@
 <resources>
     <string name="app_name">OBN-soft Sandbox</string>
     <string name="pick_hsv_color">Pick HSV color.</string>
+    <string name="pick_grid_color">Pick preset color.</string>
 </resources>
