@@ -12,8 +12,8 @@ import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.LinearLayout.LayoutParams;
+import android.widget.TextView;
 
 public class MainActivity extends Activity {
     /** Called when the activity is first created. */
@@ -26,8 +26,7 @@ public class MainActivity extends Activity {
     public void onPickHSVColor(View v) {
         LinearLayout ll = new LinearLayout(this);
         final TextView tv = new TextView(this);
-        LayoutParams lp = new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
-        lp.weight = 1.0f;
+        LayoutParams lp = new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT, 1f);
         tv.setLayoutParams(lp);
         tv.setGravity(Gravity.CENTER);
         ll.addView(tv);
@@ -57,9 +56,9 @@ public class MainActivity extends Activity {
 
     public void onPickGridColor(View v) {
         LinearLayout ll = new LinearLayout(this);
+        ll.setOrientation(LinearLayout.VERTICAL);
         final TextView tv = new TextView(this);
-        LayoutParams lp = new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
-        lp.weight = 1.0f;
+        LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         tv.setLayoutParams(lp);
         tv.setGravity(Gravity.CENTER);
         ll.addView(tv);

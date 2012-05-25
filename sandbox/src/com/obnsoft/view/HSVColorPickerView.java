@@ -32,8 +32,8 @@ public class HSVColorPickerView extends View {
     private float   mSatValX;
     private float   mSatValY;
     private double  mLastHueDeg;
-    private float   mLastSatValX;
-    private float   mLastSatValY;
+    private float   mSatValGapX;
+    private float   mSatValGapY;
     private Target  mTarget = Target.NONE;
     private RectF   mRectHue = new RectF();
     private Paint   mPaintHue = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -71,12 +71,10 @@ public class HSVColorPickerView extends View {
 
         mPaintSat.setStyle(Paint.Style.FILL);
         mPaintVal.setStyle(Paint.Style.FILL);
-        setPaintSatVal((double) mHSV[0]);
 
         mPaintCurCol.setStyle(Paint.Style.FILL);
         mPaintCurColF.setStyle(Paint.Style.STROKE);
         mPaintCurColH.setStyle(Paint.Style.STROKE);
-        setPaintCurColor(mHSV);
 
         setColor(Color.BLACK);
     }
@@ -86,10 +84,10 @@ public class HSVColorPickerView extends View {
     }
 
     public void setColor(int color) {
-        mCurColor = color;
+        mCurColor = color | 0xFF000000;
         Color.colorToHSV(color, mHSV);
         setPaintSatVal((double) mHSV[0]);
-        setPaintCurColor(mHSV);
+        setPaintCurColor(mHSV, false);
     }
 
     public int getColor() {
@@ -114,7 +112,7 @@ public class HSVColorPickerView extends View {
         mRectHue.set(-r, -r, r, r);
         mPaintHue.setStrokeWidth(mRadius / 4f);
         setPaintSatVal((double) mHSV[0]);
-        setPaintCurColor(mHSV);
+        setPaintCurColor(mHSV, false);
         mPaintCurColF.setStrokeWidth(mRadius / 120f + 1f);
         mPaintCurColH.setStrokeWidth(mRadius / 120f + 1f);
     }
@@ -183,7 +181,7 @@ public class HSVColorPickerView extends View {
             if (hue > 360.0) hue -= 360.0;
             mHSV[0] = (float) hue;
             setPaintSatVal(hue);
-            setPaintCurColor(mHSV);
+            setPaintCurColor(mHSV, true);
         }
         mLastHueDeg = deg;
         return true;
@@ -195,25 +193,25 @@ public class HSVColorPickerView extends View {
             if (Math.sqrt(x * x + y * y) > r) {
                 return false;
             }
+            mSatValGapX = mSatValX - x;
+            mSatValGapY = mSatValY - y;
         } else {
-            mSatValX += x - mLastSatValX;
-            mSatValY += y - mLastSatValY;
+            x += mSatValGapX;
+            y += mSatValGapY;
             double d = Math.toRadians(mHSV[0] + 120.0);
             double nx = Math.cos(d);
             double ny = -Math.sin(d);
-            double val = (2.0 - (nx * mSatValX + ny * mSatValY) * 2.0 / r) / 3.0;
+            double val = (2.0 - (nx * x + ny * y) * 2.0 / r) / 3.0;
             double sat = (val > 0.0) ?
-                    0.5 + (-ny * mSatValX + nx * mSatValY) / r / SQRT3 / val : 0.0;
+                    0.5 + (-ny * x + nx * y) / r / SQRT3 / val : 0.0;
             if (val > 1.0) val = 1.0;
             if (val < 0.0) val = 0.0;
             if (sat > 1.0) sat = 1.0;
             if (sat < 0.0) sat = 0.0;
             mHSV[1] = (float) sat;
             mHSV[2] = (float) val;
-            setPaintCurColor(mHSV);
+            setPaintCurColor(mHSV, true);
         }
-        mLastSatValX = x;
-        mLastSatValY = y;
         return true;
     }
 
@@ -257,14 +255,16 @@ public class HSVColorPickerView extends View {
         mPaintCurColH.setColor((calcBrightness(pureCol) < 0.5) ? Color.WHITE : Color.BLACK);
     }
 
-    private void setPaintCurColor(float[] hsv) {
-        while (hsv[0] < 0f)     hsv[0] += 360f;
-        while (hsv[0] >= 360f)  hsv[0] -= 360f;
-        if (hsv[1] > 1f) hsv[1] = 1f;
-        if (hsv[1] < 0f) hsv[1] = 0f;
-        if (hsv[2] > 1f) hsv[2] = 1f;
-        if (hsv[2] < 0f) hsv[2] = 0f;
-        mCurColor = Color.HSVToColor(hsv);
+    private void setPaintCurColor(float[] hsv, boolean updated) {
+        if (updated) {
+            while (hsv[0] < 0f)     hsv[0] += 360f;
+            while (hsv[0] >= 360f)  hsv[0] -= 360f;
+            if (hsv[1] > 1f) hsv[1] = 1f;
+            if (hsv[1] < 0f) hsv[1] = 0f;
+            if (hsv[2] > 1f) hsv[2] = 1f;
+            if (hsv[2] < 0f) hsv[2] = 0f;
+            mCurColor = Color.HSVToColor(hsv);
+        }
         mPaintCurCol.setColor(mCurColor);
         mPaintCurColF.setColor((calcBrightness(mCurColor) < 0.5) ? Color.WHITE : Color.BLACK);
 
