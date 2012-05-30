@@ -3,17 +3,19 @@ package com.obnsoft.view;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.LinearGradient;
 import android.graphics.Paint;
+import android.graphics.Shader;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.RectShape;
 import android.util.AttributeSet;
+import android.view.Display;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 
-public class RGBColorPickerView extends LinearLayout {
-
-    public interface OnColorChangedListener {
-        void colorChanged(int color);
-    }
+public class RGBColorPickerView extends LinearLayout implements ColorPickerInterface {
 
     private interface OnValueChangedListener {
         void onValueChanged(View view, int value);
@@ -39,7 +41,6 @@ public class RGBColorPickerView extends LinearLayout {
                 super(context);
                 mParent = parent;
                 mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-                mPaint.setColor(Color.WHITE);
             }
 
             protected void resize() {
@@ -60,20 +61,23 @@ public class RGBColorPickerView extends LinearLayout {
                 int offset = mParent.getScrollX();
                 int value = (offset + mScale / 2) / mScale + mMinValue;
 
+                mPaint.setColor(Color.LTGRAY);
                 mPaint.setTextSize(mHeight / 4);
                 int iMax = Math.min(value  + margin / mScale + 1, mMaxValue);
                 for (int i = Math.max(value - margin / mScale - 1, mMinValue); i <= iMax; i++) {
                     boolean isUnit = (i % mUnit == 0 || i == mMinValue || i == mMaxValue);
                     int x = margin + (i - mMinValue) * mScale;
                     c.drawLine(x, 0, x, mHeight / (isUnit ? 2 : 4), mPaint);
-                    if (isUnit && Math.abs(offset + margin - x) > mHeight) {
+                    if (isUnit && Math.abs(offset + margin - x) > mHeight / 2) {
                         String s = String.valueOf(i);
                         c.drawText(s, x - mPaint.measureText(s) / 2, mHeight * 5 / 8, mPaint);
                     }
                 }
+                mPaint.setColor(Color.WHITE);
                 mPaint.setTextSize(mHeight / 2);
                 String s = String.valueOf(value);
-                c.drawText(s, offset + margin - mPaint.measureText(s) / 2, mHeight * 7 / 8, mPaint);
+                c.drawText(s, offset + margin - mPaint.measureText(s) / 2,
+                        mHeight * 7 / 8, mPaint);
             }
         }
 
@@ -132,6 +136,7 @@ public class RGBColorPickerView extends LinearLayout {
     }
 
     private int mCurColor;
+    private int mMinimumSize;
     private MeterScrollView mRedMeter;
     private MeterScrollView mGreenMeter;
     private MeterScrollView mBlueMeter;
@@ -145,18 +150,22 @@ public class RGBColorPickerView extends LinearLayout {
         super(context, attrs);
         setOrientation(VERTICAL);
 
+        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        Display disp = wm.getDefaultDisplay();
+        mMinimumSize = Math.min(disp.getWidth(), disp.getHeight()) / 2;
+
         mRedMeter = new MeterScrollView(context);
-        mRedMeter.setBackgroundColor(0xFF800000);
+        mRedMeter.setBackgroundDrawable(new ShapeDrawable(new RectShape()));
         mRedMeter.setRange(0, 255, 8);
         addView(mRedMeter);
 
         mGreenMeter = new MeterScrollView(context);
-        mGreenMeter.setBackgroundColor(0xFF008000);
+        mGreenMeter.setBackgroundDrawable(new ShapeDrawable(new RectShape()));
         mGreenMeter.setRange(0, 255, 8);
         addView(mGreenMeter);
 
         mBlueMeter = new MeterScrollView(context);
-        mBlueMeter.setBackgroundColor(0xFF000080);
+        mBlueMeter.setBackgroundDrawable(new ShapeDrawable(new RectShape()));
         mBlueMeter.setRange(0, 255, 8);
         addView(mBlueMeter);
 
@@ -173,12 +182,11 @@ public class RGBColorPickerView extends LinearLayout {
         mRedMeter.setValueChangedListener(listener);
         mGreenMeter.setValueChangedListener(listener);
         mBlueMeter.setValueChangedListener(listener);
+
+        setColor(Color.BLACK);
     }
 
-    public void setListener(OnColorChangedListener l) {
-        mListener = l;
-    }
-
+    @Override
     public void setColor(int color) {
         mCurColor = color | 0xFF000000;
         mRedMeter.setValue(Color.red(mCurColor));
@@ -189,14 +197,36 @@ public class RGBColorPickerView extends LinearLayout {
         }
     }
 
+    @Override
     public int getColor() {
         return mCurColor;
     }
 
     @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(MeasureSpec.makeMeasureSpec(240, MeasureSpec.EXACTLY),
-                heightMeasureSpec);
+    public void setListener(OnColorChangedListener l) {
+        mListener = l;
     }
 
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int width = (MeasureSpec.getMode(widthMeasureSpec) == MeasureSpec.EXACTLY) ?
+                MeasureSpec.getSize(widthMeasureSpec) : mMinimumSize;
+
+        ShapeDrawable sd;
+        sd = (ShapeDrawable) mRedMeter.getBackground();
+        sd.getPaint().setShader(new LinearGradient(0, 0, width / 2, 0,
+                Color.BLACK, 0xFFC00000, Shader.TileMode.MIRROR));
+        mRedMeter.setFadingEdgeLength(width / 3);
+        sd = (ShapeDrawable) mGreenMeter.getBackground();
+        sd.getPaint().setShader(new LinearGradient(0, 0, width / 2, 0,
+                Color.BLACK, 0xFF008000, Shader.TileMode.MIRROR));
+        mGreenMeter.setFadingEdgeLength(width / 3);
+        sd = (ShapeDrawable) mBlueMeter.getBackground();
+        sd.getPaint().setShader(new LinearGradient(0, 0, width / 2, 0,
+                Color.BLACK, 0xFF0000FF, Shader.TileMode.MIRROR));
+        mBlueMeter.setFadingEdgeLength(width / 3);
+
+        super.onMeasure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
+                heightMeasureSpec);
+    }
 }

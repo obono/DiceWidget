@@ -16,11 +16,7 @@ import android.widget.GridView;
 import android.widget.RelativeLayout;
 
 public class GridColorPickerView extends GridView
-        implements android.widget.AdapterView.OnItemClickListener {
-
-    public interface OnColorChangedListener {
-        void colorChanged(int color);
-    }
+        implements ColorPickerInterface, AdapterView.OnItemClickListener {
 
     class ColorSampleView extends View implements Checkable {
 
@@ -102,6 +98,7 @@ public class GridColorPickerView extends GridView
     }
 
     private int mCurColor;
+    private int mMinimumSize;
     private int mBoxSize;
     private OnColorChangedListener mListener;
     static Integer[] sPresets = new Integer[65];
@@ -136,9 +133,9 @@ public class GridColorPickerView extends GridView
 
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         Display disp = wm.getDefaultDisplay();
-        mBoxSize = Math.min(disp.getWidth(), disp.getHeight()) / 8;
+        mMinimumSize = Math.min(disp.getWidth(), disp.getHeight()) / 2;
 
-        //setVerticalScrollBarEnabled(true);
+        setVerticalScrollBarEnabled(true);
         setVerticalFadingEdgeEnabled(true);
         setNumColumns(5);
         MyAdapter adapter = new MyAdapter(context, sPresets);
@@ -147,10 +144,7 @@ public class GridColorPickerView extends GridView
         setColor(Color.BLACK);
     }
 
-    public void setListener(OnColorChangedListener l) {
-        mListener = l;
-    }
-
+    @Override
     public void setColor(int color) {
         mCurColor = color | 0xFF000000;
         MyAdapter adapter = (MyAdapter) getAdapter();
@@ -160,23 +154,30 @@ public class GridColorPickerView extends GridView
                 return;
             }
         }
+        if (mListener != null) {
+            mListener.colorChanged(mCurColor);
+        }
     }
 
+    @Override
     public int getColor() {
         return mCurColor;
     }
 
     @Override
+    public void setListener(OnColorChangedListener l) {
+        mListener = l;
+    }
+
+    @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        if (MeasureSpec.getMode(widthMeasureSpec) == MeasureSpec.UNSPECIFIED) {
-            widthMeasureSpec =
-                    MeasureSpec.makeMeasureSpec(mBoxSize * 6, MeasureSpec.EXACTLY);
-        }
-        if (MeasureSpec.getMode(heightMeasureSpec) == MeasureSpec.UNSPECIFIED) {
-            heightMeasureSpec =
-                    MeasureSpec.makeMeasureSpec(mBoxSize * 3, MeasureSpec.EXACTLY);
-        }
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        int width = (MeasureSpec.getMode(widthMeasureSpec) == MeasureSpec.EXACTLY) ?
+                MeasureSpec.getSize(widthMeasureSpec) : mMinimumSize;
+        int height = (MeasureSpec.getMode(widthMeasureSpec) == MeasureSpec.EXACTLY) ?
+                MeasureSpec.getSize(widthMeasureSpec) : mMinimumSize;
+        mBoxSize = width / 6;
+        super.onMeasure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
+                MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
     }
 
     @Override

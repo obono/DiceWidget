@@ -15,11 +15,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 
-public class HSVColorPickerView extends View {
-
-    public interface OnColorChangedListener {
-        void colorChanged(int color, float hue, float sat, float val);
-    }
+public class HSVColorPickerView extends View implements ColorPickerInterface {
 
     private enum Target {
         NONE, HUE, SAT_VAL
@@ -79,10 +75,7 @@ public class HSVColorPickerView extends View {
         setColor(Color.BLACK);
     }
 
-    public void setListener(OnColorChangedListener l) {
-        mListener = l;
-    }
-
+    @Override
     public void setColor(int color) {
         mCurColor = color | 0xFF000000;
         Color.colorToHSV(color, mHSV);
@@ -90,8 +83,14 @@ public class HSVColorPickerView extends View {
         setPaintCurColor(mHSV, false);
     }
 
+    @Override
     public int getColor() {
         return mCurColor;
+    }
+
+    @Override
+    public void setListener(OnColorChangedListener l) {
+        mListener = l;
     }
 
     public float[] getHSV() {
@@ -104,8 +103,6 @@ public class HSVColorPickerView extends View {
                 MeasureSpec.getSize(widthMeasureSpec) : mMinimumSize;
         int height = (MeasureSpec.getMode(widthMeasureSpec) == MeasureSpec.EXACTLY) ?
                 MeasureSpec.getSize(heightMeasureSpec) : mMinimumSize;
-        setMeasuredDimension(Math.max(width, getSuggestedMinimumWidth()),
-                Math.max(height, getSuggestedMinimumHeight()));
 
         mRadius = Math.min(width, height) / 2f;
         float r = mRadius * 7f / 8f;
@@ -115,6 +112,9 @@ public class HSVColorPickerView extends View {
         setPaintCurColor(mHSV, false);
         mPaintCurColF.setStrokeWidth(mRadius / 120f + 1f);
         mPaintCurColH.setStrokeWidth(mRadius / 120f + 1f);
+
+        super.onMeasure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
+                MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
     }
 
     @Override
@@ -278,7 +278,7 @@ public class HSVColorPickerView extends View {
         mRectCurCol.set(mSatValX - r8, mSatValY - r8, mSatValX + r8, mSatValY + r8);
 
         if (mListener != null) {
-            mListener.colorChanged(mCurColor, mHSV[0], mHSV[1], mHSV[2]);
+            mListener.colorChanged(mCurColor);
         }
     }
 }
