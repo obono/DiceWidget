@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">OBN-soft Sandbox</string>
+    <string name="pick_rgb_color">Pick RGB color.</string>
     <string name="pick_hsv_color">Pick HSV color.</string>
     <string name="pick_grid_color">Pick preset color.</string>
 </resources>

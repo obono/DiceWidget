@@ -7,6 +7,12 @@
 <Button  
     android:layout_width="fill_parent" 
     android:layout_height="wrap_content" 
+    android:text="@string/pick_rgb_color"
+    android:onClick="onPickRGBColor"
+    />
+<Button  
+    android:layout_width="fill_parent" 
+    android:layout_height="wrap_content" 
     android:text="@string/pick_hsv_color"
     android:onClick="onPickHSVColor"
     />
