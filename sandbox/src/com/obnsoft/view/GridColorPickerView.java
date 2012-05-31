@@ -1,6 +1,8 @@
 package com.obnsoft.view;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.util.AttributeSet;
@@ -11,112 +13,110 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Checkable;
 import android.widget.GridView;
 import android.widget.RelativeLayout;
 
 public class GridColorPickerView extends GridView
         implements ColorPickerInterface, AdapterView.OnItemClickListener {
 
-    class ColorSampleView extends View implements Checkable {
+    class MyAdapter extends ArrayAdapter<Integer> {
 
-        boolean mChecked = false;
-        int mSize = 0;
+        class ColorSampleView extends View {
 
-        public ColorSampleView(Context context) {
-            super(context);
-        }
+            int mSize = 0;
+            boolean mChecked = false;
 
-        public void setSize(int size) {
-            mSize = size;
-        }
+            public ColorSampleView(Context context) {
+                super(context);
+            }
 
-        @Override
-        public void onDraw(Canvas c) {
-            super.onDraw(c);
-            if (mChecked) {
-                
+            public void setChecked(boolean checked) {
+                mChecked = checked;
+            }
+
+            public void setSize(int size) {
+                mSize = size;
+            }
+
+            @Override
+            public void onDraw(Canvas c) {
+                super.onDraw(c);
+                if (mChecked) {
+                    c.drawBitmap(mBmpSelected,
+                            (mSize - mBmpSelected.getWidth()) / 2,
+                            (mSize - mBmpSelected.getHeight()) / 2, null);
+                }
+            }
+
+            @Override
+            public void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+                setMeasuredDimension(mSize, mSize);
             }
         }
 
-        @Override
-        public void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-            setMeasuredDimension(mSize, mSize);
-        }
-
-        @Override
-        public boolean isChecked() {
-            return mChecked;
-        }
-
-        @Override
-        public void setChecked(boolean checked) {
-            mChecked = checked;
-        }
-
-        @Override
-        public void toggle() {
-            mChecked = !mChecked;
-        }
-    }
-
-    class MyAdapter extends ArrayAdapter<Integer> {
-
-        class ViewHolder {
-            ColorSampleView cv;
-        }
-
+        private int mSelected = -1;
         private Context mContext;
+        private Bitmap mBmpSelected;
 
         public MyAdapter(Context context, Integer[] objects) {
             super(context, 0, objects);
             mContext = context;
+            mBmpSelected = BitmapFactory.decodeResource(
+                    getResources(), android.R.drawable.radiobutton_on_background);
         }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            ViewHolder holder;
-
+            ColorSampleView cv;
             if (convertView == null) {
                 RelativeLayout rl = new RelativeLayout(mContext);
                 rl.setGravity(Gravity.CENTER);
                 int pad = mBoxSize / 10;
                 rl.setPadding(pad, pad, pad, pad);
-                ColorSampleView cv = new ColorSampleView(mContext);
+                cv = new ColorSampleView(mContext);
                 rl.addView(cv);
                 convertView = rl;
-                holder = new ViewHolder();
-                holder.cv = cv;
-                convertView.setTag(holder);
+                convertView.setTag(cv);
             } else {
-                holder = (ViewHolder) convertView.getTag();
+                cv = (ColorSampleView) convertView.getTag();
             }
-            holder.cv.setSize(mBoxSize);
-            holder.cv.setBackgroundColor(getItem(position));
+            cv.setSize(mBoxSize);
+            cv.setChecked(position == mSelected);
+            cv.setBackgroundColor(getItem(position));
             return convertView;
+        }
+
+        public void setSelected(int position) {
+            mSelected = position;
+            notifyDataSetChanged();
+        }
+
+        public int getSelection() {
+            return mSelected;
         }
     }
 
     private int mCurColor;
     private int mMinimumSize;
+    private boolean mMeasured = false;
     private int mBoxSize;
     private OnColorChangedListener mListener;
     static Integer[] sPresets = new Integer[65];
 
     static {
         float[] hsv = new float[3];
+        hsv[0] = hsv[1] = 0f;
+        for (int i = 0; i < 5; i++) {
+            hsv[2] = i / 4f;
+            sPresets[i] = Color.HSVToColor(hsv);
+        }
         for (int i = 0; i < 12; i++) {
             hsv[0] = i * 30;
             for (int j = 0; j < 5; j++) {
                 hsv[1] = (j > 2) ? (6 - j) / 4f : 1f;
                 hsv[2] = (j < 2) ? (2 + j) / 4f : 1f;
-                sPresets[i * 5 + j] = Color.HSVToColor(hsv);
+                sPresets[i * 5 + j + 5] = Color.HSVToColor(hsv);
             }
-        }
-        hsv[1] = 0f;
-        for (int i = 0; i < 5; i++) {
-            hsv[2] = i / 4f;
-            sPresets[60 + i] = Color.HSVToColor(hsv);
         }
     }
 
@@ -141,22 +141,40 @@ public class GridColorPickerView extends GridView
         MyAdapter adapter = new MyAdapter(context, sPresets);
         setAdapter(adapter);
         setOnItemClickListener(this);
+
         setColor(Color.BLACK);
     }
 
     @Override
     public void setColor(int color) {
-        mCurColor = color | 0xFF000000;
         MyAdapter adapter = (MyAdapter) getAdapter();
+        int target = 0;
+        double minDiff = 256 * 256 * 2;
         for (int i = 0; i < adapter.getCount(); i++) {
-            if (mCurColor == adapter.getItem(i)) {
-                onItemClick(this, null, i, 0);
-                return;
+            int targetColor = adapter.getItem(i);
+            double diff = colorDiff(color, targetColor);
+            if (diff < minDiff) {
+                mCurColor = targetColor;
+                minDiff = diff;
+                target = i;
             }
+        }
+        adapter.setSelected(target);
+        if (mMeasured) {
+            smoothScrollToPosition(target);
+        } else {
+            setSelection(target);
         }
         if (mListener != null) {
             mListener.colorChanged(mCurColor);
         }
+    }
+
+    private double colorDiff(int col1, int col2) {
+        int rd = Color.red(col1) - Color.red(col2);
+        int gd = Color.green(col1) - Color.green(col2);
+        int bd = Color.blue(col1) - Color.blue(col2);
+        return Math.sqrt(rd * rd + gd * gd + bd * bd);
     }
 
     @Override
@@ -176,6 +194,7 @@ public class GridColorPickerView extends GridView
         int height = (MeasureSpec.getMode(heightMeasureSpec) == MeasureSpec.EXACTLY) ?
                 MeasureSpec.getSize(heightMeasureSpec) : mMinimumSize;
         mBoxSize = width / 6;
+        mMeasured = true;
         super.onMeasure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
                 MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
     }
@@ -184,6 +203,7 @@ public class GridColorPickerView extends GridView
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         MyAdapter adapter = (MyAdapter) parent.getAdapter();
         mCurColor = adapter.getItem(position);
+        adapter.setSelected(position);
         if (mListener != null) {
             mListener.colorChanged(mCurColor);
         }

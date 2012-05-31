@@ -129,8 +129,7 @@ public class RGBColorPickerView extends LinearLayout implements ColorPickerInter
             if (value < mMinValue) value = mMinValue;
             if (value > mMaxValue) value = mMaxValue;
             mValue = value;
-            scrollTo((mValue - mMinValue) * mScale, 0);
-            fling(0);
+            smoothScrollTo((mValue - mMinValue) * mScale, 0);
         }
 
         public int getValue() {
