@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.Shader;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RectShape;
@@ -27,8 +28,9 @@ public class RGBColorPickerView extends LinearLayout implements ColorPickerInter
         private int mHeight;
         private int mValue = 0;
         private int mMinValue = 0;
-        private int mMaxValue = 100;
-        private int mUnit = 10;
+        private int mMaxValue = 255;
+        private int mUnit = 8;
+        private int mBGColor;
         private MeterView mChild;
         private OnValueChangedListener mListener;
 
@@ -36,6 +38,7 @@ public class RGBColorPickerView extends LinearLayout implements ColorPickerInter
 
             private MeterScrollView mParent;
             private Paint mPaint;
+            private Path mTriangle = new Path();
 
             public MeterView(Context context, MeterScrollView parent) {
                 super(context);
@@ -46,6 +49,12 @@ public class RGBColorPickerView extends LinearLayout implements ColorPickerInter
             protected void resize() {
                 int width = (mMaxValue - mMinValue) * mScale + 1;
                 int margin = mParent.getWidth() / 2;
+                mTriangle.reset();
+                mTriangle.moveTo(0, mHeight / 8);
+                mTriangle.lineTo(-mHeight / 8, mHeight / 4);
+                mTriangle.lineTo( mHeight / 8, mHeight / 4);
+                mTriangle.lineTo(0, mHeight / 8);
+
                 setMeasuredDimension(width + margin * 2, mHeight);
                 mParent.setValue(mValue);
             }
@@ -61,9 +70,9 @@ public class RGBColorPickerView extends LinearLayout implements ColorPickerInter
                 int offset = mParent.getScrollX();
                 int value = (offset + mScale / 2) / mScale + mMinValue;
 
-                mPaint.setColor(Color.LTGRAY);
+                mPaint.setColor(Color.GRAY);
                 mPaint.setTextSize(mHeight / 4);
-                int iMax = Math.min(value  + margin / mScale + 1, mMaxValue);
+                int iMax = Math.min(value + margin / mScale + 1, mMaxValue);
                 for (int i = Math.max(value - margin / mScale - 1, mMinValue); i <= iMax; i++) {
                     boolean isUnit = (i % mUnit == 0 || i == mMinValue || i == mMaxValue);
                     int x = margin + (i - mMinValue) * mScale;
@@ -73,21 +82,31 @@ public class RGBColorPickerView extends LinearLayout implements ColorPickerInter
                         c.drawText(s, x - mPaint.measureText(s) / 2, mHeight * 5 / 8, mPaint);
                     }
                 }
+
+                c.translate(margin + offset, 0);
                 mPaint.setColor(Color.WHITE);
                 mPaint.setTextSize(mHeight / 2);
+                c.drawPath(mTriangle, mPaint);
                 String s = String.valueOf(value);
-                c.drawText(s, offset + margin - mPaint.measureText(s) / 2,
-                        mHeight * 7 / 8, mPaint);
+                c.drawText(s, -mPaint.measureText(s) / 2, mHeight * 3 / 4, mPaint);
             }
         }
 
         public MeterScrollView(Context context) {
+            this(context, Color.TRANSPARENT);
+        }
+
+        public MeterScrollView(Context context, int backgroundColor) {
             super(context);
+            setHorizontalScrollBarEnabled(true);
+            setScrollbarFadingEnabled(false);
+            setBackgroundDrawable(new ShapeDrawable(new RectShape()));
+
             mScale = (int) (getResources().getDisplayMetrics().density * 12f);
             mHeight = mScale * 4;
+            mBGColor = backgroundColor;
             mChild = new MeterView(context, this);
             addView(mChild);
-            setHorizontalScrollBarEnabled(false);
         }
 
         public void setRange(int min, int max) {
@@ -99,13 +118,11 @@ public class RGBColorPickerView extends LinearLayout implements ColorPickerInter
             mMaxValue = max;
             mUnit = unit;
             mChild.resize();
-            setValue(mValue);
         }
 
         public void setScale(int scale) {
             mScale = scale;
             mChild.resize();
-            setValue(mValue);
         }
 
         public void setValue(int value) {
@@ -113,6 +130,7 @@ public class RGBColorPickerView extends LinearLayout implements ColorPickerInter
             if (value > mMaxValue) value = mMaxValue;
             mValue = value;
             scrollTo((mValue - mMinValue) * mScale, 0);
+            fling(0);
         }
 
         public int getValue() {
@@ -121,6 +139,15 @@ public class RGBColorPickerView extends LinearLayout implements ColorPickerInter
 
         public void setValueChangedListener(OnValueChangedListener listener) {
             mListener = listener;
+        }
+
+        @Override
+        protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+            ShapeDrawable sd = (ShapeDrawable) getBackground();
+            sd.getPaint().setShader(new LinearGradient(0, 0, w / 2, 0,
+                    Color.BLACK, mBGColor, Shader.TileMode.MIRROR));
+            setFadingEdgeLength(w / 3);
+            mChild.resize();
         }
 
         @Override
@@ -154,20 +181,9 @@ public class RGBColorPickerView extends LinearLayout implements ColorPickerInter
         Display disp = wm.getDefaultDisplay();
         mMinimumSize = Math.min(disp.getWidth(), disp.getHeight()) / 2;
 
-        mRedMeter = new MeterScrollView(context);
-        mRedMeter.setBackgroundDrawable(new ShapeDrawable(new RectShape()));
-        mRedMeter.setRange(0, 255, 8);
-        addView(mRedMeter);
-
-        mGreenMeter = new MeterScrollView(context);
-        mGreenMeter.setBackgroundDrawable(new ShapeDrawable(new RectShape()));
-        mGreenMeter.setRange(0, 255, 8);
-        addView(mGreenMeter);
-
-        mBlueMeter = new MeterScrollView(context);
-        mBlueMeter.setBackgroundDrawable(new ShapeDrawable(new RectShape()));
-        mBlueMeter.setRange(0, 255, 8);
-        addView(mBlueMeter);
+        mRedMeter = new MeterScrollView(context, 0xFFC00000);
+        mGreenMeter = new MeterScrollView(context, 0xFF008000);
+        mBlueMeter = new MeterScrollView(context, 0xFF0000FF);
 
         OnValueChangedListener listener = new OnValueChangedListener() {
             @Override
@@ -182,6 +198,10 @@ public class RGBColorPickerView extends LinearLayout implements ColorPickerInter
         mRedMeter.setValueChangedListener(listener);
         mGreenMeter.setValueChangedListener(listener);
         mBlueMeter.setValueChangedListener(listener);
+
+        addView(mRedMeter);
+        addView(mGreenMeter);
+        addView(mBlueMeter);
 
         setColor(Color.BLACK);
     }
@@ -211,21 +231,6 @@ public class RGBColorPickerView extends LinearLayout implements ColorPickerInter
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int width = (MeasureSpec.getMode(widthMeasureSpec) == MeasureSpec.EXACTLY) ?
                 MeasureSpec.getSize(widthMeasureSpec) : mMinimumSize;
-
-        ShapeDrawable sd;
-        sd = (ShapeDrawable) mRedMeter.getBackground();
-        sd.getPaint().setShader(new LinearGradient(0, 0, width / 2, 0,
-                Color.BLACK, 0xFFC00000, Shader.TileMode.MIRROR));
-        mRedMeter.setFadingEdgeLength(width / 3);
-        sd = (ShapeDrawable) mGreenMeter.getBackground();
-        sd.getPaint().setShader(new LinearGradient(0, 0, width / 2, 0,
-                Color.BLACK, 0xFF008000, Shader.TileMode.MIRROR));
-        mGreenMeter.setFadingEdgeLength(width / 3);
-        sd = (ShapeDrawable) mBlueMeter.getBackground();
-        sd.getPaint().setShader(new LinearGradient(0, 0, width / 2, 0,
-                Color.BLACK, 0xFF0000FF, Shader.TileMode.MIRROR));
-        mBlueMeter.setFadingEdgeLength(width / 3);
-
         super.onMeasure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
                 heightMeasureSpec);
     }

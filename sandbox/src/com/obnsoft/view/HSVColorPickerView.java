@@ -81,6 +81,7 @@ public class HSVColorPickerView extends View implements ColorPickerInterface {
         Color.colorToHSV(color, mHSV);
         setPaintSatVal((double) mHSV[0]);
         setPaintCurColor(mHSV, false);
+        postInvalidate();
     }
 
     @Override
@@ -101,7 +102,7 @@ public class HSVColorPickerView extends View implements ColorPickerInterface {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int width = (MeasureSpec.getMode(widthMeasureSpec) == MeasureSpec.EXACTLY) ?
                 MeasureSpec.getSize(widthMeasureSpec) : mMinimumSize;
-        int height = (MeasureSpec.getMode(widthMeasureSpec) == MeasureSpec.EXACTLY) ?
+        int height = (MeasureSpec.getMode(heightMeasureSpec) == MeasureSpec.EXACTLY) ?
                 MeasureSpec.getSize(heightMeasureSpec) : mMinimumSize;
 
         mRadius = Math.min(width, height) / 2f;

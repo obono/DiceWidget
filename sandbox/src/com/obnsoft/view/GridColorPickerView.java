@@ -173,8 +173,8 @@ public class GridColorPickerView extends GridView
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int width = (MeasureSpec.getMode(widthMeasureSpec) == MeasureSpec.EXACTLY) ?
                 MeasureSpec.getSize(widthMeasureSpec) : mMinimumSize;
-        int height = (MeasureSpec.getMode(widthMeasureSpec) == MeasureSpec.EXACTLY) ?
-                MeasureSpec.getSize(widthMeasureSpec) : mMinimumSize;
+        int height = (MeasureSpec.getMode(heightMeasureSpec) == MeasureSpec.EXACTLY) ?
+                MeasureSpec.getSize(heightMeasureSpec) : mMinimumSize;
         mBoxSize = width / 6;
         super.onMeasure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
                 MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
