@@ -61,6 +61,15 @@ public class HSVColorPickerView extends View implements ColorPickerInterface {
     private static final int[] HUE_COLORS = {
         0xFFFF0000, 0xFFFF00FF, 0xFF0000FF, 0xFF00FFFF, 0xFF00FF00, 0xFFFFFF00, 0xFFFF0000
     };
+    private static final int[] HUE_COLORS_T = {
+        0x40FF0000, 0x40FF00FF, 0x400000FF, 0x4000FFFF, 0x4000FF00, 0x40FFFF00, 0x40FF0000
+    };
+    private static final SweepGradient HUE_GRADIENT =
+        new SweepGradient(0, 0, HUE_COLORS, null);
+    private static final SweepGradient HUE_GRADIENT_T =
+        new SweepGradient(0, 0, HUE_COLORS_T, null);
+
+    private static final float INTER_RATIO = 3f / 4f;
     private static final double SQRT3 = Math.sqrt(3.0);
 
     public HSVColorPickerView(Context context) {
@@ -79,7 +88,7 @@ public class HSVColorPickerView extends View implements ColorPickerInterface {
         mMinimumSize = Math.min(disp.getWidth(), disp.getHeight()) / 2;
 
         mPaintHue.setStyle(Paint.Style.STROKE);
-        mPaintHue.setShader(new SweepGradient(0, 0, HUE_COLORS, null));
+        mPaintHue.setShader(HUE_GRADIENT);
 
         mPaintSat.setStyle(Paint.Style.FILL);
         mPaintVal.setStyle(Paint.Style.FILL);
@@ -94,7 +103,11 @@ public class HSVColorPickerView extends View implements ColorPickerInterface {
     @Override
     public void setColor(int color) {
         mCurColor = color | 0xFF000000;
+        float hue = mHSV[0];
         Color.colorToHSV(color, mHSV);
+        if (mHSV[1] == 0f) {
+            mHSV[0] = hue;
+        }
         setPaintSatVal((double) mHSV[0]);
         setPaintCurColor(mHSV, false);
         postInvalidate();
@@ -122,9 +135,9 @@ public class HSVColorPickerView extends View implements ColorPickerInterface {
                 MeasureSpec.getSize(heightMeasureSpec) : mMinimumSize;
 
         mRadius = Math.min(width, height) / 2f;
-        float r = mRadius * 7f / 8f;
+        float r = mRadius * ((INTER_RATIO + 1f) / 2f);
         mRectHue.set(-r, -r, r, r);
-        mPaintHue.setStrokeWidth(mRadius / 4f);
+        mPaintHue.setStrokeWidth(mRadius * (1f - INTER_RATIO));
         setPaintSatVal((double) mHSV[0]);
         setPaintCurColor(mHSV, false);
         mPaintCurColF.setStrokeWidth(mRadius / 120f + 1f);
@@ -144,9 +157,11 @@ public class HSVColorPickerView extends View implements ColorPickerInterface {
                 if (mTarget == Target.NONE) {
                     if (calcSatVal(x, y, true)) {
                         mTarget = Target.SAT_VAL;
+                        mPaintHue.setShader(HUE_GRADIENT_T);
                         invalidate();
                     } else if (calcHue(x, y, true)) {
                         mTarget = Target.HUE;
+                        setPaintSatVal(mHSV[0]);
                         invalidate();
                     }
                 }
@@ -163,6 +178,9 @@ public class HSVColorPickerView extends View implements ColorPickerInterface {
                 break;
             case MotionEvent.ACTION_UP:
                 mTarget = Target.NONE;
+                mPaintHue.setShader(HUE_GRADIENT);
+                setPaintSatVal(mHSV[0]);
+                invalidate();
                 break;
         }
         return true;
@@ -175,7 +193,8 @@ public class HSVColorPickerView extends View implements ColorPickerInterface {
         double d = Math.toRadians(mHSV[0]);
         float nx = (float) Math.cos(d);
         float ny = (float) -Math.sin(d);
-        canvas.drawLine(nx * mRadius, ny * mRadius, 0f, 0f, mPaintCurColH);
+        float nr = mRadius * INTER_RATIO;
+        canvas.drawLine(nx * mRadius, ny * mRadius, nx * nr, ny * nr, mPaintCurColH);
         canvas.drawPath(mPathSatVal, mPaintVal);
         canvas.drawPath(mPathSatVal, mPaintSat);
         canvas.drawOval(mRectCurCol, mPaintCurCol);
@@ -189,7 +208,7 @@ public class HSVColorPickerView extends View implements ColorPickerInterface {
     private boolean calcHue(float x, float y, boolean isDown) {
         double deg = Math.toDegrees(Math.atan2(-y, x));
         if (isDown) {
-            if (Math.sqrt(x * x + y * y) > (double) mRadius) {
+            if (Math.sqrt(x * x + y * y) > (double) mRadius * 1.25) {
                 return false;
             }
         } else {
@@ -205,7 +224,7 @@ public class HSVColorPickerView extends View implements ColorPickerInterface {
     }
 
     private boolean calcSatVal(float x, float y, boolean isDown) {
-        double r = mRadius * 3.0 / 4.0;
+        double r = mRadius * INTER_RATIO;
         if (isDown) {
             if (Math.sqrt(x * x + y * y) > r) {
                 return false;
@@ -233,7 +252,7 @@ public class HSVColorPickerView extends View implements ColorPickerInterface {
     }
 
     private void setPaintSatVal(double hue) {
-        double r = mRadius * 3.0 / 4.0;
+        double r = mRadius * INTER_RATIO;
         float x[] = new float[3];
         float y[] = new float[3];
         for (int i = 0; i < 3; i++) {
@@ -264,9 +283,14 @@ public class HSVColorPickerView extends View implements ColorPickerInterface {
             pos[1] = (float) ((210.0 - hue) / 360.0);
             pos[2] = (float) ((510.0 - hue) / 360.0);
         }
-        mPaintVal.setShader(new SweepGradient(x[0], y[0], col, pos));
-
         int pureCol = Color.HSVToColor(new float[] {(float) hue, 1f, 1f});
+        if (mTarget == Target.HUE) {
+            for (int i = 0; i < 4; i++) {
+                col[i] &= 0x40FFFFFF;
+            }
+            pureCol &= 0x40FFFFFF;
+        }
+        mPaintVal.setShader(new SweepGradient(x[0], y[0], col, pos));
         mPaintSat.setShader(new LinearGradient(x[0], y[0], (x[1] + x[2]) / 2f, (y[1] + y[2]) / 2f,
                 pureCol, pureCol & 0xFFFFFF, Shader.TileMode.CLAMP));
         mPaintCurColH.setColor((calcBrightness(pureCol) < 0.5) ? Color.WHITE : Color.BLACK);
@@ -285,7 +309,7 @@ public class HSVColorPickerView extends View implements ColorPickerInterface {
         mPaintCurCol.setColor(mCurColor);
         mPaintCurColF.setColor((calcBrightness(mCurColor) < 0.5) ? Color.WHITE : Color.BLACK);
 
-        double r = mRadius * 3.0 / 4.0;
+        double r = mRadius * INTER_RATIO;
         double d = Math.toRadians(hsv[0] + 120.0);
         double dx = Math.cos(d) * r;
         double dy = -Math.sin(d) * r;

@@ -58,9 +58,7 @@ public class GridColorPickerView extends GridView
             public void onDraw(Canvas c) {
                 super.onDraw(c);
                 if (mChecked) {
-                    c.drawBitmap(mBmpSelected,
-                            (mSize - mBmpSelected.getWidth()) / 2,
-                            (mSize - mBmpSelected.getHeight()) / 2, null);
+                    c.drawBitmap(mBmpSelected, 0, 0, null);
                 }
             }
 
@@ -78,7 +76,7 @@ public class GridColorPickerView extends GridView
             super(context, 0, objects);
             mContext = context;
             mBmpSelected = BitmapFactory.decodeResource(
-                    getResources(), android.R.drawable.radiobutton_on_background);
+                    getResources(), android.R.drawable.checkbox_on_background);
         }
 
         @Override

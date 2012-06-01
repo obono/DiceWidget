@@ -60,6 +60,7 @@ public class RGBColorPickerView extends LinearLayout implements ColorPickerInter
                 super(context);
                 mParent = parent;
                 mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+                mPaint.setStyle(Paint.Style.FILL);
             }
 
             protected void resize() {
@@ -67,8 +68,8 @@ public class RGBColorPickerView extends LinearLayout implements ColorPickerInter
                 int margin = mParent.getWidth() / 2;
                 mTriangle.reset();
                 mTriangle.moveTo(0, mHeight / 8);
-                mTriangle.lineTo(-mHeight / 8, mHeight / 4);
-                mTriangle.lineTo( mHeight / 8, mHeight / 4);
+                mTriangle.lineTo(-mHeight / 8, 0);
+                mTriangle.lineTo( mHeight / 8, 0);
                 mTriangle.lineTo(0, mHeight / 8);
 
                 setMeasuredDimension(width + margin * 2, mHeight);
@@ -87,6 +88,7 @@ public class RGBColorPickerView extends LinearLayout implements ColorPickerInter
                 int value = (offset + mScale / 2) / mScale + mMinValue;
 
                 mPaint.setColor(Color.GRAY);
+                mPaint.setStrokeWidth((float) mHeight / 32f);
                 mPaint.setTextSize(mHeight / 4);
                 int iMax = Math.min(value + margin / mScale + 1, mMaxValue);
                 for (int i = Math.max(value - margin / mScale - 1, mMinValue); i <= iMax; i++) {
