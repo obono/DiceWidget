@@ -47,6 +47,7 @@ public class HeaderScrollView extends HorizontalScrollView {
             super(parent.getContext());
             mParent = parent;
             mPaintGrid.setStyle(Paint.Style.FILL_AND_STROKE);
+            mPaintGrid.setColor(Color.WHITE);
             mPaintText.setColor(Color.LTGRAY);
         }
 
@@ -93,7 +94,7 @@ public class HeaderScrollView extends HorizontalScrollView {
                 if (mFocusCol >= 0) {
                     int cellSize = mData.cellSize;
                     mPaintGrid.setColor(mIsFocus ?
-                            Color.argb(63, 255, 255, 0) : Color.argb(63, 0, 0, 191));
+                            Color.argb(63, 255, 255, 0) : Color.argb(31, 255, 255, 0));
                     c.drawRect(mFocusCol * cellSize, 0,
                             (mFocusCol + 1) * cellSize, getHeight(), mPaintGrid);
                 }

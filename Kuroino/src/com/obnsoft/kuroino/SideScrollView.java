@@ -79,7 +79,7 @@ public class SideScrollView extends ScrollView {
                 if (mFocusRow >= 0) {
                     int cellSize = mData.cellSize;
                     mPaintGrid.setColor(mIsFocus ?
-                            Color.argb(63, 255, 255, 0) : Color.argb(63, 0, 0, 191));
+                            Color.argb(63, 255, 255, 0) : Color.argb(31, 255, 255, 0));
                     c.drawRect(0, mFocusRow * cellSize,
                             getWidth(), (mFocusRow + 1) * cellSize, mPaintGrid);
                 }

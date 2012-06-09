@@ -110,7 +110,7 @@ public class SheetScrollView extends FreeScrollView {
                 c.drawLine(col * cellSize, scrollY,
                         col * cellSize, scrollY + scrollHeight, mPaintGrid);
             }
-            mPaintGrid.setColor(Color.argb(63, 0, 0, 191));
+            mPaintGrid.setColor(Color.argb(31, 255, 255, 0));
             if (mFocusRow >= 0) {
                 c.drawRect(scrollX, mFocusRow * cellSize,
                         scrollX + scrollWidth, (mFocusRow + 1) * cellSize, mPaintGrid);

@@ -24,10 +24,10 @@ public class MainActivity extends Activity {
         SheetData data = new SheetData();
         data.cellSize = (int) (48f * getResources().getDisplayMetrics().density);
         data.createNewData(new GregorianCalendar(2012, 0, 1),
-                new GregorianCalendar(2013, 11, 31),
-                1,
-                null, //new boolean[] {true, false, false, false, false, false, true},
-                new String[] {"H“¡r‰î", "H“¡r‰î", "H“¡r‰î"});
+                new GregorianCalendar(2012, 11, 31),
+                0,
+                new boolean[] {false, true, false, true, false, false, true},
+                new String[] {"Australia", "Brazil", "Canada", "Denmark", "Egypt", "France", "German"});
         mHeader.setData(data);
         mSide.setData(data);
         mSheet.setData(data);
