@@ -25,8 +25,10 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -35,11 +37,24 @@ import android.widget.TextView;
 
 public class MainActivity extends Activity {
 
-    /** Called when the activity is first created. */
+    private static final int PICK_FILE_REQUEST = 0;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode,
+            Intent data) {
+        if (requestCode == PICK_FILE_REQUEST) {
+            if (resultCode == RESULT_OK) {
+                String path = data.getStringExtra(MyFilePickerActivity.INTENT_EXTRA_PATH);
+                TextView tv = (TextView) findViewById(R.id.text_hello);
+                tv.setText(path);
+            }
+        }
     }
 
     public void onPickRGBColor(View v) {
@@ -52,6 +67,14 @@ public class MainActivity extends Activity {
 
     public void onPickGridColor(View v) {
         pickColor(new GridColorPickerView(this));
+    }
+
+    public void onPickFile(View v) {
+        String path = Environment.getExternalStorageDirectory().getPath();
+        Intent intent = new Intent(this, MyFilePickerActivity.class);
+        intent.putExtra(MyFilePickerActivity.INTENT_EXTRA_PATH, path);
+        intent.putExtra(MyFilePickerActivity.INTENT_EXTRA_EXTENSION, ".xml");
+        startActivityForResult(intent, PICK_FILE_REQUEST);
     }
 
     private void pickColor(final View cpv) {

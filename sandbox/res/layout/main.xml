@@ -4,172 +4,47 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     >
-<Button  
+<TextView
+    android:id="@+id/text_hello"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:text="@string/hello"
+    />
+<Button
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:text="@string/pick_rgb_color"
     android:onClick="onPickRGBColor"
     />
-<Button  
+<Button
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:text="@string/pick_hsv_color"
     android:onClick="onPickHSVColor"
     />
-<Button  
+<Button
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:text="@string/pick_grid_color"
     android:onClick="onPickGridColor"
     />
 
-<com.obnsoft.view.FreeScrollView
+<Button
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:text="@string/pick_file"
+    android:onClick="onPickFile"
+    />
+
+<!-- com.obnsoft.view.FreeScrollView
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     >
-<LinearLayout android:orientation="vertical" android:layout_width="wrap_content" android:layout_height="wrap_content">
-
-<LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content">
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-</LinearLayout>
-
-<LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content">
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-</LinearLayout>
-
-<LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content">
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-</LinearLayout>
-
-<LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content">
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-</LinearLayout>
-
-<LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content">
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-</LinearLayout>
-
-<LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content">
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-</LinearLayout>
-
-<LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content">
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-</LinearLayout>
-
-<LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content">
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-</LinearLayout>
-
-<LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content">
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-</LinearLayout>
-
-<LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content">
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon" />
-</LinearLayout>
-
-</LinearLayout>
-</com.obnsoft.view.FreeScrollView>
+    <ImageView
+        android:layout_width="1000dp"
+        android:layout_height="1000dp"
+        android:src="@drawable/icon"
+        />
+</com.obnsoft.view.FreeScrollView -->
 
 </LinearLayout>
