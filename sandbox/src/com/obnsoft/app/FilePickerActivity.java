@@ -21,13 +21,24 @@ import android.widget.TextView;
 
 public class FilePickerActivity extends ListActivity {
 
-    public static final String INTENT_EXTRA_PATH = "path";
+    public static final String INTENT_EXTRA_DIRECTORY = "directory";
+    public static final String INTENT_EXTRA_TOPDIRECTORY = "topDirectory";
     public static final String INTENT_EXTRA_EXTENSION = "extension";
-    private String mPathCurrent;
-    private String mExtension;
-    private ArrayList<String> mPathStack = new ArrayList<String>();
+    public static final String INTENT_EXTRA_WRITEMODE = "writeMode";
+    public static final String INTENT_EXTRA_SELECTPATH = "selectPath";
 
+    private String mDirTop;
+    private String mDirCurrent;
+    private String mExtension;
+    private boolean mWriteMode = false;
+    private int mPosNewEntry;
+    private ArrayList<String> mStackPath = new ArrayList<String>();
     private FilePickerAdapter mAdapter;
+
+    private int mResIdDir = android.R.drawable.ic_menu_more;
+    private int mResIdFile = android.R.drawable.ic_menu_set_as;
+    private int mResIdNew = android.R.drawable.ic_menu_add;
+    private int mResIdNewMsg = 0;
 
     class FilePickerAdapter extends ArrayAdapter<File> {
 
@@ -74,6 +85,10 @@ public class FilePickerActivity extends ListActivity {
                     });
                 }
             }
+            if (mWriteMode) {
+                mPosNewEntry = getCount();
+                add(null);
+            }
             notifyDataSetChanged();
         }
 
@@ -94,11 +109,16 @@ public class FilePickerActivity extends ListActivity {
                 holder = (FilePickerViewHolder) convertView.getTag();
             }
             File file = (File) getItem(position);
-            holder.imageView.setImageResource(file.isDirectory() ?
-                    android.R.drawable.ic_menu_more : android.R.drawable.ic_menu_set_as);
             holder.textView.setSingleLine(true);
-            holder.textView.setText(file.getName());
             holder.textView.setTextAppearance(mContext, android.R.style.TextAppearance_Large);
+            if (mWriteMode && position == mPosNewEntry) {
+                holder.textView.setText(
+                        (mResIdNewMsg == 0) ? "(New File)" : getText(mResIdNewMsg));
+                holder.imageView.setImageResource(mResIdNew);
+            } else {
+                holder.textView.setText(file.getName());
+                holder.imageView.setImageResource(file.isDirectory() ? mResIdDir : mResIdFile);
+            }
             return convertView;
         }
     }
@@ -110,17 +130,38 @@ public class FilePickerActivity extends ListActivity {
         Intent intent = getIntent();
         String path = null;
         if (intent != null) {
-            path = intent.getStringExtra(INTENT_EXTRA_PATH);
+            path = intent.getStringExtra(INTENT_EXTRA_DIRECTORY);
+            mDirTop = intent.getStringExtra(INTENT_EXTRA_TOPDIRECTORY);
             mExtension = intent.getStringExtra(INTENT_EXTRA_EXTENSION);
-            if (mExtension != null) {
-                mExtension = mExtension.toLowerCase();
-                if (!mExtension.startsWith(".")) {
-                    mExtension = "." + mExtension;
-                }
+            mWriteMode = intent.getBooleanExtra(INTENT_EXTRA_WRITEMODE, false);
+        }
+
+        /*  Check top directory.  */
+        if (mDirTop == null) {
+            mDirTop = Environment.getExternalStorageDirectory().getPath();
+        }
+        if (!mDirTop.endsWith(File.separator)) {
+            mDirTop += File.separator;
+        }
+
+        /*  Check current directory.  */
+        if (path == null) {
+            path = mDirTop;
+        } else {
+            if (!path.endsWith(File.separator)) {
+                path += File.separator;
+            }
+            if (!path.startsWith(mDirTop)) {
+                path = mDirTop;
             }
         }
-        if (path == null) {
-            path = Environment.getExternalSDStorageDirectory().getPath();
+
+        /*  Check extension.  */
+        if (mExtension != null) {
+            mExtension = mExtension.toLowerCase();
+            if (!mExtension.startsWith(".")) {
+                mExtension = "." + mExtension;
+            }
         }
 
         mAdapter = new FilePickerAdapter(this);
@@ -132,14 +173,13 @@ public class FilePickerActivity extends ListActivity {
     protected void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
         File file = (File) mAdapter.getItem(position);
-        if (file.isDirectory()) {
-            mPathStack.add(mPathCurrent);
-            setCurrentDirectory(file.getPath());
+        if (mWriteMode && position == mPosNewEntry) {
+            onNewFileRequested(mDirCurrent, mExtension);
+        } else if (file.isDirectory()) {
+            mStackPath.add(mDirCurrent);
+            setCurrentDirectory(file.getPath() + File.separator);
         } else {
-            Intent intent = new Intent();
-            intent.putExtra(INTENT_EXTRA_PATH, file.getPath());
-            setResult(RESULT_OK, intent);
-            finish();
+            onFileSelected(file.getPath());
         }
     }
 
@@ -150,14 +190,22 @@ public class FilePickerActivity extends ListActivity {
             setResult(RESULT_CANCELED);
             super.onBackPressed();
         } else {
-            mPathStack.remove(mPathStack.size() - 1);
+            mStackPath.remove(mStackPath.size() - 1);
             setCurrentDirectory(path);
         }
     }
 
+    public void setResourceId(int dirId, int fileId, int newId, int newMsgId) {
+        if (dirId != 0)     mResIdDir = dirId;
+        if (fileId != 0)    mResIdFile = fileId;
+        if (newId != 0)     mResIdNew = newId;
+        if (newMsgId != 0)  mResIdNewMsg = newMsgId;
+    }
+
     public void setCurrentDirectory(String path) {
-        mPathCurrent = path;
+        mDirCurrent = path;
         mAdapter.setTargetDirectory(path);
+        getListView().smoothScrollBy(0, 0); // Stop momentum scrolling
         onCurrentDirectoryChanged(path);
     }
 
@@ -165,29 +213,70 @@ public class FilePickerActivity extends ListActivity {
         ;
     }
 
+    public void onFileSelected(String path) {
+        setResultAndFinish(path);
+    }
+
+    public void onNewFileRequested(String directory, String extension) {
+        String newPath = directory + "newfile";
+        if (extension != null) {
+            newPath += extension;
+        }
+        setResultAndFinish(newPath);
+    }
+
     public void goToUpperDirectory() {
         String path = getUpperDirectory();
         if (path != null) {
-            mPathStack.add(mPathCurrent);
+            mStackPath.add(mDirCurrent);
             setCurrentDirectory(path);
         }
     }
 
+    public String getTopDirectory() {
+        return mDirTop;
+    }
+
     public String getCurrentDirectory() {
-        return mPathCurrent;
+        return mDirCurrent;
+    }
+
+    public String getExtension() {
+        return mExtension;
+    }
+
+    public boolean isWriteMode() {
+        return mWriteMode;
+    }
+
+    public String getTrimmedCurrentDirectory(String path) {
+        if (path != null && path.startsWith(mDirTop)) {
+            return path.substring(mDirTop.length());
+        }
+        return null;
     }
 
     public String getLastDirectory() {
-        int size = mPathStack.size();
-        return (size > 0) ? mPathStack.get(size - 1) : null;
+        int size = mStackPath.size();
+        return (size > 0) ? mStackPath.get(size - 1) : null;
     }
 
     public String getUpperDirectory() {
-        int start = mPathCurrent.length() - 1;
-        if (mPathCurrent.endsWith(File.separator)) {
+        if (mDirCurrent.equals(mDirTop)) {
+            return null;
+        }
+        int start = mDirCurrent.length() - 1;
+        if (mDirCurrent.endsWith(File.separator)) {
             start--;
         }
-        int index = mPathCurrent.lastIndexOf(File.separatorChar, start);
-        return (index >= 0) ? mPathCurrent.substring(0, index + 1) : null;
+        int index = mDirCurrent.lastIndexOf(File.separatorChar, start);
+        return (index >= 0) ? mDirCurrent.substring(0, index + 1) : null;
+    }
+
+    public void setResultAndFinish(String path) {
+        Intent intent = new Intent();
+        intent.putExtra(INTENT_EXTRA_SELECTPATH, path);
+        setResult(RESULT_OK, intent);
+        finish();
     }
 }

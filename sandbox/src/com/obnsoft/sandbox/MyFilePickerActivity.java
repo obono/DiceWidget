@@ -19,7 +19,7 @@ public class MyFilePickerActivity extends FilePickerActivity {
     public void onCurrentDirectoryChanged(String path) {
         super.onCurrentDirectoryChanged(path);
         TextView tv = (TextView) findViewById(R.id.text_current_directory);
-        tv.setText(path);
+        tv.setText(getTrimmedCurrentDirectory(path));
         Button btn = (Button) findViewById(R.id.button_back_directory);
         btn.setEnabled(getLastDirectory() != null);
         btn = (Button) findViewById(R.id.button_upper_directory);
