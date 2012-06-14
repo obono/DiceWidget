@@ -17,11 +17,10 @@
 package com.obnsoft.kuroino;
 
 import android.content.Context;
-import android.graphics.Bitmap;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.graphics.Paint.FontMetrics;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -32,6 +31,7 @@ public class SideScrollView extends ScrollView {
 
     private SheetData mData = null;
     private SideView mChild = null;
+    private int mFocusRow = -1;
 
     /*----------------------------------------------------------------------*/
 
@@ -41,9 +41,6 @@ public class SideScrollView extends ScrollView {
         private Paint mPaintGrid = new Paint();
         private Paint mPaintText = new Paint(Paint.ANTI_ALIAS_FLAG);
         private boolean mIsFocus;
-        private int mFocusRow = -1;
-        private Bitmap mBmpCache = null;
-        private Rect mRectTmp = new Rect();
 
         public SideView(View parent) {
             super(parent.getContext());
@@ -64,11 +61,13 @@ public class SideScrollView extends ScrollView {
                 if (mData != null) {
                     mIsFocus = true;
                     mFocusRow = (int) event.getY() / mData.cellSize;
+                    ((MainActivity) getContext()).handleFocus(mParent, mFocusRow, -1);
                     postInvalidate();
                 }
                 break;
             case MotionEvent.ACTION_UP:
                 if (mIsFocus) {
+                    ((MainActivity) getContext()).handleClick(mParent, mFocusRow, -1);
                     postInvalidate();
                     mIsFocus = false;
                 }
@@ -76,6 +75,7 @@ public class SideScrollView extends ScrollView {
             case MotionEvent.ACTION_CANCEL:
                 if (mIsFocus) {
                     mFocusRow = -1;
+                    ((MainActivity) getContext()).handleFocus(mParent, -1, -1);
                     postInvalidate();
                     mIsFocus = false;
                 }
@@ -86,14 +86,41 @@ public class SideScrollView extends ScrollView {
 
         @Override
         public void onDraw(Canvas c) {
-            if (mData != null && mBmpCache != null) {
+            if (mData != null) {
+                int width = mParent.getWidth();
+                int cellSize = mData.cellSize;
+                int rows = mData.names.size();
+
                 int scrollY = mParent.getScrollY();
                 int scrollHeight = mParent.getHeight();
-                mRectTmp.set(0, scrollY, getWidth(), scrollY + scrollHeight);
-                c.drawBitmap(mBmpCache, mRectTmp, mRectTmp, null);
 
+                int startRow = Math.max(scrollY / cellSize, 0);
+                int endRow = Math.min((scrollY + scrollHeight - 1) / cellSize, rows - 1);
+
+                TypedArray rowsCols = getResources().obtainTypedArray(R.array.rows_colors);
+                mPaintText.setTextSize(cellSize / 3f);
+                FontMetrics fm = mPaintText.getFontMetrics();
+                float tx = cellSize * 0.125f;
+                float ty = (cellSize - fm.ascent - fm.descent) / 2f;
+                for (int row = startRow; row <= endRow; row++) {
+                    int y = row * cellSize;
+
+                    /*  Background  */
+                    mPaintGrid.setColor(rowsCols.getColor(row & 1, Color.TRANSPARENT));
+                    c.drawRect(0, y, width, y + cellSize, mPaintGrid);
+
+                    /*  Name  */
+                    c.drawText(mData.names.get(row), tx, y + ty, mPaintText);
+                }
+
+                /*  Grid  */
+                mPaintGrid.setColor(Color.WHITE);
+                for (int row = startRow; row <= endRow + 1; row++) {
+                    c.drawLine(0, row * cellSize, width, row * cellSize, mPaintGrid);
+                }
+
+                /*  Focus  */
                 if (mFocusRow >= 0) {
-                    int cellSize = mData.cellSize;
                     mPaintGrid.setColor(mIsFocus ?
                             Color.argb(63, 255, 255, 0) : Color.argb(31, 255, 255, 0));
                     c.drawRect(0, mFocusRow * cellSize,
@@ -104,42 +131,9 @@ public class SideScrollView extends ScrollView {
 
         private void resize() {
             int width = mParent.getWidth();
-            int height = 1;
-            if (mData != null) {
-                height = mData.names.size() * mData.cellSize + 1;
-                createCache();
-            }
+            int height = (mData != null) ? mData.names.size() * mData.cellSize + 1 : 1;
             setMeasuredDimension(width, height);
         }
-
-        private void createCache() {
-            if (mBmpCache != null) {
-                mBmpCache.recycle();
-            }
-            int width = mParent.getWidth();
-            int cellSize = mData.cellSize;
-            int rows = mData.names.size();
-            if (width > 0) {
-                mBmpCache = Bitmap.createBitmap(
-                        width, rows * cellSize + 1, Bitmap.Config.RGB_565);
-                Canvas c = new Canvas(mBmpCache);
-                c.drawRGB(63, 63, 63);
-                mPaintText.setTextSize(cellSize / 3f);
-                FontMetrics fm = mPaintText.getFontMetrics();
-                float tx = cellSize * 0.125f;
-                float ty = (cellSize - fm.ascent - fm.descent) / 2f;
-                mPaintGrid.setColor(Color.WHITE);
-                for (int i = 0; i < rows; i++) {
-                    int y = i * cellSize;
-                    c.drawText(mData.names.get(i), tx, y + ty, mPaintText);
-                    c.drawLine(0, y, width, y, mPaintGrid);
-                }
-                c.drawLine(0, rows * cellSize, width, rows * cellSize, mPaintGrid);
-            } else {
-                mBmpCache = null;
-            }
-        }
-
     }
 
     /*----------------------------------------------------------------------*/
@@ -160,6 +154,11 @@ public class SideScrollView extends ScrollView {
     public void setData(SheetData data) {
         mData = data;
         mChild.resize();
+    }
+
+    public void setFocus(int row) {
+        mFocusRow = row;
+        mChild.postInvalidate();
     }
 
     @Override

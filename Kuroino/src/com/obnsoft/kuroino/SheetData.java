@@ -24,11 +24,13 @@ public class SheetData {
     public int cellSize;
     public ArrayList<String> names = new ArrayList<String>();
     public ArrayList<Calendar> dates = new ArrayList<Calendar>();
+    public ArrayList<String[]> attends = new ArrayList<String[]>();
 
     public void createNewData(Calendar begin, Calendar end,
             int often, boolean[] weekFlgs, String[] names) {
         this.names.clear();
         this.dates.clear();
+        this.attends.clear();
         if (begin == null || end == null) {
             return;
         }
@@ -44,8 +46,10 @@ public class SheetData {
         }
 
         if (names != null) {
+            int size = this.dates.size();
             for (String name : names) {
                 this.names.add(name);
+                this.attends.add(new String[size]);
             }
         }
     }

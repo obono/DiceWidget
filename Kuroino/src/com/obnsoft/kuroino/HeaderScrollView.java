@@ -19,12 +19,11 @@ package com.obnsoft.kuroino;
 import java.util.Calendar;
 
 import android.content.Context;
-import android.graphics.Bitmap;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.FontMetrics;
-import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -32,20 +31,9 @@ import android.widget.HorizontalScrollView;
 
 public class HeaderScrollView extends HorizontalScrollView {
 
-    private static final String[] MONTHS = {
-        //"Jan.", "Feb.", "Mar.", "Apr.", "May.", "Jun.",
-        //"Jul.", "Aug.", "Sep.", "Oct.", "Nov.", "Dec.",
-        "1åé", "2åé", "3åé", "4åé", "5åé", "6åé",
-        "7åé", "8åé", "9åé", "10åé", "11åé", "12åé",
-    };
-
-    private static final String[] DWEEK = {
-        //"Sun.", "Mon.", "Tue.", "Wed.", "Thu.", "Fri.", "Sat.",
-        "ì˙", "åé", "âŒ", "êÖ", "ñÿ", "ã‡", "ìy",
-    };
-
     private SheetData mData = null;
     private HeaderView mChild = null;
+    private int mFocusCol = -1;
 
     /*----------------------------------------------------------------------*/
 
@@ -53,17 +41,13 @@ public class HeaderScrollView extends HorizontalScrollView {
 
         private View mParent = null;
         private boolean mIsFocus;
-        private int mFocusCol = -1;
         private Paint mPaintGrid = new Paint();
         private Paint mPaintText = new Paint(Paint.ANTI_ALIAS_FLAG);
-        private Bitmap mBmpCache = null;
-        private Rect mRectTmp = new Rect();
 
         public HeaderView(View parent) {
             super(parent.getContext());
             mParent = parent;
             mPaintGrid.setStyle(Paint.Style.FILL_AND_STROKE);
-            mPaintGrid.setColor(Color.WHITE);
             mPaintText.setColor(Color.LTGRAY);
         }
 
@@ -79,11 +63,13 @@ public class HeaderScrollView extends HorizontalScrollView {
                 if (mData != null) {
                     mIsFocus = true;
                     mFocusCol = (int) event.getX() / mData.cellSize;
+                    ((MainActivity) getContext()).handleFocus(mParent, -1, mFocusCol);
                     postInvalidate();
                 }
                 break;
             case MotionEvent.ACTION_UP:
                 if (mIsFocus) {
+                    ((MainActivity) getContext()).handleClick(mParent, -1, mFocusCol);
                     postInvalidate();
                     mIsFocus = false;
                 }
@@ -91,6 +77,7 @@ public class HeaderScrollView extends HorizontalScrollView {
             case MotionEvent.ACTION_CANCEL:
                 if (mIsFocus) {
                     mFocusCol = -1;
+                    ((MainActivity) getContext()).handleFocus(mParent, -1, -1);
                     postInvalidate();
                     mIsFocus = false;
                 }
@@ -101,14 +88,99 @@ public class HeaderScrollView extends HorizontalScrollView {
 
         @Override
         public void onDraw(Canvas c) {
-            if (mData != null && mBmpCache != null) {
+            if (mData != null) {
+                int height = mParent.getHeight();
+                int cellSize = mData.cellSize;
+                int cols = mData.dates.size();
+
                 int scrollX = mParent.getScrollX();
                 int scrollWidth = mParent.getWidth();
-                mRectTmp.set(scrollX, 0, scrollX + scrollWidth, getHeight());
-                c.drawBitmap(mBmpCache, mRectTmp, mRectTmp, null);
 
+                int startCol = Math.max(scrollX / cellSize, 0);
+                int endCol = Math.min((scrollX + scrollWidth - 1) / cellSize, cols - 1);
+
+                String[] monthStrs = getResources().getStringArray(R.array.month_strings);
+                String[] dweekStrs = getResources().getStringArray(R.array.dweek_strings);
+                TypedArray dweekCols = getResources().obtainTypedArray(R.array.dweek_colors);
+
+                /*  Background  */
+                mPaintGrid.setColor(dweekCols.getColor(1, Color.TRANSPARENT));
+                c.drawRect(scrollX, 0, scrollX + scrollWidth, height, mPaintGrid);
+
+                int lastYear = 0;
+                int lastMonth = 0;
+                int lastDatePos = -1;
+                FontMetrics fm = mPaintText.getFontMetrics();
+                String str;
+                float strWidth;
+
+                for (int col = startCol; col <= endCol; col++) {
+                    Calendar cal = mData.dates.get(col);
+                    int year = cal.get(Calendar.YEAR);
+                    int month = cal.get(Calendar.MONTH);
+                    boolean isNewMonth = (year != lastYear || month != lastMonth);
+                    int dweek = cal.get(Calendar.DAY_OF_WEEK) - 1;
+                    int x = col * cellSize;
+                    float y = fm.descent - fm.ascent;
+
+                    /*  Background  */
+                    mPaintGrid.setColor(dweekCols.getColor(dweek, Color.TRANSPARENT));
+                    c.drawRect(x, y, x + cellSize, height, mPaintGrid);
+
+                    /*  Grid  */
+                    mPaintGrid.setColor(Color.WHITE);
+                    c.drawLine(x, isNewMonth ? 0 : y, x, height, mPaintGrid);
+
+                    /*  Day of month  */
+                    mPaintText.setTextSize(height / 2f);
+                    fm = mPaintText.getFontMetrics();
+                    str = String.valueOf(cal.get(Calendar.DAY_OF_MONTH));
+                    strWidth = mPaintText.measureText(str);
+                    c.drawText(str, x + (cellSize - strWidth) / 2f,
+                            (height - fm.ascent - fm.descent) / 2f, mPaintText);
+
+                    /*  Day of week  */
+                    mPaintText.setTextSize(height / 4f);
+                    fm = mPaintText.getFontMetrics();
+                    str = dweekStrs[dweek];
+                    strWidth = mPaintText.measureText(str);
+                    c.drawText(str, x + (cellSize - strWidth) / 2f, 
+                            height - fm.descent, mPaintText);
+
+                    /*  Month and year  */
+                    if (isNewMonth) {
+                        if (lastDatePos >= 0) {
+                            str = String.format("%s '%02d", monthStrs[lastMonth], lastYear % 100);
+                            strWidth = mPaintText.measureText(str);
+                            float tx = (col - 1) * cellSize + (cellSize - strWidth) / 2;
+                            float cx = scrollX + scrollWidth / 2f;
+                            if (lastDatePos * cellSize + cellSize / 2 <= cx &&
+                                    (col - 1) * cellSize + cellSize / 2 >= cx) {
+                                tx = cx - strWidth / 2f;
+                            }
+                            c.drawText(str, tx, -fm.ascent, mPaintText);
+                        }
+                        lastYear = year;
+                        lastMonth = month;
+                        lastDatePos = col;
+                    }
+                }
+
+                /*  Final grid  */
+                if (endCol == cols - 1) {
+                    mPaintGrid.setColor(Color.WHITE);
+                    c.drawLine(cols * cellSize, 0, cols * cellSize, height, mPaintGrid);
+                }
+
+                /*  Final month and Year  */
+                str = String.format("%s '%02d", monthStrs[lastMonth], lastYear % 100);
+                strWidth = mPaintText.measureText(str);
+                float tx = lastDatePos * cellSize + (cellSize - strWidth) / 2;
+                float cx = scrollX + (scrollWidth - strWidth) / 2f;
+                c.drawText(str, Math.max(cx, tx), -fm.ascent, mPaintText);
+
+                /*  Focus  */
                 if (mFocusCol >= 0) {
-                    int cellSize = mData.cellSize;
                     mPaintGrid.setColor(mIsFocus ?
                             Color.argb(63, 255, 255, 0) : Color.argb(31, 255, 255, 0));
                     c.drawRect(mFocusCol * cellSize, 0,
@@ -118,79 +190,10 @@ public class HeaderScrollView extends HorizontalScrollView {
         }
 
         private void resize() {
-            int width = 1;
+            int width = (mData != null) ?  mData.dates.size() * mData.cellSize + 1 : 1;
             int height = mParent.getHeight();
-            if (mData != null) {
-                width = mData.dates.size() * mData.cellSize + 1;
-                createCache();
-            }
             setMeasuredDimension(width, height);
         }
-
-        private void createCache() {
-            if (mBmpCache != null) {
-                mBmpCache.recycle();
-            }
-            int height = mParent.getHeight();
-            int cellSize = mData.cellSize;
-            int cols = mData.dates.size();
-            if (height > 0) {
-                mBmpCache = Bitmap.createBitmap(
-                        cols * cellSize + 1, height, Bitmap.Config.RGB_565);
-                Canvas c = new Canvas(mBmpCache);
-                c.drawRGB(31, 31, 31);
-
-                int lastYear = 0;
-                int lastMonth = 0;
-                String str;
-                float strWidth;
-                for (int i = 0; i < cols; i++) {
-                    int x = i * cellSize;
-                    Calendar cal = mData.dates.get(i);
-                    int dweek = cal.get(Calendar.DAY_OF_WEEK);
-                    if (dweek == Calendar.SUNDAY) {
-                        mPaintGrid.setColor(Color.rgb(47, 31, 31));
-                        c.drawRect(i * cellSize, 0, (i + 1) * cellSize, height, mPaintGrid);
-                        mPaintGrid.setColor(Color.WHITE);
-                    }
-                    if (dweek == Calendar.SATURDAY) {
-                        mPaintGrid.setColor(Color.rgb(31, 31, 63));
-                        c.drawRect(i * cellSize, 0, (i + 1) * cellSize, height, mPaintGrid);
-                        mPaintGrid.setColor(Color.WHITE);
-                    }
-
-                    mPaintText.setTextSize(height / 4f);
-                    FontMetrics fm = mPaintText.getFontMetrics();
-
-                    int year = cal.get(Calendar.YEAR);
-                    int month = cal.get(Calendar.MONTH);
-                    if (year != lastYear || month != lastMonth) {
-                        str = String.format("%s '%02d", MONTHS[month], year % 100);
-                        strWidth = mPaintText.measureText(str);
-                        c.drawText(str, x + (cellSize - strWidth) / 2, -fm.ascent, mPaintText);
-                        lastYear = year;
-                        lastMonth = month;
-                    }
-
-                    str = DWEEK[cal.get(Calendar.DAY_OF_WEEK) - 1];
-                    strWidth = mPaintText.measureText(str);
-                    c.drawText(str, x + (cellSize - strWidth) / 2f,
-                            height - fm.descent, mPaintText);
-
-                    mPaintText.setTextSize(height / 2f);
-                    fm = mPaintText.getFontMetrics();
-                    str = String.valueOf(cal.get(Calendar.DAY_OF_MONTH));
-                    strWidth = mPaintText.measureText(str);
-                    c.drawText(str, x + (cellSize - strWidth) / 2f,
-                            (height - fm.ascent - fm.descent) / 2f, mPaintText);
-                    c.drawLine(x, 0, x, height, mPaintGrid);
-                }
-                c.drawLine(cols * cellSize, 0, cols * cellSize, height, mPaintGrid);
-            } else {
-                mBmpCache = null;
-            }
-        }
-
     }
 
     /*----------------------------------------------------------------------*/
@@ -211,6 +214,11 @@ public class HeaderScrollView extends HorizontalScrollView {
     public void setData(SheetData data) {
         mData = data;
         mChild.resize();
+    }
+
+    public void setFocus(int col) {
+        mFocusCol = col;
+        mChild.postInvalidate();
     }
 
     @Override

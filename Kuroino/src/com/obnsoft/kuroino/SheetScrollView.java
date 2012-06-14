@@ -31,6 +31,8 @@ public class SheetScrollView extends FreeScrollView {
 
     private SheetData mData = null;
     private SheetView mChild = null;
+    private int mFocusRow = -1;
+    private int mFocusCol = -1;
 
     /*----------------------------------------------------------------------*/
 
@@ -38,8 +40,6 @@ public class SheetScrollView extends FreeScrollView {
 
         private View mParent = null;
         private boolean mIsFocus;
-        private int mFocusRow = -1;
-        private int mFocusCol = -1;
         private Paint mPaintGrid = new Paint();
         private Paint mPaintText = new Paint(Paint.ANTI_ALIAS_FLAG);
 
@@ -64,11 +64,13 @@ public class SheetScrollView extends FreeScrollView {
                     mIsFocus = true;
                     mFocusCol = (int) event.getX() / mData.cellSize;
                     mFocusRow = (int) event.getY() / mData.cellSize;
+                    ((MainActivity) getContext()).handleFocus(mParent, mFocusRow, mFocusCol);
                     postInvalidate();
                 }
                 break;
             case MotionEvent.ACTION_UP:
                 if (mIsFocus) {
+                    ((MainActivity) getContext()).handleClick(mParent, mFocusRow, mFocusCol);
                     postInvalidate();
                     mIsFocus = false;
                 }
@@ -76,6 +78,7 @@ public class SheetScrollView extends FreeScrollView {
             case MotionEvent.ACTION_CANCEL:
                 if (mIsFocus) {
                     mFocusCol = mFocusRow = -1;
+                    ((MainActivity) getContext()).handleFocus(mParent, -1, -1);
                     postInvalidate();
                     mIsFocus = false;
                 }
@@ -99,33 +102,38 @@ public class SheetScrollView extends FreeScrollView {
             int scrollWidth = mParent.getWidth();
             int scrollHeight = mParent.getHeight();
 
-            int fromRow = Math.max(scrollY / cellSize, 0);
+            int startRow = Math.max(scrollY / cellSize, 0);
             int endRow = Math.min((scrollY + scrollHeight - 1) / cellSize, rows - 1);
-            int fromCol = Math.max(scrollX / cellSize, 0);
+            int startCol = Math.max(scrollX / cellSize, 0);
             int endCol = Math.min((scrollX + scrollWidth - 1) / cellSize, cols - 1);
 
-            /*  Draw Symbol  */
+            /*  Symbol  */
             FontMetrics fm = mPaintText.getFontMetrics();
             float strHeight = fm.ascent + fm.descent;
-            for (int row = fromRow; row <= endRow; row++) {
-                for (int col = fromCol; col <= endCol; col++) {
-                    String str = "Œ‡";
-                    float strWidth = mPaintText.measureText(str);
-                    c.drawText(str, col * cellSize + (cellSize - strWidth) / 2f,
-                            row * cellSize + (cellSize - strHeight) / 2f, mPaintText);
+            for (int row = startRow; row <= endRow; row++) {
+                String[] attends = mData.attends.get(row);
+                for (int col = startCol; col <= endCol; col++) {
+                    String str = attends[col];
+                    if (str != null) {
+                        float strWidth = mPaintText.measureText(str);
+                        c.drawText(str, col * cellSize + (cellSize - strWidth) / 2f,
+                                row * cellSize + (cellSize - strHeight) / 2f, mPaintText);
+                    }
                 }
             }
 
-            /*  Draw Grid  */
+            /*  Grid  */
             mPaintGrid.setColor(Color.WHITE);
-            for (int row = fromRow; row <= endRow + 1; row++) {
+            for (int row = startRow; row <= endRow + 1; row++) {
                 c.drawLine(scrollX, row * cellSize,
                         scrollX + scrollWidth, row * cellSize, mPaintGrid);
             }
-            for (int col = fromCol; col <= endCol + 1; col++) {
+            for (int col = startCol; col <= endCol + 1; col++) {
                 c.drawLine(col * cellSize, scrollY,
                         col * cellSize, scrollY + scrollHeight, mPaintGrid);
             }
+
+            /*  Focus  */
             mPaintGrid.setColor(Color.argb(31, 255, 255, 0));
             if (mFocusRow >= 0) {
                 c.drawRect(scrollX, mFocusRow * cellSize,
@@ -172,6 +180,12 @@ public class SheetScrollView extends FreeScrollView {
     public void setData(SheetData data) {
         mData = data;
         mChild.resize();
+    }
+
+    public void setFocus(int row, int col) {
+        mFocusRow = row;
+        mFocusCol = col;
+        mChild.postInvalidate();
     }
 
     @Override
