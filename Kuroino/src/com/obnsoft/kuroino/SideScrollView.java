@@ -59,10 +59,13 @@ public class SideScrollView extends ScrollView {
             switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
                 if (mData != null) {
-                    mIsFocus = true;
-                    mFocusRow = (int) event.getY() / mData.cellSize;
-                    ((MainActivity) getContext()).handleFocus(mParent, mFocusRow, -1);
-                    postInvalidate();
+                    int row = (int) event.getY() / mData.cellSize;
+                    if (row >= 0 && row < mData.entries.size()) {
+                        mIsFocus = true;
+                        mFocusRow = (int) event.getY() / mData.cellSize;
+                        ((MainActivity) getContext()).handleFocus(mParent, mFocusRow, -1);
+                        postInvalidate();
+                    }
                 }
                 break;
             case MotionEvent.ACTION_UP:
@@ -89,7 +92,7 @@ public class SideScrollView extends ScrollView {
             if (mData != null) {
                 int width = mParent.getWidth();
                 int cellSize = mData.cellSize;
-                int rows = mData.names.size();
+                int rows = mData.entries.size();
 
                 int scrollY = mParent.getScrollY();
                 int scrollHeight = mParent.getHeight();
@@ -110,7 +113,7 @@ public class SideScrollView extends ScrollView {
                     c.drawRect(0, y, width, y + cellSize, mPaintGrid);
 
                     /*  Name  */
-                    c.drawText(mData.names.get(row), tx, y + ty, mPaintText);
+                    c.drawText(mData.entries.get(row).name, tx, y + ty, mPaintText);
                 }
 
                 /*  Grid  */
@@ -131,7 +134,7 @@ public class SideScrollView extends ScrollView {
 
         private void resize() {
             int width = mParent.getWidth();
-            int height = (mData != null) ? mData.names.size() * mData.cellSize + 1 : 1;
+            int height = (mData != null) ? mData.entries.size() * mData.cellSize + 1 : 1;
             setMeasuredDimension(width, height);
         }
     }
@@ -154,6 +157,7 @@ public class SideScrollView extends ScrollView {
     public void setData(SheetData data) {
         mData = data;
         mChild.resize();
+        postInvalidate();
     }
 
     public void setFocus(int row) {

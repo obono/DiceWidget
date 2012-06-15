@@ -61,10 +61,13 @@ public class HeaderScrollView extends HorizontalScrollView {
             switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
                 if (mData != null) {
-                    mIsFocus = true;
-                    mFocusCol = (int) event.getX() / mData.cellSize;
-                    ((MainActivity) getContext()).handleFocus(mParent, -1, mFocusCol);
-                    postInvalidate();
+                    int col = (int) event.getX() / mData.cellSize;
+                    if (mFocusCol >= 0 && mFocusCol < mData.dates.size()) {
+                        mIsFocus = true;
+                        mFocusCol = col;
+                        ((MainActivity) getContext()).handleFocus(mParent, -1, mFocusCol);
+                        postInvalidate();
+                    }
                 }
                 break;
             case MotionEvent.ACTION_UP:
@@ -214,6 +217,7 @@ public class HeaderScrollView extends HorizontalScrollView {
     public void setData(SheetData data) {
         mData = data;
         mChild.resize();
+        postInvalidate();
     }
 
     public void setFocus(int col) {

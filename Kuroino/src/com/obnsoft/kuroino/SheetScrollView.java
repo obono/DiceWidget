@@ -16,6 +16,8 @@
 
 package com.obnsoft.kuroino;
 
+import java.util.ArrayList;
+
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -61,11 +63,16 @@ public class SheetScrollView extends FreeScrollView {
             switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
                 if (mData != null) {
-                    mIsFocus = true;
-                    mFocusCol = (int) event.getX() / mData.cellSize;
-                    mFocusRow = (int) event.getY() / mData.cellSize;
-                    ((MainActivity) getContext()).handleFocus(mParent, mFocusRow, mFocusCol);
-                    postInvalidate();
+                    int row = (int) event.getY() / mData.cellSize;
+                    int col = (int) event.getX() / mData.cellSize;
+                    if (row >= 0 && row < mData.entries.size() &&
+                            col >= 0 && col < mData.dates.size()) {
+                        mIsFocus = true;
+                        mFocusRow = row;
+                        mFocusCol = col;
+                        ((MainActivity) getContext()).handleFocus(mParent, mFocusRow, mFocusCol);
+                        postInvalidate();
+                    }
                 }
                 break;
             case MotionEvent.ACTION_UP:
@@ -94,7 +101,7 @@ public class SheetScrollView extends FreeScrollView {
             }
 
             int cellSize = mData.cellSize;
-            int rows = mData.names.size();
+            int rows = mData.entries.size();
             int cols = mData.dates.size();
 
             int scrollX = mParent.getScrollX();
@@ -111,9 +118,9 @@ public class SheetScrollView extends FreeScrollView {
             FontMetrics fm = mPaintText.getFontMetrics();
             float strHeight = fm.ascent + fm.descent;
             for (int row = startRow; row <= endRow; row++) {
-                String[] attends = mData.attends.get(row);
+                ArrayList<String> attends = mData.entries.get(row).attends;
                 for (int col = startCol; col <= endCol; col++) {
-                    String str = attends[col];
+                    String str = attends.get(col);
                     if (str != null) {
                         float strWidth = mPaintText.measureText(str);
                         c.drawText(str, col * cellSize + (cellSize - strWidth) / 2f,
@@ -155,7 +162,7 @@ public class SheetScrollView extends FreeScrollView {
             int height = 1;
             if (mData != null) {
                 width = mData.dates.size() * mData.cellSize + 1;
-                height = mData.names.size() * mData.cellSize + 1;
+                height = mData.entries.size() * mData.cellSize + 1;
             }
             setMeasuredDimension(width, height);
         }
@@ -180,6 +187,7 @@ public class SheetScrollView extends FreeScrollView {
     public void setData(SheetData data) {
         mData = data;
         mChild.resize();
+        postInvalidate();
     }
 
     public void setFocus(int row, int col) {

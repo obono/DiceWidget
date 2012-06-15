@@ -16,10 +16,14 @@
 
 package com.obnsoft.kuroino;
 
+import java.util.ArrayList;
 import java.util.GregorianCalendar;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Environment;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 
 public class MainActivity extends Activity {
@@ -45,9 +49,37 @@ public class MainActivity extends Activity {
                 0,
                 new boolean[] {false, true, false, true, false, false, true},
                 new String[] {"Australia", "Brazil", "Canada", "Denmark", "Egypt", "France", "German"});
-        mHeader.setData(mData);
-        mSide.setData(mData);
-        mSheet.setData(mData);
+        setData(mData);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        boolean ret = super.onCreateOptionsMenu(menu);
+        menu.add(0, Menu.FIRST, Menu.NONE, "Import");
+        menu.add(0, Menu.FIRST + 1, Menu.NONE, "Export");
+        return ret;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getGroupId() == 0) {
+            String filePath = Environment.getExternalStorageDirectory() + "/hoge.csv";
+            switch (item.getItemId()) {
+            case Menu.FIRST:
+                mData.importExternalData(filePath);
+                setData(mData);
+                return true;
+            case Menu.FIRST + 1:
+                mData.exportCurrentData(filePath);
+                return true;
+            }
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     protected void handleFocus(View v, int row, int col) {
@@ -72,23 +104,24 @@ public class MainActivity extends Activity {
             ; // TODO
         } else if (v == mSheet) {
             String[] symbolStrs = getResources().getStringArray(R.array.symbol_strings);
-            String[] attends = mData.attends.get(row);
-            if (symbolStrs.length == 0 || attends.length - 1 < row) {
+            ArrayList<String> attends = mData.entries.get(row).attends;
+            if (symbolStrs.length == 0 || attends.size() - 1 < col) {
                 return;
             }
-            if (attends[col] == null) {
-                attends[col] = symbolStrs[0];
+            String attend = attends.get(col);
+            if (attend == null) {
+                attends.set(col, symbolStrs[0]);
             } else {
                 boolean match = false;
                 for (int i = 0; i < symbolStrs.length - 1; i++) {
-                    if (symbolStrs[i].equals(attends[col])) {
-                        attends[col] = symbolStrs[i + 1];
+                    if (symbolStrs[i].equals(attend)) {
+                        attends.set(col, symbolStrs[i + 1]);
                         match = true;
                         break;
                     }
                 }
                 if (!match) {
-                    attends[col] = null;
+                    attends.set(col, null);
                 }
             }
         }
@@ -103,5 +136,11 @@ public class MainActivity extends Activity {
             mHeader.scrollTo(l, 0);
             mSide.scrollTo(0, t);
         }
+    }
+
+    private void setData(SheetData data) {
+        mHeader.setData(data);
+        mSide.setData(data);
+        mSheet.setData(data);
     }
 }
