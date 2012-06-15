@@ -31,6 +31,8 @@ import android.widget.HorizontalScrollView;
 
 public class HeaderScrollView extends HorizontalScrollView {
 
+    private static final String MONTH_YEAR_FORMAT = "%s '%02d";
+
     private SheetData mData = null;
     private HeaderView mChild = null;
     private int mFocusCol = -1;
@@ -98,6 +100,7 @@ public class HeaderScrollView extends HorizontalScrollView {
 
                 int scrollX = mParent.getScrollX();
                 int scrollWidth = mParent.getWidth();
+                int baseWidth = Math.min(mParent.getWidth(), getWidth());
 
                 int startCol = Math.max(scrollX / cellSize, 0);
                 int endCol = Math.min((scrollX + scrollWidth - 1) / cellSize, cols - 1);
@@ -153,10 +156,11 @@ public class HeaderScrollView extends HorizontalScrollView {
                     /*  Month and year  */
                     if (isNewMonth) {
                         if (lastDatePos >= 0) {
-                            str = String.format("%s '%02d", monthStrs[lastMonth], lastYear % 100);
+                            str = String.format(MONTH_YEAR_FORMAT,
+                                    monthStrs[lastMonth], lastYear % 100);
                             strWidth = mPaintText.measureText(str);
                             float tx = (col - 1) * cellSize + (cellSize - strWidth) / 2;
-                            float cx = scrollX + scrollWidth / 2f;
+                            float cx = scrollX + baseWidth / 2f;
                             if (lastDatePos * cellSize + cellSize / 2 <= cx &&
                                     (col - 1) * cellSize + cellSize / 2 >= cx) {
                                 tx = cx - strWidth / 2f;
@@ -176,11 +180,14 @@ public class HeaderScrollView extends HorizontalScrollView {
                 }
 
                 /*  Final month and Year  */
-                str = String.format("%s '%02d", monthStrs[lastMonth], lastYear % 100);
-                strWidth = mPaintText.measureText(str);
-                float tx = lastDatePos * cellSize + (cellSize - strWidth) / 2;
-                float cx = scrollX + (scrollWidth - strWidth) / 2f;
-                c.drawText(str, Math.max(cx, tx), -fm.ascent, mPaintText);
+                if (lastDatePos >= 0) {
+                    str = String.format(MONTH_YEAR_FORMAT,
+                            monthStrs[lastMonth], lastYear % 100);
+                    strWidth = mPaintText.measureText(str);
+                    float tx = lastDatePos * cellSize + (cellSize - strWidth) / 2;
+                    float cx = scrollX + (baseWidth - strWidth) / 2f;
+                    c.drawText(str, Math.max(cx, tx), -fm.ascent, mPaintText);
+                }
 
                 /*  Focus  */
                 if (mFocusCol >= 0) {
@@ -196,6 +203,7 @@ public class HeaderScrollView extends HorizontalScrollView {
             int width = (mData != null) ?  mData.dates.size() * mData.cellSize + 1 : 1;
             int height = mParent.getHeight();
             setMeasuredDimension(width, height);
+            layout(0, 0, width, height);
         }
     }
 

@@ -165,6 +165,7 @@ public class SheetScrollView extends FreeScrollView {
                 height = mData.entries.size() * mData.cellSize + 1;
             }
             setMeasuredDimension(width, height);
+            layout(0, 0, width, height);
         }
 
     }

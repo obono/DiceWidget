@@ -136,6 +136,7 @@ public class SideScrollView extends ScrollView {
             int width = mParent.getWidth();
             int height = (mData != null) ? mData.entries.size() * mData.cellSize + 1 : 1;
             setMeasuredDimension(width, height);
+            layout(0, 0, width, height);
         }
     }
 
