@@ -32,6 +32,9 @@ import java.util.GregorianCalendar;
 
 public class SheetData {
 
+    public static final int MAX_ROWS = 256;
+    public static final int MAX_COLS = 701;
+
     public int cellSize;
     public ArrayList<Calendar> dates = new ArrayList<Calendar>();
     public ArrayList<EntryData> entries = new ArrayList<EntryData>();
@@ -59,7 +62,7 @@ public class SheetData {
 
     public void createNewData(Calendar begin, Calendar end,
             int often, boolean[] weekFlgs, String[] names) {
-        clear();
+        clearAll();
         if (begin == null || end == null) {
             return;
         }
@@ -84,11 +87,19 @@ public class SheetData {
     }
 
     public boolean importExternalData(String filePath) {
-        boolean ret = false;
-        clear();
+        clearAll();
+        BufferedReader in;
         try {
-            BufferedReader in  = new BufferedReader(new FileReader(new File(filePath)));
-            String strBuf = in.readLine();
+            in = new BufferedReader(new FileReader(new File(filePath)));
+        } catch (FileNotFoundException e) {
+            return false;
+        }
+
+        boolean ret = false;
+        int cols = 0;
+        String strBuf;
+        try {
+            strBuf = in.readLine();
             DateFormat df = new SimpleDateFormat(DATE_FORMAT);
             if (strBuf != null) {
                 String[] ary = strBuf.split(",");
@@ -97,33 +108,46 @@ public class SheetData {
                     if (skipped) {
                         Calendar cal = new GregorianCalendar();
                         cal.setTime(df.parse(strDate));
+                        if (cols > 0 && !this.dates.get(cols - 1).before(cal)) {
+                            break;
+                        }
                         this.dates.add(cal);
+                        if (++cols >= MAX_COLS) {
+                            break;
+                        }
                     }
                     skipped = true;
                 }
             }
-            int size = this.dates.size();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
+            // do nothing
+        }
+
+        int rows = 0;
+        try {
             while ((strBuf = in.readLine()) != null) {
                 String[] ary = strBuf.split(",");
                 if (ary.length > 0) {
-                    EntryData entry = new EntryData(ary[0], size);
-                    for (int i = 1; i < ary.length && i <= size; i++) {
+                    EntryData entry = new EntryData(ary[0], cols);
+                    for (int i = 1; i < ary.length && i <= cols; i++) {
                         if (ary[i].length() > 0) {
                             entry.attends.set(i - 1, ary[i]);
                         }
                     }
                     this.entries.add(entry);
+                    if (++rows >= MAX_ROWS) {
+                        break;
+                    }
                 }
             }
             in.close();
             ret = true;
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
-        } catch (ParseException e) {
-            e.printStackTrace();
         }
+
         return ret;
     }
 
@@ -159,7 +183,81 @@ public class SheetData {
         return ret;
     }
 
-    public void clear() {
+    public boolean insertDate(Calendar cal) {
+        if (this.dates.size() >= MAX_COLS) {
+            return false;
+        }
+        int index = searchDate(cal, false);
+        if (index < 0 || index >= this.entries.size()) {
+            this.dates.add((Calendar) cal.clone());
+            for (EntryData entry : this.entries) {
+                entry.attends.add(null);
+            }
+        } else if (this.dates.get(index).equals(cal)){
+            return false;
+        } else {
+            this.dates.add(index, (Calendar) cal.clone());
+            for (EntryData entry : this.entries) {
+                entry.attends.add(index, null);
+            }
+        }
+        return true;
+    }
+
+    public int searchDate(Calendar cal, boolean match) {
+        int lo = 0;
+        int hi = this.dates.size() - 1;
+        while (lo <= hi) {
+            int mid = lo + (hi - lo) / 2;
+            Calendar cal2 = this.dates.get(mid);
+            if (cal2.after(cal)) {
+                hi = mid - 1;
+            } else if (cal2.before(cal)) {
+                lo = mid + 1;
+            } else {
+                return mid;
+            }
+        }
+        return (match) ? -1 : lo;
+    }
+
+    public boolean insertEntry(String name) {
+        return insertEntry(name, this.entries.size());
+    }
+
+    public boolean insertEntry(String name, int index) {
+        if (this.entries.size() >= MAX_ROWS) {
+            return false;
+        }
+        EntryData entry = new EntryData(name, this.dates.size());
+        if (index < 0 || index >= this.entries.size()) {
+            this.entries.add(entry);
+        } else {
+            this.entries.add(index, entry);
+        }
+        return true;
+    }
+
+    public boolean deleteDate(int index) {
+        if (index < 0 || index >= this.dates.size()) {
+            return false;
+        }
+        this.dates.remove(index);
+        for (EntryData entry : this.entries) {
+            entry.attends.remove(index);
+        }
+        return false;
+    }
+
+    public boolean deleteEntry(int index) {
+        if (index < 0 || index >= this.entries.size()) {
+            return false;
+        }
+        this.entries.remove(index);
+        return true;
+    }
+
+    public void clearAll() {
         for (EntryData entry : this.entries) {
             entry.attends.clear();
         }
