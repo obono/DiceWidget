@@ -16,11 +16,53 @@
 
 package com.obnsoft.kuroino;
 
+import java.util.Calendar;
+
+import android.app.AlertDialog;
 import android.app.Application;
+import android.app.DatePickerDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.view.View;
 
 public class MyApplication extends Application {
 
     public MyApplication() {
         super();
     }
+
+    /*----------------------------------------------------------------------*/
+
+    static public void showDatePickerDialog(
+            Context context, Calendar cal, DatePickerDialog.OnDateSetListener listener) {
+        new DatePickerDialog(context, listener, cal.get(Calendar.YEAR),
+                cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)).show();
+    }
+
+    static public void showYesNoDialog(
+            Context context, int iconId, int titleId, int msgId,
+            DialogInterface.OnClickListener listener) {
+        new AlertDialog.Builder(context)
+                .setIcon(iconId)
+                .setTitle(titleId)
+                .setMessage(msgId)
+                .setPositiveButton(android.R.string.yes, listener)
+                .setNegativeButton(android.R.string.no, null)
+                .show();
+    }
+
+    static public void showCustomDialog(
+            Context context, int iconId, int titleId, View view,
+            DialogInterface.OnClickListener listener) {
+        new AlertDialog.Builder(context)
+                .setIcon(iconId)
+                .setTitle(titleId)
+                .setView(view)
+                .setPositiveButton(android.R.string.ok, listener)
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    /*----------------------------------------------------------------------*/
+
 }

@@ -23,8 +23,10 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.FontMetrics;
 import android.util.AttributeSet;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ScrollView;
 
 public class SideScrollView extends ScrollView {
@@ -164,6 +166,11 @@ public class SideScrollView extends ScrollView {
     public void setFocus(int row) {
         mFocusRow = row;
         mChild.postInvalidate();
+    }
+
+    @Override
+    protected ContextMenuInfo getContextMenuInfo() {
+        return new AdapterContextMenuInfo(null, mFocusRow, 0);
     }
 
     @Override

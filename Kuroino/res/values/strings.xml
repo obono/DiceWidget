@@ -1,4 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Roll book</string>
+    <string name="title_import">Choose the file to import from</string>
+    <string name="title_export">Choose the file to export to</string>
+
+    <string name="menu_new">New</string>
+    <string name="menu_newsheet">New sheet</string>
+    <string name="menu_add">Add</string>
+    <string name="menu_adddate">Add a date</string>
+    <string name="menu_addmember">Add a member</string>
+    <string name="menu_insert">Insert</string>
+    <string name="menu_insertmember">Insert a member here</string>
+    <string name="menu_moveup">Move up</string>
+    <string name="menu_movedown">Move down</string>
+    <string name="menu_modify">Modify</string>
+    <string name="menu_delete">Delete</string>
+    <string name="menu_info">Information</string>
+    <string name="menu_import">Import</string>
+    <string name="menu_export">Export</string>
+
+    <string name="btn_back">Back</string>
+    <string name="btn_upper">Upper</string>
+
+    <string name="msg_newmembername">Member name</string>
+    <string name="msg_newfilename">File name</string>
+    <string name="msg_topdirectory">(Top directory)</string>
+    <string name="msg_nofiles">No files...</string>
+    <string name="msg_createfile">(New file)</string>
+    <string name="msg_delete">Are you sure to delete?</string>
+    <string name="msg_overwrite">Are you sure to overwrite?</string>
 </resources>
