@@ -16,6 +16,7 @@
 
 package com.obnsoft.kuroino;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -31,15 +32,14 @@ import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.DatePicker;
 import android.widget.EditText;
 
 public class MainActivity extends Activity {
 
-    private static final int MENU_GID_OPTION    = 0;
-    private static final int MENU_GID_HEADER    = 1;
-    private static final int MENU_GID_SIDE      = 2;
+    private static final int MENU_GID_OPTION    = Menu.FIRST;
+    private static final int MENU_GID_HEADER    = Menu.FIRST + 1;
+    private static final int MENU_GID_SIDE      = Menu.FIRST + 2;
 
     private static final int MENU_ID_IMPORT         = Menu.FIRST;
     private static final int MENU_ID_EXPORT         = Menu.FIRST + 1;
@@ -57,6 +57,9 @@ public class MainActivity extends Activity {
 
     private static final int REQUEST_ID_IMPORT = 1;
     private static final int REQUEST_ID_EXPORT = 2;
+
+    private int mTargetRow;
+    private int mTargetCol;
 
     private HeaderScrollView    mHeader;
     private SideScrollView      mSide;
@@ -77,15 +80,27 @@ public class MainActivity extends Activity {
 
         mData = new SheetData();
         mData.cellSize = (int) (48f * getResources().getDisplayMetrics().density);
-        mData.createNewData(new GregorianCalendar(2012, 0, 1),
-                new GregorianCalendar(2012, 11, 31),
-                0,
-                new boolean[] {false, true, false, true, false, false, true},
-                new String[] {"Australia", "Brazil", "Canada", "Denmark", "Egypt", "France", "German"});
+        if ((new File(getLocalFileName())).exists()) {
+            mData.importExternalData(getLocalFileName());
+        } else {
+            mData.createNewData(new GregorianCalendar(2012, 0, 1),
+                    new GregorianCalendar(2012, 11, 31),
+                    0,
+                    new boolean[] {false, true, false, true, false, false, true},
+                    new String[] {"Australia", "Brazil", "Canada", "Denmark",
+                                    "Egypt", "France", "German"});
+        }
         setData(mData);
     }
 
-    
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (true) {
+            mData.exportCurrentData(getLocalFileName());
+        }
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         boolean ret = super.onCreateOptionsMenu(menu);
@@ -108,44 +123,7 @@ public class MainActivity extends Activity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getGroupId() == MENU_GID_OPTION) {
-            switch (item.getItemId()) {
-            case MENU_ID_IMPORT:
-                Intent intent1 = new Intent(this, MyFilePickerActivity.class);
-                intent1.putExtra(MyFilePickerActivity.INTENT_EXTRA_TITLEID, R.string.title_import);
-                intent1.putExtra(MyFilePickerActivity.INTENT_EXTRA_EXTENSION, "csv");
-                startActivityForResult(intent1, REQUEST_ID_IMPORT);
-                return true;
-            case MENU_ID_EXPORT:
-                Intent intent2 = new Intent(this, MyFilePickerActivity.class);
-                intent2.putExtra(MyFilePickerActivity.INTENT_EXTRA_TITLEID, R.string.title_export);
-                intent2.putExtra(MyFilePickerActivity.INTENT_EXTRA_EXTENSION, "csv");
-                intent2.putExtra(MyFilePickerActivity.INTENT_EXTRA_WRITEMODE, true);
-                startActivityForResult(intent2, REQUEST_ID_EXPORT);
-                return true;
-            case MENU_ID_ADDDATE:
-                DatePickerDialog.OnDateSetListener listener1 =
-                        new DatePickerDialog.OnDateSetListener() {
-                    @Override
-                    public void onDateSet(DatePicker view, int year, int month, int day) {
-                        mData.insertDate(new GregorianCalendar(year, month, day));
-                        setData(mData);
-                    }
-                };
-                MyApplication.showDatePickerDialog(
-                        this, Calendar.getInstance(), listener1);
-                return true;
-            case MENU_ID_ADDMEMBER:
-                final EditText editView = new EditText(this);
-                editView.setSingleLine();
-                DialogInterface.OnClickListener listener2 = new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        mData.insertEntry(editView.getText().toString().trim());
-                        setData(mData);
-                    }
-                };
-                MyApplication.showCustomDialog(
-                        this, android.R.drawable.ic_dialog_info,
-                        R.string.msg_newmembername, editView, listener2);
+            if (executeFunction(item.getItemId())) {
                 return true;
             }
         }
@@ -156,16 +134,14 @@ public class MainActivity extends Activity {
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
         if (v == mHeader) {
-            int index = ((AdapterContextMenuInfo) menuInfo).position;
-            Calendar cal = mData.dates.get(index);
+            Calendar cal = mData.dates.get(mTargetCol);
             menu.setHeaderTitle(DateFormat.getDateFormat(this).format(cal.getTime()));
             menu.add(MENU_GID_HEADER, MENU_ID_MODIFYDATE, Menu.NONE, R.string.menu_modify);
             menu.add(MENU_GID_HEADER, MENU_ID_DELETEDATE, Menu.NONE, R.string.menu_delete);
             menu.add(MENU_GID_HEADER, MENU_ID_INFODATE, Menu.NONE, R.string.menu_info);
             menu.add(MENU_GID_HEADER, MENU_ID_ADDDATE, Menu.NONE, R.string.menu_adddate);
         } else if (v == mSide) {
-            int index = ((AdapterContextMenuInfo) menuInfo).position;
-            menu.setHeaderTitle(mData.entries.get(index).name);
+            menu.setHeaderTitle(mData.entries.get(mTargetRow).name);
             menu.add(MENU_GID_SIDE, MENU_ID_MODIFYMEMBER, Menu.NONE, R.string.menu_modify);
             menu.add(MENU_GID_SIDE, MENU_ID_MOVEUPMEMBER, Menu.NONE, R.string.menu_moveup);
             menu.add(MENU_GID_SIDE, MENU_ID_MOVEDOWNMEMBER, Menu.NONE, R.string.menu_movedown);
@@ -177,17 +153,10 @@ public class MainActivity extends Activity {
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
-        if (item.getGroupId() == MENU_GID_HEADER) {
-            switch (item.getItemId()) {
-                // TODO
-                //mData.deleteDate(col);
-                //setData(mData);
-            }
-        } else if (item.getGroupId() == MENU_GID_SIDE) {
-            switch (item.getItemId()) {
-                // TODO
-                //mData.deleteEntry(row);
-                //setData(mData);
+        if (item.getGroupId() == MENU_GID_HEADER ||
+                item.getGroupId() == MENU_GID_SIDE) {
+            if (executeFunction(item.getItemId())) {
+                return true;
             }
         }
         return super.onContextItemSelected(item);
@@ -226,6 +195,8 @@ public class MainActivity extends Activity {
     }
 
     protected void handleClick(View v, int row, int col) {
+        mTargetRow = row;
+        mTargetCol = col;
         if (v == mHeader) {
             openContextMenu(mHeader);
         } else if (v == mSide) {
@@ -266,9 +237,136 @@ public class MainActivity extends Activity {
         }
     }
 
+    private boolean executeFunction(int menuId) {
+        switch (menuId) {
+
+        case MENU_ID_IMPORT:
+            // TODO: show confirmation!
+            Intent intent1 = new Intent(this, MyFilePickerActivity.class);
+            intent1.putExtra(MyFilePickerActivity.INTENT_EXTRA_TITLEID, R.string.title_import);
+            intent1.putExtra(MyFilePickerActivity.INTENT_EXTRA_EXTENSION, "csv");
+            startActivityForResult(intent1, REQUEST_ID_IMPORT);
+            return true;
+
+        case MENU_ID_EXPORT:
+            Intent intent2 = new Intent(this, MyFilePickerActivity.class);
+            intent2.putExtra(MyFilePickerActivity.INTENT_EXTRA_TITLEID, R.string.title_export);
+            intent2.putExtra(MyFilePickerActivity.INTENT_EXTRA_EXTENSION, "csv");
+            intent2.putExtra(MyFilePickerActivity.INTENT_EXTRA_WRITEMODE, true);
+            startActivityForResult(intent2, REQUEST_ID_EXPORT);
+            return true;
+
+        case MENU_ID_ADDDATE:
+            DatePickerDialog.OnDateSetListener dl1 =
+                    new DatePickerDialog.OnDateSetListener() {
+                @Override
+                public void onDateSet(DatePicker view, int year, int month, int day) {
+                    mData.insertDate(new GregorianCalendar(year, month, day));
+                    setData(mData);
+                }
+            };
+            MyApplication.showDatePickerDialog(
+                    this, Calendar.getInstance(), dl1);
+            return true;
+
+        case MENU_ID_MODIFYDATE:
+            DatePickerDialog.OnDateSetListener dl2 =
+                    new DatePickerDialog.OnDateSetListener() {
+                @Override
+                public void onDateSet(DatePicker view, int year, int month, int day) {
+                    mData.moveDate(mTargetCol, new GregorianCalendar(year, month, day));
+                    setData(mData);
+                }
+            };
+            MyApplication.showDatePickerDialog(
+                    this, mData.dates.get(mTargetCol), dl2);
+            return true;
+
+        case MENU_ID_DELETEDATE:
+            DialogInterface.OnClickListener cl0 = new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    mData.deleteDate(mTargetCol);
+                    setData(mData);
+                }
+            };
+            MyApplication.showYesNoDialog(
+                    this, android.R.drawable.ic_dialog_alert,
+                    R.string.menu_delete, R.string.msg_delete, cl0);
+            return true;
+
+        case MENU_ID_INFODATE:
+            // TODO
+            return true;
+
+        case MENU_ID_ADDMEMBER:
+            mTargetRow = mData.entries.size();
+        case MENU_ID_INSERTMEMBER:
+            final EditText ev1 = new EditText(this);
+            ev1.setSingleLine();
+            DialogInterface.OnClickListener cl1 = new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    mData.insertEntry(mTargetRow, ev1.getText().toString());
+                    setData(mData);
+                }
+            };
+            MyApplication.showCustomDialog(
+                    this, android.R.drawable.ic_dialog_info,
+                    R.string.msg_newmembername, ev1, cl1);
+            return true;
+
+        case MENU_ID_MODIFYMEMBER:
+            final EditText ev2 = new EditText(this);
+            ev2.setSingleLine();
+            String name = mData.entries.get(mTargetRow).name;
+            ev2.setText(name);
+            ev2.setSelection(0, name.length());
+            DialogInterface.OnClickListener cl2 = new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    mData.modifyEntry(mTargetRow, ev2.getText().toString());
+                    setData(mData);
+                }
+            };
+            MyApplication.showCustomDialog(
+                    this, android.R.drawable.ic_dialog_info,
+                    R.string.msg_newmembername, ev2, cl2);
+            return true;
+
+        case MENU_ID_MOVEUPMEMBER:
+            mData.moveEntry(mTargetRow, -1);
+            setData(mData);
+            return true;
+
+        case MENU_ID_MOVEDOWNMEMBER:
+            mData.moveEntry(mTargetRow, 1);
+            setData(mData);
+            return true;
+
+        case MENU_ID_DELETEMEMBER:
+            DialogInterface.OnClickListener cl3 = new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    mData.deleteEntry(mTargetRow);
+                    setData(mData);
+                }
+            };
+            MyApplication.showYesNoDialog(
+                    this, android.R.drawable.ic_dialog_alert,
+                    R.string.menu_delete, R.string.msg_delete, cl3);
+            return true;
+
+        case MENU_ID_INFOMEMBER:
+            // TODO
+            return true;
+        }
+        return false;
+    }
+
     private void setData(SheetData data) {
         mHeader.setData(data);
         mSide.setData(data);
         mSheet.setData(data);
+    }
+
+    private String getLocalFileName() {
+        return getFilesDir() + File.pathSeparator + "work.csv";
     }
 }

@@ -25,6 +25,13 @@
         <item>Sat</item>
     </string-array>
 
+    <string-array name="symbol_strings">
+        <item>P</item>
+        <item>A</item>
+        <item>L</item>
+        <item>E</item>
+    </string-array>
+
     <array name="dweek_colors">
         <item>#FF2F1F1F</item>
         <item>#FF1F1F1F</item>

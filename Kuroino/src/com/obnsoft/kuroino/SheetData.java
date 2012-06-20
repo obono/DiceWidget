@@ -28,6 +28,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.GregorianCalendar;
 
 public class SheetData {
@@ -50,11 +51,18 @@ public class SheetData {
         public ArrayList<String> attends;
 
         public EntryData(String name, int size) {
-            this.name = name;
+            setName(name);
             this.attends = new ArrayList<String>(size);
             for (int i = 0; i < size; i++) {
                 this.attends.add(null);
             }
+        }
+
+        public void setName(String name) {
+            if (name != null) {
+                name = name.replaceAll("[,\"]", "").trim();
+            }
+            this.name = name;
         }
     }
 
@@ -70,18 +78,25 @@ public class SheetData {
             often = 1;
         }
         Calendar cur = (Calendar) begin.clone();
+        int cols = 0;
         while (cur.before(end)) {
             if (weekFlgs == null || weekFlgs[cur.get(Calendar.DAY_OF_WEEK) - 1]) {
                 this.dates.add((Calendar) cur.clone());
             }
             cur.add(Calendar.DAY_OF_MONTH, often);
+            if (++cols >= MAX_COLS) {
+                break;
+            }
         }
 
+        int rows = 0;
         if (names != null) {
-            int size = this.dates.size();
-            this.entries.ensureCapacity(names.length);
+            this.entries.ensureCapacity(Math.min(names.length, MAX_ROWS));
             for (String name : names) {
-                this.entries.add(new EntryData(name, size));
+                this.entries.add(new EntryData(name, cols));
+                if (++rows >= MAX_ROWS) {
+                    break;
+                }
             }
         }
     }
@@ -133,7 +148,7 @@ public class SheetData {
                     EntryData entry = new EntryData(ary[0], cols);
                     for (int i = 1; i < ary.length && i <= cols; i++) {
                         if (ary[i].length() > 0) {
-                            entry.attends.set(i - 1, ary[i]);
+                            entry.attends.set(i - 1, ary[i].substring(0, 1));
                         }
                     }
                     this.entries.add(entry);
@@ -184,11 +199,11 @@ public class SheetData {
     }
 
     public boolean insertDate(Calendar cal) {
-        if (this.dates.size() >= MAX_COLS) {
+        if (cal == null || this.dates.size() >= MAX_COLS) {
             return false;
         }
         int index = searchDate(cal, false);
-        if (index < 0 || index >= this.entries.size()) {
+        if (index < 0 || index >= this.dates.size()) {
             this.dates.add((Calendar) cal.clone());
             for (EntryData entry : this.entries) {
                 entry.attends.add(null);
@@ -199,6 +214,30 @@ public class SheetData {
             this.dates.add(index, (Calendar) cal.clone());
             for (EntryData entry : this.entries) {
                 entry.attends.add(index, null);
+            }
+        }
+        return true;
+    }
+
+    public boolean moveDate(int index, Calendar cal) {
+        if (cal == null || index < 0 || index >= this.dates.size()) {
+            return false;
+        }
+        int index2 = searchDate(cal, false);
+        if (this.dates.get(index2).equals(cal)) {
+            return false;
+        }
+        this.dates.set(index, (Calendar) cal.clone());
+        if (index + 1 < index2) {
+            index2--;
+            Collections.rotate(this.dates.subList(index, index2 + 1), -1);
+            for (EntryData entry : this.entries) {
+                Collections.rotate(entry.attends.subList(index, index2 + 1), -1);
+            }
+        } else if (index > index2) {
+            Collections.rotate(this.dates.subList(index2, index + 1), 1);
+            for (EntryData entry : this.entries) {
+                Collections.rotate(entry.attends.subList(index2, index + 1), 1);
             }
         }
         return true;
@@ -221,11 +260,22 @@ public class SheetData {
         return (match) ? -1 : lo;
     }
 
-    public boolean insertEntry(String name) {
-        return insertEntry(name, this.entries.size());
+    public boolean deleteDate(int index) {
+        if (index < 0 || index >= this.dates.size()) {
+            return false;
+        }
+        this.dates.remove(index);
+        for (EntryData entry : this.entries) {
+            entry.attends.remove(index);
+        }
+        return false;
     }
 
-    public boolean insertEntry(String name, int index) {
+    public boolean insertEntry(String name) {
+        return insertEntry(this.entries.size(), name);
+    }
+
+    public boolean insertEntry(int index, String name) {
         if (this.entries.size() >= MAX_ROWS) {
             return false;
         }
@@ -238,15 +288,25 @@ public class SheetData {
         return true;
     }
 
-    public boolean deleteDate(int index) {
-        if (index < 0 || index >= this.dates.size()) {
+    public boolean moveEntry(int index, int distance) {
+        if (index < 0 || index >= this.entries.size() ||
+                index + distance < 0 || index + distance >= this.entries.size()) {
             return false;
         }
-        this.dates.remove(index);
-        for (EntryData entry : this.entries) {
-            entry.attends.remove(index);
+        if (distance > 0) {
+            Collections.rotate(this.entries.subList(index, index + distance + 1), -1);
+        } else if (distance < 0) {
+            Collections.rotate(this.entries.subList(index + distance, index + 1), 1);
         }
-        return false;
+        return true;
+    }
+
+    public boolean modifyEntry(int index, String name) {
+        if (index < 0 || index >= this.entries.size()) {
+            return false;
+        }
+        this.entries.get(index).setName(name);
+        return true;
     }
 
     public boolean deleteEntry(int index) {

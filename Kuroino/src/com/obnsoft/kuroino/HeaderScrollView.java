@@ -27,9 +27,7 @@ import android.graphics.Paint.FontMetrics;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.HorizontalScrollView;
-import android.widget.AdapterView.AdapterContextMenuInfo;
 
 public class HeaderScrollView extends HorizontalScrollView {
 
@@ -233,11 +231,6 @@ public class HeaderScrollView extends HorizontalScrollView {
     public void setFocus(int col) {
         mFocusCol = col;
         mChild.postInvalidate();
-    }
-
-    @Override
-    protected ContextMenuInfo getContextMenuInfo() {
-        return new AdapterContextMenuInfo(null, mFocusCol, 0);
     }
 
     @Override

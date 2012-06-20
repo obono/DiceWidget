@@ -27,6 +27,6 @@
     <string name="msg_topdirectory">(トップディレクトリ)</string>
     <string name="msg_nofiles">ファイルがありません</string>
     <string name="msg_createfile">(新規作成)</string>
-    <string name="msg_delete">削除しますか?</string>
-    <string name="msg_overwrite">上書きしますか?</string>
+    <string name="msg_delete">削除してよろしいですか?</string>
+    <string name="msg_overwrite">上書きしてよろしいですか?</string>
 </resources>
