@@ -261,8 +261,11 @@ public class MainActivity extends Activity {
                     new DatePickerDialog.OnDateSetListener() {
                 @Override
                 public void onDateSet(DatePicker view, int year, int month, int day) {
-                    mData.insertDate(new GregorianCalendar(year, month, day));
-                    setData(mData);
+                    Calendar cal1 = new GregorianCalendar(year, month, day);
+                    if (mData.insertDate(cal1)) {
+                        setData(mData);
+                        handleFocus(null, -1, mData.searchDate(cal1, true));
+                    }
                 }
             };
             MyApplication.showDatePickerDialog(
@@ -274,8 +277,10 @@ public class MainActivity extends Activity {
                     new DatePickerDialog.OnDateSetListener() {
                 @Override
                 public void onDateSet(DatePicker view, int year, int month, int day) {
-                    mData.moveDate(mTargetCol, new GregorianCalendar(year, month, day));
-                    setData(mData);
+                    Calendar cal2 = new GregorianCalendar(year, month, day);
+                    mData.moveDate(mTargetCol, cal2);
+                    //setData(mData);
+                    handleFocus(null, -1, mData.searchDate(cal2, true));
                 }
             };
             MyApplication.showDatePickerDialog(
@@ -287,6 +292,7 @@ public class MainActivity extends Activity {
                 public void onClick(DialogInterface dialog, int whichButton) {
                     mData.deleteDate(mTargetCol);
                     setData(mData);
+                    handleFocus(null, -1, -1);
                 }
             };
             MyApplication.showYesNoDialog(
@@ -306,6 +312,7 @@ public class MainActivity extends Activity {
             DialogInterface.OnClickListener cl1 = new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
                     mData.insertEntry(mTargetRow, ev1.getText().toString());
+                    handleFocus(null, mTargetRow, -1);
                     setData(mData);
                 }
             };
@@ -332,13 +339,17 @@ public class MainActivity extends Activity {
             return true;
 
         case MENU_ID_MOVEUPMEMBER:
-            mData.moveEntry(mTargetRow, -1);
-            setData(mData);
+            if (mData.moveEntry(mTargetRow, -1)) {
+                //setData(mData);
+                handleFocus(null, mTargetRow - 1, -1);
+            }
             return true;
 
         case MENU_ID_MOVEDOWNMEMBER:
-            mData.moveEntry(mTargetRow, 1);
-            setData(mData);
+            if (mData.moveEntry(mTargetRow, 1)) {
+                //setData(mData);
+                handleFocus(null, mTargetRow + 1, -1);
+            }
             return true;
 
         case MENU_ID_DELETEMEMBER:
@@ -346,6 +357,7 @@ public class MainActivity extends Activity {
                 public void onClick(DialogInterface dialog, int whichButton) {
                     mData.deleteEntry(mTargetRow);
                     setData(mData);
+                    handleFocus(null, -1, -1);
                 }
             };
             MyApplication.showYesNoDialog(

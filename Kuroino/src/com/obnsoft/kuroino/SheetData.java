@@ -224,7 +224,7 @@ public class SheetData {
             return false;
         }
         int index2 = searchDate(cal, false);
-        if (this.dates.get(index2).equals(cal)) {
+        if (index2 < this.dates.size() && this.dates.get(index2).equals(cal)) {
             return false;
         }
         this.dates.set(index, (Calendar) cal.clone());

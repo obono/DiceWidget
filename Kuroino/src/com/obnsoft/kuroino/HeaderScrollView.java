@@ -64,7 +64,7 @@ public class HeaderScrollView extends HorizontalScrollView {
             case MotionEvent.ACTION_DOWN:
                 if (mData != null) {
                     int col = (int) event.getX() / mData.cellSize;
-                    if (mFocusCol >= 0 && mFocusCol < mData.dates.size()) {
+                    if (col >= 0 && col < mData.dates.size()) {
                         mIsFocus = true;
                         mFocusCol = col;
                         ((MainActivity) getContext()).handleFocus(mParent, -1, mFocusCol);
