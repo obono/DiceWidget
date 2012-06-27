@@ -54,6 +54,7 @@ public class MainActivity extends Activity {
     private static final int MENU_ID_DELETEMEMBER   = Menu.FIRST + 10;
     private static final int MENU_ID_INFOMEMBER     = Menu.FIRST + 11;
     private static final int MENU_ID_INSERTMEMBER   = Menu.FIRST + 12;
+    private static final int MENU_ID_CREATE         = Menu.FIRST + 13;
 
     private static final int REQUEST_ID_IMPORT = 1;
     private static final int REQUEST_ID_EXPORT = 2;
@@ -104,6 +105,8 @@ public class MainActivity extends Activity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         boolean ret = super.onCreateOptionsMenu(menu);
+        menu.add(MENU_GID_OPTION, MENU_ID_CREATE, Menu.NONE, R.string.menu_new)
+        .setIcon(android.R.drawable.ic_menu_edit);
         menu.add(MENU_GID_OPTION, MENU_ID_IMPORT, Menu.NONE, R.string.menu_import)
             .setIcon(android.R.drawable.ic_menu_set_as);
         menu.add(MENU_GID_OPTION, MENU_ID_EXPORT, Menu.NONE, R.string.menu_export)
@@ -240,6 +243,12 @@ public class MainActivity extends Activity {
     private boolean executeFunction(int menuId) {
         switch (menuId) {
 
+        case MENU_ID_CREATE:
+            // TODO: show confirmation!
+            Intent intent0 = new Intent(this, WizardActivity.class);
+            startActivity(intent0);
+            return true;
+
         case MENU_ID_IMPORT:
             // TODO: show confirmation!
             Intent intent1 = new Intent(this, MyFilePickerActivity.class);
@@ -326,7 +335,7 @@ public class MainActivity extends Activity {
             ev2.setSingleLine();
             String name = mData.entries.get(mTargetRow).name;
             ev2.setText(name);
-            ev2.setSelection(0, name.length());
+            ev2.selectAll();
             DialogInterface.OnClickListener cl2 = new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
                     mData.modifyEntry(mTargetRow, ev2.getText().toString());

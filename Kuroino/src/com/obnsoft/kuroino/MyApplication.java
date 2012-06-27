@@ -24,6 +24,8 @@ import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.view.View;
+import android.view.WindowManager;
+import android.widget.EditText;
 
 public class MyApplication extends Application {
 
@@ -51,16 +53,58 @@ public class MyApplication extends Application {
                 .show();
     }
 
+    static public void showSingleChoiceDialog(
+            Context context, int iconId, int titleId, String[] items,
+            int choice, DialogInterface.OnClickListener listener) {
+        new AlertDialog.Builder(context)
+                .setIcon(iconId)
+                .setTitle(titleId)
+                .setSingleChoiceItems(items, choice, listener)
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    static public void showMultiChoiceDialog(
+            Context context, int iconId, int titleId, String[] items,
+            final boolean[] choices, DialogInterface.OnClickListener listener) {
+        DialogInterface.OnMultiChoiceClickListener
+        listener2 = new DialogInterface.OnMultiChoiceClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+                choices[which] = isChecked;
+            }
+        };
+        new AlertDialog.Builder(context)
+                .setIcon(iconId)
+                .setTitle(titleId)
+                .setMultiChoiceItems(items, choices, listener2)
+                .setPositiveButton(android.R.string.ok, listener)
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
     static public void showCustomDialog(
             Context context, int iconId, int titleId, View view,
             DialogInterface.OnClickListener listener) {
-        new AlertDialog.Builder(context)
+        final AlertDialog dlg = new AlertDialog.Builder(context)
                 .setIcon(iconId)
                 .setTitle(titleId)
                 .setView(view)
                 .setPositiveButton(android.R.string.ok, listener)
                 .setNegativeButton(android.R.string.cancel, null)
-                .show();
+                .create();
+        if (view instanceof EditText) {
+            view.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                @Override
+                public void onFocusChange(View v, boolean hasFocus) {
+                    if (hasFocus) {
+                        dlg.getWindow().setSoftInputMode(
+                                WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+                    }
+                }
+            });
+        }
+        dlg.show();
     }
 
     /*----------------------------------------------------------------------*/

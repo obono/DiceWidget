@@ -24,6 +24,10 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".WizardActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation"
+            />
+        <activity
             android:name=".MyFilePickerActivity"
             android:configChanges="keyboard|keyboardHidden|orientation"
             />
