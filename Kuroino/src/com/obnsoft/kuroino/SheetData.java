@@ -79,7 +79,7 @@ public class SheetData {
         }
         Calendar cur = (Calendar) begin.clone();
         int cols = 0;
-        while (cur.before(end)) {
+        while (!cur.after(end)) {
             if (weekFlgs == null || weekFlgs[cur.get(Calendar.DAY_OF_WEEK) - 1]) {
                 this.dates.add((Calendar) cur.clone());
             }

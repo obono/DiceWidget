@@ -32,6 +32,15 @@
         <item>E</item>
     </string-array>
 
+    <string-array name="sample_members">
+        <item>Andrew</item>
+        <item>Bob</item>
+        <item>Christie</item>
+        <item>Donna</item>
+        <item>Enrique</item>
+        <item>Fred</item>
+    </string-array>
+
     <string-array name="often_configs">
         <item>Daily</item>
         <item>Weekly</item>

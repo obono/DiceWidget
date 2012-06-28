@@ -222,8 +222,11 @@ public class HeaderScrollView extends HorizontalScrollView {
         initialize();
     }
 
-    public void setData(SheetData data) {
+    public void setSheetData(SheetData data) {
         mData = data;
+    }
+
+    public void refreshView() {
         mChild.resize();
         postInvalidate();
     }

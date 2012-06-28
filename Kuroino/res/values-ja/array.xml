@@ -31,4 +31,13 @@
         <item>遅</item>
         <item>早</item>
     </string-array>
+
+    <string-array name="sample_members">
+        <item>一の瀬 花枝</item>
+        <item>二階堂 望</item>
+        <item>三鷹 瞬</item>
+        <item>四谷氏</item>
+        <item>五代 裕作</item>
+        <item>六本木 朱美</item>
+    </string-array>
 </resources>

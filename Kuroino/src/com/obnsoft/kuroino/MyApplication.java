@@ -23,17 +23,29 @@ import android.app.Application;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.text.format.DateFormat;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
 
 public class MyApplication extends Application {
 
+    private SheetData mData;
+
     public MyApplication() {
         super();
+        mData = new SheetData();
+    }
+
+    protected SheetData getSheetData() {
+        return mData;
     }
 
     /*----------------------------------------------------------------------*/
+
+    static public CharSequence getDateString(Context context, Calendar cal) {
+        return DateFormat.getDateFormat(context).format(cal.getTime());
+    }
 
     static public void showDatePickerDialog(
             Context context, Calendar cal, DatePickerDialog.OnDateSetListener listener) {
@@ -44,12 +56,34 @@ public class MyApplication extends Application {
     static public void showYesNoDialog(
             Context context, int iconId, int titleId, int msgId,
             DialogInterface.OnClickListener listener) {
+        showYesNoDialog(context, iconId, context.getText(titleId), msgId, listener);
+    }
+
+    static public void showYesNoDialog(
+            Context context, int iconId, CharSequence title, int msgId,
+            DialogInterface.OnClickListener listener) {
         new AlertDialog.Builder(context)
                 .setIcon(iconId)
-                .setTitle(titleId)
+                .setTitle(title)
                 .setMessage(msgId)
                 .setPositiveButton(android.R.string.yes, listener)
                 .setNegativeButton(android.R.string.no, null)
+                .show();
+    }
+
+    static public void showShareDialog(
+            Context context, int iconId, CharSequence title, CharSequence msg) {
+        new AlertDialog.Builder(context)
+                .setIcon(iconId)
+                .setTitle(title)
+                .setMessage(msg)
+                .setPositiveButton("Share", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        
+                    }
+                })
+                .setNeutralButton(android.R.string.ok, null)
                 .show();
     }
 
@@ -91,8 +125,11 @@ public class MyApplication extends Application {
                 .setTitle(titleId)
                 .setView(view)
                 .setPositiveButton(android.R.string.ok, listener)
-                .setNegativeButton(android.R.string.cancel, null)
                 .create();
+        if (listener != null) {
+            dlg.setButton(AlertDialog.BUTTON_NEGATIVE, context.getText(android.R.string.cancel),
+                    (DialogInterface.OnClickListener) null);
+        }
         if (view instanceof EditText) {
             view.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                 @Override

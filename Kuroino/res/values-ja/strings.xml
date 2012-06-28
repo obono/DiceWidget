@@ -18,6 +18,7 @@
     <string name="menu_info">情報</string>
     <string name="menu_import">インポート</string>
     <string name="menu_export">エクスポート</string>
+    <string name="menu_version">バージョン情報</string>
 
     <string name="btn_back">戻る</string>
     <string name="btn_upper">上へ</string>
@@ -29,4 +30,5 @@
     <string name="msg_createfile">(新規作成)</string>
     <string name="msg_delete">削除してよろしいですか?</string>
     <string name="msg_overwrite">上書きしてよろしいですか?</string>
+    <string name="msg_newsheet">現在編集中のデータは失われますが、よろしいですか?</string>
 </resources>

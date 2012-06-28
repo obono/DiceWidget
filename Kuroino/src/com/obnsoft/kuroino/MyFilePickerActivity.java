@@ -58,6 +58,7 @@ public class MyFilePickerActivity extends FilePickerActivity {
     public void onFileSelected(final String path) {
         if (isWriteMode()) {
             DialogInterface.OnClickListener cl = new DialogInterface.OnClickListener() {
+                @Override
                 public void onClick(DialogInterface dialog, int whichButton) {
                     setResultAndFinish(path);
                 }
@@ -75,6 +76,7 @@ public class MyFilePickerActivity extends FilePickerActivity {
         final EditText edittext = new EditText(this);
         edittext.setSingleLine();
         DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
+            @Override
             public void onClick(DialogInterface dialog, int whichButton) {
                 String newPath = directory + edittext.getText().toString().trim();
                 if (extension != null && !newPath.endsWith(extension)) {

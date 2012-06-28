@@ -2,6 +2,7 @@ package com.obnsoft.kuroino;
 
 import java.text.DateFormat;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
@@ -31,9 +32,14 @@ public class WizardActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.wizard);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-        mCalFrom = Calendar.getInstance();
-        mCalTo = Calendar.getInstance();
-        mCalTo.add(Calendar.MONTH, 1);
+
+        mCalFrom = new GregorianCalendar();
+        int year = mCalFrom.get(Calendar.YEAR);
+        int month = mCalFrom.get(Calendar.MONTH);
+        mCalFrom.clear();
+        mCalFrom.set(year, month, 1);
+        mCalTo = new GregorianCalendar(
+                year, month, mCalFrom.getActualMaximum(Calendar.DAY_OF_MONTH));
         mDateFormat = android.text.format.DateFormat.getDateFormat(this);
 
         mBtnDateFrom = (Button) findViewById(R.id.button_period_from);
@@ -82,6 +88,11 @@ public class WizardActivity extends Activity {
     }
 
     public void onCreate(View view) {
+        EditText memberView = (EditText) findViewById(R.id.edittext_member);
+        SheetData data = ((MyApplication) getApplication()).getSheetData();
+        data.createNewData(mCalFrom, mCalTo, mIntervalDays,
+                (mIntervalDays == 0) ? mDweekFlgs : null,
+                memberView.getText().toString().split("\n", SheetData.MAX_ROWS));
         finish();
     }
 
@@ -100,6 +111,7 @@ public class WizardActivity extends Activity {
         String[] items = getResources().getStringArray(R.array.often_configs);
         int choice = (mIntervalDays <= 1) ? 1 - mIntervalDays : 2;
         DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
+            @Override
             public void onClick(DialogInterface dialog, int which) {
                 switch (which) {
                 case 0: // Daily
@@ -125,6 +137,7 @@ public class WizardActivity extends Activity {
         String[] items = getResources().getStringArray(R.array.dweek_strings);
         final boolean[] flgs = mDweekFlgs.clone();
         DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
+            @Override
             public void onClick(DialogInterface dialog, int whichButton) {
                 mDweekFlgs = flgs;
                 mIntervalDays = 0;
@@ -147,6 +160,7 @@ public class WizardActivity extends Activity {
             edittext.selectAll();
         }
         DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
+            @Override
             public void onClick(DialogInterface dialog, int whichButton) {
                 try {
                     int value = Integer.parseInt(edittext.getText().toString());
