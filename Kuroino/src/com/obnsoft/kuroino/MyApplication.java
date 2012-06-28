@@ -23,6 +23,7 @@ import android.app.Application;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.text.format.DateFormat;
 import android.view.View;
 import android.view.WindowManager;
@@ -72,7 +73,11 @@ public class MyApplication extends Application {
     }
 
     static public void showShareDialog(
-            Context context, int iconId, CharSequence title, CharSequence msg) {
+            final Context context, int iconId, CharSequence title, CharSequence msg) {
+        final Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_TEXT, title.toString() + "\n\n" + msg);
         new AlertDialog.Builder(context)
                 .setIcon(iconId)
                 .setTitle(title)
@@ -80,7 +85,11 @@ public class MyApplication extends Application {
                 .setPositiveButton("Share", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        
+                        try {
+                            context.startActivity(intent);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
                 })
                 .setNeutralButton(android.R.string.ok, null)

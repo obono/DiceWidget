@@ -442,7 +442,7 @@ public class MainActivity extends Activity {
                     map.put(key, stats);
                 }
                 stats.count++;
-                stats.buf.append(' ').append(entry.name);
+                stats.buf.append("\n - ").append(entry.name);
             }
         }
         StringBuffer msgBuf = new StringBuffer();
@@ -452,38 +452,38 @@ public class MainActivity extends Activity {
             }
             SymbolStats stats = map.get(key);
             msgBuf.append(key).append(": ")
-                .append(String.format("%d person(s)", stats.count));
-            if (stats.count > 0) {
-                msgBuf.append('\n').append(stats.buf);
-            }
+                .append(String.format("%d person(s)", stats.count))
+                .append(stats.buf);
         }
         MyApplication.showShareDialog(this, android.R.drawable.ic_dialog_info,
                 MyApplication.getDateString(this, mData.dates.get(col)), msgBuf);
     }
 
     private void showMemberStats(int row) {
-        LinkedHashMap<String, Integer> map = new LinkedHashMap<String, Integer>();
+        class SymbolStats {
+            int count = 0;
+        }
+        LinkedHashMap<String, SymbolStats> map = new LinkedHashMap<String, SymbolStats>();
         String[] symbols = getResources().getStringArray(R.array.symbol_strings);
         for (String key : symbols) {
-            map.put(key, new Integer(0));
+            map.put(key, new SymbolStats());
         }
         for (String key : mData.entries.get(row).attends) {
             if (key != null) {
-                Integer count = map.get(key);
-                if (count == null) {
-                    count = new Integer(0);
-                    map.put(key, count);
+                SymbolStats stats = map.get(key);
+                if (stats == null) {
+                    stats = new SymbolStats();
+                    map.put(key, stats);
                 }
-                count++;
+                stats.count++;
             }
         }
         StringBuffer msgBuf = new StringBuffer();
+        msgBuf.append(MyApplication.getDateString(this, mData.dates.get(0))).append(" - ")
+            .append(MyApplication.getDateString(this, mData.dates.get(mData.dates.size() - 1)));
         for (String key : map.keySet()) {
-            if (msgBuf.length() > 0) {
-                msgBuf.append('\n');
-            }
-            msgBuf.append(key).append(": ")
-                .append(String.format("%d time(s)", map.get(key)));
+            msgBuf.append('\n').append(key).append(": ")
+                .append(String.format("%d time(s)", map.get(key).count));
         }
         MyApplication.showShareDialog(this, android.R.drawable.ic_dialog_info,
                 mData.entries.get(row).name, msgBuf);
