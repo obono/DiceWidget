@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_code">OBN-A06</string>
     <string name="app_name">Roll book</string>
     <string name="title_import">Choose the file to import from</string>
     <string name="title_export">Choose the file to export to</string>
@@ -20,11 +21,25 @@
     <string name="menu_export">Export</string>
     <string name="menu_version">Version info</string>
 
-    <string name="btn_back">Back</string>
-    <string name="btn_upper">Upper</string>
+    <string name="text_period">Period</string>
+    <string name="text_period_from">from</string>
+    <string name="text_period_to">to</string>
+    <string name="text_period_often">Once every %d days</string>
+    <string name="text_member">Member</string>
+    <string name="text_member_hint">Write each name on a line.</string>
+    <string name="text_member_count">%d person(s)</string>
+    <string name="text_times_count">%d time(s)</string>
 
-    <string name="msg_newmembername">Member name</string>
-    <string name="msg_newfilename">File name</string>
+    <string name="button_back">Back</string>
+    <string name="button_upper">Upper</string>
+    <string name="button_create">Create</string>
+    <string name="button_share">Share</string>
+
+    <string name="msg_newmembername">Enter the member name</string>
+    <string name="msg_newfilename">Enter the file name</string>
+    <string name="msg_period_often">Choose the repetition</string>
+    <string name="msg_period_days_of_week">Choose the day(s) of week</string>
+    <string name="msg_period_interval_days">Enter the interval days</string>
     <string name="msg_topdirectory">(Top directory)</string>
     <string name="msg_nofiles">No files...</string>
     <string name="msg_createfile">(New file)</string>

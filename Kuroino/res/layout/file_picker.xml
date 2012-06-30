@@ -32,14 +32,14 @@
         android:id="@+id/button_back_directory"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/btn_back"
+        android:text="@string/button_back"
         android:onClick="onBackDirectory"
         />
     <Button
         android:id="@+id/button_upper_directory"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/btn_upper"
+        android:text="@string/button_upper"
         android:onClick="onUpperDirectory"
         />
 </LinearLayout>

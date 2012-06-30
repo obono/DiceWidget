@@ -41,12 +41,19 @@ public class SideScrollView extends ScrollView {
         private Paint mPaintGrid = new Paint();
         private Paint mPaintText = new Paint(Paint.ANTI_ALIAS_FLAG);
         private boolean mIsFocus;
+        private int[] mRowCols;
 
         public SideView(View parent) {
             super(parent.getContext());
             mParent = parent;
             mPaintGrid.setStyle(Paint.Style.FILL_AND_STROKE);
             mPaintText.setColor(Color.LTGRAY);
+
+            TypedArray colArys = getResources().obtainTypedArray(R.array.cell_colors);
+            mRowCols = new int[] {
+                    colArys.getColor(3, Color.TRANSPARENT),
+                    colArys.getColor(4, Color.TRANSPARENT),
+            };
         }
 
         @Override
@@ -100,7 +107,6 @@ public class SideScrollView extends ScrollView {
                 int startRow = Math.max(scrollY / cellSize, 0);
                 int endRow = Math.min((scrollY + scrollHeight - 1) / cellSize, rows - 1);
 
-                TypedArray rowsCols = getResources().obtainTypedArray(R.array.rows_colors);
                 mPaintText.setTextSize(cellSize / 3f);
                 FontMetrics fm = mPaintText.getFontMetrics();
                 float tx = cellSize * 0.125f;
@@ -109,7 +115,7 @@ public class SideScrollView extends ScrollView {
                     int y = row * cellSize;
 
                     /*  Background  */
-                    mPaintGrid.setColor(rowsCols.getColor(row & 1, Color.TRANSPARENT));
+                    mPaintGrid.setColor(mRowCols[row & 1]);
                     c.drawRect(0, y, width, y + cellSize, mPaintGrid);
 
                     /*  Name  */

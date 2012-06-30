@@ -40,4 +40,20 @@
         <item>五代 裕作</item>
         <item>六本木 朱美</item>
     </string-array>
+
+    <string-array name="often_configs">
+        <item>毎日</item>
+        <item>毎週</item>
+        <item>何日かごと</item>
+    </string-array>
+
+    <string-array name="dweek_configs">
+        <item>日曜日</item>
+        <item>月曜日</item>
+        <item>火曜日</item>
+        <item>水曜日</item>
+        <item>木曜日</item>
+        <item>金曜日</item>
+        <item>土曜日</item>
+    </string-array>
 </resources>

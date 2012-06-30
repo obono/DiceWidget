@@ -47,17 +47,20 @@
         <item>Once every ~ days</item>
     </string-array>
 
-    <array name="dweek_colors">
-        <item>#FF2F1F1F</item>
-        <item>#FF1F1F1F</item>
-        <item>#FF1F1F1F</item>
-        <item>#FF1F1F1F</item>
-        <item>#FF1F1F1F</item>
+    <string-array name="dweek_configs">
+        <item>Sunday</item>
+        <item>Monday</item>
+        <item>Tuesday</item>
+        <item>Wednesday</item>
+        <item>Thursday</item>
+        <item>Friday</item>
+        <item>Saturday</item>
+    </string-array>
+
+    <array name="cell_colors">
         <item>#FF1F1F1F</item>
         <item>#FF1F1F3F</item>
-    </array>
-
-    <array name="rows_colors">
+        <item>#FF2F1F1F</item>
         <item>#FF1F271F</item>
         <item>#FF1F2F1F</item>
     </array>

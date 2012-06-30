@@ -50,7 +50,6 @@ public class SheetScrollView extends FreeScrollView {
             mParent = parent;
             mPaintGrid.setStyle(Paint.Style.FILL_AND_STROKE);
             mPaintText.setColor(Color.WHITE);
-            mPaintText.setTextSize(50);
         }
 
         @Override
@@ -115,6 +114,7 @@ public class SheetScrollView extends FreeScrollView {
             int endCol = Math.min((scrollX + scrollWidth - 1) / cellSize, cols - 1);
 
             /*  Symbol  */
+            mPaintText.setTextSize(mData.cellSize * 0.75f);
             FontMetrics fm = mPaintText.getFontMetrics();
             float strHeight = fm.ascent + fm.descent;
             for (int row = startRow; row <= endRow; row++) {

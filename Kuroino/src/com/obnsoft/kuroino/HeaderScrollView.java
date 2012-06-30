@@ -45,12 +45,26 @@ public class HeaderScrollView extends HorizontalScrollView {
         private boolean mIsFocus;
         private Paint mPaintGrid = new Paint();
         private Paint mPaintText = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private String[] mMonthStrs = getResources().getStringArray(R.array.month_strings);
+        private String[] mDweekStrs = getResources().getStringArray(R.array.dweek_strings);
+        private int[] mDweekCols;
 
         public HeaderView(View parent) {
             super(parent.getContext());
             mParent = parent;
             mPaintGrid.setStyle(Paint.Style.FILL_AND_STROKE);
             mPaintText.setColor(Color.LTGRAY);
+
+            TypedArray colArys = getResources().obtainTypedArray(R.array.cell_colors);
+            mDweekCols = new int[] {
+                    colArys.getColor(2, Color.TRANSPARENT),
+                    colArys.getColor(0, Color.TRANSPARENT),
+                    colArys.getColor(0, Color.TRANSPARENT),
+                    colArys.getColor(0, Color.TRANSPARENT),
+                    colArys.getColor(0, Color.TRANSPARENT),
+                    colArys.getColor(0, Color.TRANSPARENT),
+                    colArys.getColor(1, Color.TRANSPARENT),
+            };
         }
 
         @Override
@@ -105,12 +119,8 @@ public class HeaderScrollView extends HorizontalScrollView {
                 int startCol = Math.max(scrollX / cellSize, 0);
                 int endCol = Math.min((scrollX + scrollWidth - 1) / cellSize, cols - 1);
 
-                String[] monthStrs = getResources().getStringArray(R.array.month_strings);
-                String[] dweekStrs = getResources().getStringArray(R.array.dweek_strings);
-                TypedArray dweekCols = getResources().obtainTypedArray(R.array.dweek_colors);
-
                 /*  Background  */
-                mPaintGrid.setColor(dweekCols.getColor(1, Color.TRANSPARENT));
+                mPaintGrid.setColor(mDweekCols[1]);
                 c.drawRect(scrollX, 0, scrollX + scrollWidth, height, mPaintGrid);
 
                 int lastYear = 0;
@@ -130,7 +140,7 @@ public class HeaderScrollView extends HorizontalScrollView {
                     float y = fm.descent - fm.ascent;
 
                     /*  Background  */
-                    mPaintGrid.setColor(dweekCols.getColor(dweek, Color.TRANSPARENT));
+                    mPaintGrid.setColor(mDweekCols[dweek]);
                     c.drawRect(x, y, x + cellSize, height, mPaintGrid);
 
                     /*  Grid  */
@@ -148,7 +158,7 @@ public class HeaderScrollView extends HorizontalScrollView {
                     /*  Day of week  */
                     mPaintText.setTextSize(height / 4f);
                     fm = mPaintText.getFontMetrics();
-                    str = dweekStrs[dweek];
+                    str = mDweekStrs[dweek];
                     strWidth = mPaintText.measureText(str);
                     c.drawText(str, x + (cellSize - strWidth) / 2f, 
                             height - fm.descent, mPaintText);
@@ -157,7 +167,7 @@ public class HeaderScrollView extends HorizontalScrollView {
                     if (isNewMonth) {
                         if (lastDatePos >= 0) {
                             str = String.format(MONTH_YEAR_FORMAT,
-                                    monthStrs[lastMonth], lastYear % 100);
+                                    mMonthStrs[lastMonth], lastYear % 100);
                             strWidth = mPaintText.measureText(str);
                             float tx = (col - 1) * cellSize + (cellSize - strWidth) / 2;
                             float cx = scrollX + baseWidth / 2f;
@@ -182,7 +192,7 @@ public class HeaderScrollView extends HorizontalScrollView {
                 /*  Final month and Year  */
                 if (lastDatePos >= 0) {
                     str = String.format(MONTH_YEAR_FORMAT,
-                            monthStrs[lastMonth], lastYear % 100);
+                            mMonthStrs[lastMonth], lastYear % 100);
                     strWidth = mPaintText.measureText(str);
                     float tx = lastDatePos * cellSize + (cellSize - strWidth) / 2;
                     float cx = scrollX + (baseWidth - strWidth) / 2f;

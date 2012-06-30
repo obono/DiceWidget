@@ -16,7 +16,11 @@
 
 package com.obnsoft.kuroino;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -28,36 +32,41 @@ import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.TextView;
 
 public class MainActivity extends Activity {
 
-    private static final int MENU_GID_OPTION    = Menu.FIRST;
-    private static final int MENU_GID_HEADER    = Menu.FIRST + 1;
-    private static final int MENU_GID_SIDE      = Menu.FIRST + 2;
+    private static final int MENU_GID_OPTION    = 1;
+    private static final int MENU_GID_HEADER    = 2;
+    private static final int MENU_GID_SIDE      = 3;
 
-    private static final int MENU_ID_IMPORT         = Menu.FIRST;
-    private static final int MENU_ID_EXPORT         = Menu.FIRST + 1;
-    private static final int MENU_ID_ADDDATE        = Menu.FIRST + 2;
-    private static final int MENU_ID_MODIFYDATE     = Menu.FIRST + 3;
-    private static final int MENU_ID_DELETEDATE     = Menu.FIRST + 4;
-    private static final int MENU_ID_INFODATE       = Menu.FIRST + 5;
-    private static final int MENU_ID_ADDMEMBER      = Menu.FIRST + 6;
-    private static final int MENU_ID_MODIFYMEMBER   = Menu.FIRST + 7;
-    private static final int MENU_ID_MOVEUPMEMBER   = Menu.FIRST + 8;
-    private static final int MENU_ID_MOVEDOWNMEMBER = Menu.FIRST + 9;
-    private static final int MENU_ID_DELETEMEMBER   = Menu.FIRST + 10;
-    private static final int MENU_ID_INFOMEMBER     = Menu.FIRST + 11;
-    private static final int MENU_ID_INSERTMEMBER   = Menu.FIRST + 12;
-    private static final int MENU_ID_CREATE         = Menu.FIRST + 13;
-    private static final int MENU_ID_ABOUT          = Menu.FIRST + 14;
+    private static final int MENU_ID_ADDDATE        = 1;
+    private static final int MENU_ID_MODIFYDATE     = 2;
+    private static final int MENU_ID_DELETEDATE     = 3;
+    private static final int MENU_ID_INFODATE       = 4;
+    private static final int MENU_ID_ADDMEMBER      = 5;
+    private static final int MENU_ID_MODIFYMEMBER   = 6;
+    private static final int MENU_ID_MOVEUPMEMBER   = 7;
+    private static final int MENU_ID_MOVEDOWNMEMBER = 8;
+    private static final int MENU_ID_DELETEMEMBER   = 9;
+    private static final int MENU_ID_INFOMEMBER     = 10;
+    private static final int MENU_ID_INSERTMEMBER   = 11;
+    private static final int MENU_ID_CREATE         = 12;
+    private static final int MENU_ID_IMPORT         = 13;
+    private static final int MENU_ID_EXPORT         = 14;
+    private static final int MENU_ID_ABOUT          = 15;
 
     private static final int REQUEST_ID_IMPORT = 1;
     private static final int REQUEST_ID_EXPORT = 2;
@@ -263,42 +272,6 @@ public class MainActivity extends Activity {
     private boolean executeFunction(int menuId) {
         switch (menuId) {
 
-        case MENU_ID_CREATE:
-            final Intent intent0 = new Intent(this, WizardActivity.class);
-            DialogInterface.OnClickListener cl4 = new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int whichButton) {
-                    startActivity(intent0);
-                }
-            };
-            MyApplication.showYesNoDialog(
-                    this, android.R.drawable.ic_dialog_alert,
-                    R.string.menu_new, R.string.msg_newsheet, cl4);
-            return true;
-
-        case MENU_ID_IMPORT:
-            final Intent intent1 = new Intent(this, MyFilePickerActivity.class);
-            intent1.putExtra(MyFilePickerActivity.INTENT_EXTRA_TITLEID, R.string.title_import);
-            intent1.putExtra(MyFilePickerActivity.INTENT_EXTRA_EXTENSION, "csv");
-            DialogInterface.OnClickListener cl5 = new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int whichButton) {
-                    startActivityForResult(intent1, REQUEST_ID_IMPORT);
-                }
-            };
-            MyApplication.showYesNoDialog(
-                    this, android.R.drawable.ic_dialog_alert,
-                    R.string.menu_import, R.string.msg_newsheet, cl5);
-            return true;
-
-        case MENU_ID_EXPORT:
-            Intent intent2 = new Intent(this, MyFilePickerActivity.class);
-            intent2.putExtra(MyFilePickerActivity.INTENT_EXTRA_TITLEID, R.string.title_export);
-            intent2.putExtra(MyFilePickerActivity.INTENT_EXTRA_EXTENSION, "csv");
-            intent2.putExtra(MyFilePickerActivity.INTENT_EXTRA_WRITEMODE, true);
-            startActivityForResult(intent2, REQUEST_ID_EXPORT);
-            return true;
-
         case MENU_ID_ADDDATE:
             DatePickerDialog.OnDateSetListener dl1 =
                     new DatePickerDialog.OnDateSetListener() {
@@ -414,10 +387,44 @@ public class MainActivity extends Activity {
             showMemberStats(mTargetRow);
             return true;
 
+        case MENU_ID_CREATE:
+            final Intent intent0 = new Intent(this, WizardActivity.class);
+            DialogInterface.OnClickListener cl4 = new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    startActivity(intent0);
+                }
+            };
+            MyApplication.showYesNoDialog(
+                    this, android.R.drawable.ic_dialog_alert,
+                    R.string.menu_new, R.string.msg_newsheet, cl4);
+            return true;
+
+        case MENU_ID_IMPORT:
+            final Intent intent1 = new Intent(this, MyFilePickerActivity.class);
+            intent1.putExtra(MyFilePickerActivity.INTENT_EXTRA_TITLEID, R.string.title_import);
+            intent1.putExtra(MyFilePickerActivity.INTENT_EXTRA_EXTENSION, "csv");
+            DialogInterface.OnClickListener cl5 = new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    startActivityForResult(intent1, REQUEST_ID_IMPORT);
+                }
+            };
+            MyApplication.showYesNoDialog(
+                    this, android.R.drawable.ic_dialog_alert,
+                    R.string.menu_import, R.string.msg_newsheet, cl5);
+            return true;
+
+        case MENU_ID_EXPORT:
+            Intent intent2 = new Intent(this, MyFilePickerActivity.class);
+            intent2.putExtra(MyFilePickerActivity.INTENT_EXTRA_TITLEID, R.string.title_export);
+            intent2.putExtra(MyFilePickerActivity.INTENT_EXTRA_EXTENSION, "csv");
+            intent2.putExtra(MyFilePickerActivity.INTENT_EXTRA_WRITEMODE, true);
+            startActivityForResult(intent2, REQUEST_ID_EXPORT);
+            return true;
+
         case MENU_ID_ABOUT:
-            MyApplication.showCustomDialog(
-                    this, android.R.drawable.ic_dialog_info,
-                    R.string.menu_version, null, null); // TODO
+            showVersion();
             return true;
         }
         return false;
@@ -452,7 +459,7 @@ public class MainActivity extends Activity {
             }
             SymbolStats stats = map.get(key);
             msgBuf.append(key).append(": ")
-                .append(String.format("%d person(s)", stats.count))
+                .append(String.format(getText(R.string.text_member_count).toString(), stats.count))
                 .append(stats.buf);
         }
         MyApplication.showShareDialog(this, android.R.drawable.ic_dialog_info,
@@ -482,11 +489,38 @@ public class MainActivity extends Activity {
         msgBuf.append(MyApplication.getDateString(this, mData.dates.get(0))).append(" - ")
             .append(MyApplication.getDateString(this, mData.dates.get(mData.dates.size() - 1)));
         for (String key : map.keySet()) {
-            msgBuf.append('\n').append(key).append(": ")
-                .append(String.format("%d time(s)", map.get(key).count));
+            msgBuf.append('\n').append(key).append(": ").append(String.format(
+                    getText(R.string.text_times_count).toString(), map.get(key).count));
         }
         MyApplication.showShareDialog(this, android.R.drawable.ic_dialog_info,
                 mData.entries.get(row).name, msgBuf);
+    }
+
+    private void showVersion() {
+        LayoutInflater inflater = LayoutInflater.from(this);
+        final View aboutView = inflater.inflate(R.layout.about, null);
+        try {
+            PackageInfo packageInfo = getPackageManager().getPackageInfo(
+                    getPackageName(), PackageManager.GET_META_DATA);
+            TextView textView = (TextView) aboutView.findViewById(R.id.text_about_version);
+            textView.setText("Version " + packageInfo.versionName);
+
+            StringBuilder buf = new StringBuilder();
+            InputStream in = getResources().openRawResource(R.raw.license);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+            String str;
+            while((str = reader.readLine()) != null) {
+                buf.append(str).append('\n');
+            }
+            textView = (TextView) aboutView.findViewById(R.id.text_about_message);
+            textView.setText(buf.toString());
+        } catch (NameNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        MyApplication.showCustomDialog(this, android.R.drawable.ic_dialog_info,
+                R.string.menu_version, aboutView, null);
     }
 
     private void refreshViews() {

@@ -44,23 +44,39 @@ public class MyApplication extends Application {
 
     /*----------------------------------------------------------------------*/
 
-    static public CharSequence getDateString(Context context, Calendar cal) {
+    public static CharSequence getDateString(Context context, Calendar cal) {
         return DateFormat.getDateFormat(context).format(cal.getTime());
     }
 
-    static public void showDatePickerDialog(
+    public static final char IDEOGRAPHICS_SPACE = 0x3000;
+
+    public static String trimUni(String s){
+        int len = s.length();
+        int st = 0;
+        char[] val = s.toCharArray();
+
+        while (st < len && (val[st] <= ' ' || val[st] == IDEOGRAPHICS_SPACE)) {
+            st++;
+        }
+        while (st < len && (val[len - 1] <= ' ' || val[len - 1] == IDEOGRAPHICS_SPACE)) {
+            len--;
+        }
+        return (st > 0 || len < s.length()) ? s.substring(st, len) : s;
+    }
+
+    public static void showDatePickerDialog(
             Context context, Calendar cal, DatePickerDialog.OnDateSetListener listener) {
         new DatePickerDialog(context, listener, cal.get(Calendar.YEAR),
                 cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)).show();
     }
 
-    static public void showYesNoDialog(
+    public static void showYesNoDialog(
             Context context, int iconId, int titleId, int msgId,
             DialogInterface.OnClickListener listener) {
         showYesNoDialog(context, iconId, context.getText(titleId), msgId, listener);
     }
 
-    static public void showYesNoDialog(
+    public static void showYesNoDialog(
             Context context, int iconId, CharSequence title, int msgId,
             DialogInterface.OnClickListener listener) {
         new AlertDialog.Builder(context)
@@ -72,7 +88,7 @@ public class MyApplication extends Application {
                 .show();
     }
 
-    static public void showShareDialog(
+    public static void showShareDialog(
             final Context context, int iconId, CharSequence title, CharSequence msg) {
         final Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -82,7 +98,7 @@ public class MyApplication extends Application {
                 .setIcon(iconId)
                 .setTitle(title)
                 .setMessage(msg)
-                .setPositiveButton("Share", new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.button_share, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         try {
@@ -96,7 +112,7 @@ public class MyApplication extends Application {
                 .show();
     }
 
-    static public void showSingleChoiceDialog(
+    public static void showSingleChoiceDialog(
             Context context, int iconId, int titleId, String[] items,
             int choice, DialogInterface.OnClickListener listener) {
         new AlertDialog.Builder(context)
@@ -107,7 +123,7 @@ public class MyApplication extends Application {
                 .show();
     }
 
-    static public void showMultiChoiceDialog(
+    public static void showMultiChoiceDialog(
             Context context, int iconId, int titleId, String[] items,
             final boolean[] choices, DialogInterface.OnClickListener listener) {
         DialogInterface.OnMultiChoiceClickListener
@@ -126,7 +142,7 @@ public class MyApplication extends Application {
                 .show();
     }
 
-    static public void showCustomDialog(
+    public static void showCustomDialog(
             Context context, int iconId, int titleId, View view,
             DialogInterface.OnClickListener listener) {
         final AlertDialog dlg = new AlertDialog.Builder(context)

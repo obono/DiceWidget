@@ -60,7 +60,7 @@ public class SheetData {
 
         public void setName(String name) {
             if (name != null) {
-                name = name.replaceAll("[,\"]", "").trim();
+                name = MyApplication.trimUni(name.replaceAll("[,\"]", ""));
             }
             this.name = name;
         }
@@ -93,9 +93,12 @@ public class SheetData {
         if (names != null) {
             this.entries.ensureCapacity(Math.min(names.length, MAX_ROWS));
             for (String name : names) {
-                this.entries.add(new EntryData(name, cols));
-                if (++rows >= MAX_ROWS) {
-                    break;
+                name = MyApplication.trimUni(name);
+                if (name.length() > 0) {
+                    this.entries.add(new EntryData(name, cols));
+                    if (++rows >= MAX_ROWS) {
+                        break;
+                    }
                 }
             }
         }

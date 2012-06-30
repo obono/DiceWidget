@@ -78,7 +78,7 @@ public class MyFilePickerActivity extends FilePickerActivity {
         DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int whichButton) {
-                String newPath = directory + edittext.getText().toString().trim();
+                String newPath = directory + MyApplication.trimUni(edittext.getText().toString());
                 if (extension != null && !newPath.endsWith(extension)) {
                     newPath += extension;
                 }
