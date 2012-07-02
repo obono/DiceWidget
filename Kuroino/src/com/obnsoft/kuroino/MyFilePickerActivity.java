@@ -19,6 +19,7 @@ package com.obnsoft.kuroino;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.InputType;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -75,6 +76,7 @@ public class MyFilePickerActivity extends FilePickerActivity {
     public void onNewFileRequested(final String directory, final String extension) {
         final EditText edittext = new EditText(this);
         edittext.setSingleLine();
+        edittext.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
         DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int whichButton) {

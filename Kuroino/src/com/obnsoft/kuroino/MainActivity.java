@@ -93,6 +93,7 @@ public class MainActivity extends Activity {
 
         mData = ((MyApplication) getApplication()).getSheetData();
         mData.cellSize = (int) (48f * getResources().getDisplayMetrics().density);
+        mData.fileEncode = getText(R.string.file_encoding).toString();
 
         if ((new File(getLocalFileName())).exists()) {
             mData.importExternalData(getLocalFileName());

@@ -46,4 +46,6 @@
     <string name="msg_delete">Are you sure to delete?</string>
     <string name="msg_overwrite">Are you sure to overwrite?</string>
     <string name="msg_newsheet">The current data will be lost. Are you sure?</string>
+
+    <string name="file_encoding">ISO-8859-1</string>
 </resources>

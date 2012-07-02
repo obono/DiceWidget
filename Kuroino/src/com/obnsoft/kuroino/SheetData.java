@@ -18,11 +18,13 @@ package com.obnsoft.kuroino;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -39,6 +41,7 @@ public class SheetData {
     public int cellSize;
     public ArrayList<Calendar> dates = new ArrayList<Calendar>();
     public ArrayList<EntryData> entries = new ArrayList<EntryData>();
+    public String fileEncode = "UTF-8";
 
     private static final String DATE_FORMAT = "yyyy/MM/dd";
     private static final String LF = "\r\n"; // System.getProperty("line.separator");
@@ -108,8 +111,13 @@ public class SheetData {
         clearAll();
         BufferedReader in;
         try {
-            in = new BufferedReader(new FileReader(new File(filePath)));
+            in = new BufferedReader(new InputStreamReader(
+                    new FileInputStream(filePath), fileEncode));
         } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return false;
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
             return false;
         }
 
@@ -172,7 +180,8 @@ public class SheetData {
     public boolean exportCurrentData(String filePath) {
         boolean ret = false;
         try {
-            BufferedWriter out = new BufferedWriter(new FileWriter(new File(filePath)));
+            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
+                    new FileOutputStream(filePath), fileEncode));
             StringBuffer buf = new StringBuffer();
             DateFormat df = new SimpleDateFormat(DATE_FORMAT);
             for (Calendar cal : this.dates) {

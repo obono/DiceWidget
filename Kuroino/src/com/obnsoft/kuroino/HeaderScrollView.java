@@ -137,10 +137,11 @@ public class HeaderScrollView extends HorizontalScrollView {
                     boolean isNewMonth = (year != lastYear || month != lastMonth);
                     int dweek = cal.get(Calendar.DAY_OF_WEEK) - 1;
                     int x = col * cellSize;
-                    float y = fm.descent - fm.ascent;
 
                     /*  Background  */
+                    mPaintText.setTextSize(height / 2f);
                     mPaintGrid.setColor(mDweekCols[dweek]);
+                    float y = fm.descent - fm.ascent;
                     c.drawRect(x, y, x + cellSize, height, mPaintGrid);
 
                     /*  Grid  */
@@ -148,7 +149,6 @@ public class HeaderScrollView extends HorizontalScrollView {
                     c.drawLine(x, isNewMonth ? 0 : y, x, height, mPaintGrid);
 
                     /*  Day of month  */
-                    mPaintText.setTextSize(height / 2f);
                     fm = mPaintText.getFontMetrics();
                     str = String.valueOf(cal.get(Calendar.DAY_OF_MONTH));
                     strWidth = mPaintText.measureText(str);
