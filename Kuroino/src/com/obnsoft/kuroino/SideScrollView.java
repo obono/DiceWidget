@@ -31,8 +31,8 @@ public class SideScrollView extends ScrollView {
 
     private SheetData mData = null;
     private SideView mChild = null;
-    private int mFocusRow = -1;
-    private int mClickRow = -1;
+    private int mFocusRow = SheetData.POS_GONE;
+    private int mClickRow = SheetData.POS_GONE;
 
     /*----------------------------------------------------------------------*/
 
@@ -78,15 +78,16 @@ public class SideScrollView extends ScrollView {
                 break;
             case MotionEvent.ACTION_UP:
                 if (mClickRow >= 0) {
+                    ((MainActivity) getContext()).handleClick(
+                            mParent, mClickRow, SheetData.POS_KEEP, (mClickRow == mFocusRow));
                     mFocusRow = mClickRow;
-                    mClickRow = -1;
-                    ((MainActivity) getContext()).handleClick(mParent, mFocusRow, -1, false);
+                    mClickRow = SheetData.POS_GONE;
                     postInvalidate();
                 }
                 break;
             case MotionEvent.ACTION_CANCEL:
                 if (mClickRow >= 0) {
-                    mClickRow = -1;
+                    mClickRow = SheetData.POS_GONE;
                     postInvalidate();
                 }
                 break;
@@ -98,8 +99,9 @@ public class SideScrollView extends ScrollView {
         @Override
         public boolean onLongClick(View v) {
             if (mClickRow >= 0) {
-                ((MainActivity) getContext()).handleClick(mParent, mClickRow, -1, true);
-                mClickRow = -1;
+                ((MainActivity) getContext()).handleClick(
+                        mParent, mClickRow, SheetData.POS_KEEP, true);
+                mClickRow = SheetData.POS_GONE;
                 postInvalidate();
                 return true;
             }
@@ -187,8 +189,10 @@ public class SideScrollView extends ScrollView {
     }
 
     public void setFocus(int row) {
-        mFocusRow = row;
-        mChild.postInvalidate();
+        if (row != SheetData.POS_KEEP) {
+            mFocusRow = row;
+            mChild.postInvalidate();
+        }
     }
 
     @Override

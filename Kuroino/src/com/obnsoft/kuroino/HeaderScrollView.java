@@ -35,8 +35,8 @@ public class HeaderScrollView extends HorizontalScrollView {
 
     private SheetData mData = null;
     private HeaderView mChild = null;
-    private int mFocusCol = -1;
-    private int mClickCol = -1;
+    private int mFocusCol = SheetData.POS_GONE;
+    private int mClickCol = SheetData.POS_GONE;
 
     /*----------------------------------------------------------------------*/
 
@@ -89,15 +89,16 @@ public class HeaderScrollView extends HorizontalScrollView {
                 break;
             case MotionEvent.ACTION_UP:
                 if (mClickCol >= 0) {
+                    ((MainActivity) getContext()).handleClick(
+                            mParent, SheetData.POS_KEEP, mClickCol, (mClickCol == mFocusCol));
                     mFocusCol = mClickCol;
-                    mClickCol = -1;
-                    ((MainActivity) getContext()).handleClick(mParent, -1, mFocusCol, false);
+                    mClickCol = SheetData.POS_GONE;
                     postInvalidate();
                 }
                 break;
             case MotionEvent.ACTION_CANCEL:
                 if (mClickCol >= 0) {
-                    mClickCol = -1;
+                    mClickCol = SheetData.POS_GONE;
                     postInvalidate();
                 }
                 break;
@@ -109,8 +110,9 @@ public class HeaderScrollView extends HorizontalScrollView {
         @Override
         public boolean onLongClick(View v) {
             if (mClickCol >= 0) {
-                ((MainActivity) getContext()).handleClick(mParent, -1, mClickCol, true);
-                mClickCol = -1;
+                ((MainActivity) getContext()).handleClick(
+                        mParent, SheetData.POS_KEEP, mClickCol, true);
+                mClickCol = SheetData.POS_GONE;
                 postInvalidate();
                 return true;
             }
@@ -258,8 +260,10 @@ public class HeaderScrollView extends HorizontalScrollView {
     }
 
     public void setFocus(int col) {
-        mFocusCol = col;
-        mChild.postInvalidate();
+        if (col != SheetData.POS_KEEP) {
+            mFocusCol = col;
+            mChild.postInvalidate();
+        }
     }
 
     @Override

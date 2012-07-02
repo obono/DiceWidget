@@ -33,10 +33,10 @@ public class SheetScrollView extends FreeScrollView {
 
     private SheetData mData = null;
     private SheetView mChild = null;
-    private int mFocusRow = -1;
-    private int mFocusCol = -1;
-    private int mClickRow = -1;
-    private int mClickCol = -1;
+    private int mFocusRow = SheetData.POS_GONE;
+    private int mFocusCol = SheetData.POS_GONE;
+    private int mClickRow = SheetData.POS_GONE;
+    private int mClickCol = SheetData.POS_GONE;
 
     /*----------------------------------------------------------------------*/
 
@@ -77,8 +77,8 @@ public class SheetScrollView extends FreeScrollView {
                 if (mClickRow >= 0 && mClickCol >= 0) {
                     mFocusRow = mClickRow;
                     mFocusCol = mClickCol;
-                    mClickRow = -1;
-                    mClickCol = -1;
+                    mClickRow = SheetData.POS_GONE;
+                    mClickCol = SheetData.POS_GONE;
                     ((MainActivity) getContext()).handleClick(
                             mParent, mFocusRow, mFocusCol, false);
                     postInvalidate();
@@ -86,8 +86,8 @@ public class SheetScrollView extends FreeScrollView {
                 break;
             case MotionEvent.ACTION_CANCEL:
                 if (mClickRow >= 0 && mClickCol >= 0) {
-                    mClickRow = -1;
-                    mClickCol = -1;
+                    mClickRow = SheetData.POS_GONE;
+                    mClickCol = SheetData.POS_GONE;
                     postInvalidate();
                 }
                 break;
@@ -197,9 +197,18 @@ public class SheetScrollView extends FreeScrollView {
     }
 
     public void setFocus(int row, int col) {
-        mFocusRow = row;
-        mFocusCol = col;
-        mChild.postInvalidate();
+        boolean modified = false;
+        if (row != SheetData.POS_KEEP) {
+            mFocusRow = row;
+            modified = true;
+        }
+        if (col != SheetData.POS_KEEP) {
+            mFocusCol = col;
+            modified = true;
+        }
+        if (modified) {
+            mChild.postInvalidate();
+        }
     }
 
     @Override

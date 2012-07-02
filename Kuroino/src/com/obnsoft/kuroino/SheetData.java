@@ -38,6 +38,9 @@ public class SheetData {
     public static final int MAX_ROWS = 256;
     public static final int MAX_COLS = 701;
 
+    public static final int POS_KEEP = -1;
+    public static final int POS_GONE = -2;
+
     public int cellSize;
     public ArrayList<Calendar> dates = new ArrayList<Calendar>();
     public ArrayList<EntryData> entries = new ArrayList<EntryData>();

@@ -227,22 +227,20 @@ public class MainActivity extends Activity {
         }
     }
 
-    protected void handleClick(View v, int row, int col, boolean longPress) {
+    protected void handleClick(View v, int row, int col, boolean extra) {
         if (v == mHeader) {
-            boolean twice = (col == mTargetCol);
-            mTargetCol = col;
-            if (longPress || twice) {
+            if (extra) {
+                mTargetCol = col;
                 openContextMenu(mHeader);
             } else {
-                handleFocus(v, mTargetRow, col);
+                handleFocus(v, SheetData.POS_KEEP, col);
             }
         } else if (v == mSide) {
-            boolean twice = (row == mTargetRow);
-            mTargetRow = row;
-            if (longPress || twice) {
+            if (extra) {
+                mTargetRow = row;
                 openContextMenu(mSide);
             } else {
-                handleFocus(v, row, mTargetCol);
+                handleFocus(v, row, SheetData.POS_KEEP);
             }
         } else if (v == mSheet) {
             mTargetRow = row;
@@ -294,7 +292,7 @@ public class MainActivity extends Activity {
                     Calendar cal1 = new GregorianCalendar(year, month, day);
                     if (mData.insertDate(cal1)) {
                         refreshViews();
-                        handleFocus(null, -1, mData.searchDate(cal1, true));
+                        handleFocus(null, SheetData.POS_KEEP, mData.searchDate(cal1, true));
                     }
                 }
             };
@@ -309,7 +307,7 @@ public class MainActivity extends Activity {
                 public void onDateSet(DatePicker view, int year, int month, int day) {
                     Calendar cal2 = new GregorianCalendar(year, month, day);
                     mData.moveDate(mTargetCol, cal2);
-                    handleFocus(null, -1, mData.searchDate(cal2, true));
+                    handleFocus(null, SheetData.POS_KEEP, mData.searchDate(cal2, true));
                 }
             };
             MyApplication.showDatePickerDialog(
@@ -322,7 +320,7 @@ public class MainActivity extends Activity {
                 public void onClick(DialogInterface dialog, int whichButton) {
                     mData.deleteDate(mTargetCol);
                     refreshViews();
-                    handleFocus(null, -1, -1);
+                    handleFocus(null, SheetData.POS_KEEP, SheetData.POS_GONE);
                 }
             };
             MyApplication.showYesNoDialog(
@@ -344,7 +342,7 @@ public class MainActivity extends Activity {
                 @Override
                 public void onClick(DialogInterface dialog, int whichButton) {
                     mData.insertEntry(mTargetRow, ev1.getText().toString());
-                    handleFocus(null, mTargetRow, -1);
+                    handleFocus(null, mTargetRow, SheetData.POS_KEEP);
                     refreshViews();
                 }
             };
@@ -373,13 +371,13 @@ public class MainActivity extends Activity {
 
         case MENU_ID_MOVEUPMEMBER:
             if (mData.moveEntry(mTargetRow, -1)) {
-                handleFocus(null, mTargetRow - 1, -1);
+                handleFocus(null, mTargetRow - 1, SheetData.POS_KEEP);
             }
             return true;
 
         case MENU_ID_MOVEDOWNMEMBER:
             if (mData.moveEntry(mTargetRow, 1)) {
-                handleFocus(null, mTargetRow + 1, -1);
+                handleFocus(null, mTargetRow + 1, SheetData.POS_KEEP);
             }
             return true;
 
@@ -389,7 +387,7 @@ public class MainActivity extends Activity {
                 public void onClick(DialogInterface dialog, int whichButton) {
                     mData.deleteEntry(mTargetRow);
                     refreshViews();
-                    handleFocus(null, -1, -1);
+                    handleFocus(null, SheetData.POS_GONE, SheetData.POS_KEEP);
                 }
             };
             MyApplication.showYesNoDialog(
