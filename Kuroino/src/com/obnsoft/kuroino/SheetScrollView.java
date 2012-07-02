@@ -35,13 +35,14 @@ public class SheetScrollView extends FreeScrollView {
     private SheetView mChild = null;
     private int mFocusRow = -1;
     private int mFocusCol = -1;
+    private int mClickRow = -1;
+    private int mClickCol = -1;
 
     /*----------------------------------------------------------------------*/
 
     class SheetView extends View {
 
         private View mParent = null;
-        private boolean mIsFocus;
         private Paint mPaintGrid = new Paint();
         private Paint mPaintText = new Paint(Paint.ANTI_ALIAS_FLAG);
 
@@ -66,31 +67,33 @@ public class SheetScrollView extends FreeScrollView {
                     int col = (int) event.getX() / mData.cellSize;
                     if (row >= 0 && row < mData.entries.size() &&
                             col >= 0 && col < mData.dates.size()) {
-                        mIsFocus = true;
-                        mFocusRow = row;
-                        mFocusCol = col;
-                        ((MainActivity) getContext()).handleFocus(mParent, mFocusRow, mFocusCol);
+                        mClickRow = row;
+                        mClickCol = col;
                         postInvalidate();
                     }
                 }
                 break;
             case MotionEvent.ACTION_UP:
-                if (mIsFocus) {
-                    ((MainActivity) getContext()).handleClick(mParent, mFocusRow, mFocusCol);
+                if (mClickRow >= 0 && mClickCol >= 0) {
+                    mFocusRow = mClickRow;
+                    mFocusCol = mClickCol;
+                    mClickRow = -1;
+                    mClickCol = -1;
+                    ((MainActivity) getContext()).handleClick(
+                            mParent, mFocusRow, mFocusCol, false);
                     postInvalidate();
-                    mIsFocus = false;
                 }
                 break;
             case MotionEvent.ACTION_CANCEL:
-                if (mIsFocus) {
-                    mFocusCol = mFocusRow = -1;
-                    ((MainActivity) getContext()).handleFocus(mParent, -1, -1);
+                if (mClickRow >= 0 && mClickCol >= 0) {
+                    mClickRow = -1;
+                    mClickCol = -1;
                     postInvalidate();
-                    mIsFocus = false;
                 }
                 break;
             }
-            return (mIsFocus) ? true : super.onTouchEvent(event);
+            return (mClickRow >= 0 || mClickCol >= 0) ? true : super.onTouchEvent(event);
+            //return super.onTouchEvent(event);
         }
 
         @Override
@@ -140,7 +143,7 @@ public class SheetScrollView extends FreeScrollView {
                         col * cellSize, scrollY + scrollHeight, mPaintGrid);
             }
 
-            /*  Focus  */
+            /*  Highlight  */
             mPaintGrid.setColor(Color.argb(31, 255, 255, 0));
             if (mFocusRow >= 0) {
                 c.drawRect(scrollX, mFocusRow * cellSize,
@@ -150,10 +153,10 @@ public class SheetScrollView extends FreeScrollView {
                 c.drawRect(mFocusCol * cellSize, scrollY,
                         (mFocusCol + 1) * cellSize, scrollY + scrollHeight, mPaintGrid);
             }
-            if (mIsFocus && mFocusRow >= 0 && mFocusCol >= 0) {
-                mPaintGrid.setColor(Color.argb(63, 255, 255, 0));
-                c.drawRect(mFocusCol * cellSize, mFocusRow * cellSize,
-                        (mFocusCol + 1) * cellSize, (mFocusRow + 1) * cellSize, mPaintGrid);
+            if (mClickRow >= 0 && mClickCol >= 0) {
+                mPaintGrid.setColor(Color.argb(31, 255, 255, 255));
+                c.drawRect(mClickCol * cellSize, mClickRow * cellSize,
+                        (mClickCol + 1) * cellSize, (mClickRow + 1) * cellSize, mPaintGrid);
             }
         }
 
@@ -167,7 +170,6 @@ public class SheetScrollView extends FreeScrollView {
             setMeasuredDimension(width, height);
             layout(0, 0, width, height);
         }
-
     }
 
     /*----------------------------------------------------------------------*/

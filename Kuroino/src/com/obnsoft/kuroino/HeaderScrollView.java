@@ -36,18 +36,18 @@ public class HeaderScrollView extends HorizontalScrollView {
     private SheetData mData = null;
     private HeaderView mChild = null;
     private int mFocusCol = -1;
+    private int mClickCol = -1;
 
     /*----------------------------------------------------------------------*/
 
-    class HeaderView extends View {
+    class HeaderView extends View implements OnLongClickListener {
 
         private View mParent = null;
-        private boolean mIsFocus;
         private Paint mPaintGrid = new Paint();
         private Paint mPaintText = new Paint(Paint.ANTI_ALIAS_FLAG);
         private String[] mMonthStrs = getResources().getStringArray(R.array.month_strings);
         private String[] mDweekStrs = getResources().getStringArray(R.array.dweek_strings);
-        private int[] mDweekCols;
+        private int[] mDweekColors;
 
         public HeaderView(View parent) {
             super(parent.getContext());
@@ -55,16 +55,19 @@ public class HeaderScrollView extends HorizontalScrollView {
             mPaintGrid.setStyle(Paint.Style.FILL_AND_STROKE);
             mPaintText.setColor(Color.LTGRAY);
 
-            TypedArray colArys = getResources().obtainTypedArray(R.array.cell_colors);
-            mDweekCols = new int[] {
-                    colArys.getColor(2, Color.TRANSPARENT),
-                    colArys.getColor(0, Color.TRANSPARENT),
-                    colArys.getColor(0, Color.TRANSPARENT),
-                    colArys.getColor(0, Color.TRANSPARENT),
-                    colArys.getColor(0, Color.TRANSPARENT),
-                    colArys.getColor(0, Color.TRANSPARENT),
-                    colArys.getColor(1, Color.TRANSPARENT),
+            TypedArray colorsAry = getResources().obtainTypedArray(R.array.cell_colors);
+            mDweekColors = new int[] {
+                    colorsAry.getColor(2, Color.TRANSPARENT),
+                    colorsAry.getColor(0, Color.TRANSPARENT),
+                    colorsAry.getColor(0, Color.TRANSPARENT),
+                    colorsAry.getColor(0, Color.TRANSPARENT),
+                    colorsAry.getColor(0, Color.TRANSPARENT),
+                    colorsAry.getColor(0, Color.TRANSPARENT),
+                    colorsAry.getColor(1, Color.TRANSPARENT),
             };
+
+            setLongClickable(true);
+            setOnLongClickListener(this);
         }
 
         @Override
@@ -79,30 +82,39 @@ public class HeaderScrollView extends HorizontalScrollView {
                 if (mData != null) {
                     int col = (int) event.getX() / mData.cellSize;
                     if (col >= 0 && col < mData.dates.size()) {
-                        mIsFocus = true;
-                        mFocusCol = col;
-                        ((MainActivity) getContext()).handleFocus(mParent, -1, mFocusCol);
+                        mClickCol = col;
                         postInvalidate();
                     }
                 }
                 break;
             case MotionEvent.ACTION_UP:
-                if (mIsFocus) {
-                    ((MainActivity) getContext()).handleClick(mParent, -1, mFocusCol);
+                if (mClickCol >= 0) {
+                    mFocusCol = mClickCol;
+                    mClickCol = -1;
+                    ((MainActivity) getContext()).handleClick(mParent, -1, mFocusCol, false);
                     postInvalidate();
-                    mIsFocus = false;
                 }
                 break;
             case MotionEvent.ACTION_CANCEL:
-                if (mIsFocus) {
-                    mFocusCol = -1;
-                    ((MainActivity) getContext()).handleFocus(mParent, -1, -1);
+                if (mClickCol >= 0) {
+                    mClickCol = -1;
                     postInvalidate();
-                    mIsFocus = false;
                 }
                 break;
             }
-            return (mIsFocus) ? true : super.onTouchEvent(event);
+            //return (mClickCol >= 0) ? true : super.onTouchEvent(event);
+            return super.onTouchEvent(event);
+        }
+
+        @Override
+        public boolean onLongClick(View v) {
+            if (mClickCol >= 0) {
+                ((MainActivity) getContext()).handleClick(mParent, -1, mClickCol, true);
+                mClickCol = -1;
+                postInvalidate();
+                return true;
+            }
+            return false;
         }
 
         @Override
@@ -120,7 +132,7 @@ public class HeaderScrollView extends HorizontalScrollView {
                 int endCol = Math.min((scrollX + scrollWidth - 1) / cellSize, cols - 1);
 
                 /*  Background  */
-                mPaintGrid.setColor(mDweekCols[1]);
+                mPaintGrid.setColor(mDweekColors[1]);
                 c.drawRect(scrollX, 0, scrollX + scrollWidth, height, mPaintGrid);
 
                 int lastYear = 0;
@@ -140,7 +152,7 @@ public class HeaderScrollView extends HorizontalScrollView {
 
                     /*  Background  */
                     mPaintText.setTextSize(height / 2f);
-                    mPaintGrid.setColor(mDweekCols[dweek]);
+                    mPaintGrid.setColor(mDweekColors[dweek]);
                     float y = fm.descent - fm.ascent;
                     c.drawRect(x, y, x + cellSize, height, mPaintGrid);
 
@@ -199,12 +211,16 @@ public class HeaderScrollView extends HorizontalScrollView {
                     c.drawText(str, Math.max(cx, tx), -fm.ascent, mPaintText);
                 }
 
-                /*  Focus  */
+                /*  Highlight  */
                 if (mFocusCol >= 0) {
-                    mPaintGrid.setColor(mIsFocus ?
-                            Color.argb(63, 255, 255, 0) : Color.argb(31, 255, 255, 0));
+                    mPaintGrid.setColor(Color.argb(31, 255, 255, 0));
                     c.drawRect(mFocusCol * cellSize, 0,
                             (mFocusCol + 1) * cellSize, getHeight(), mPaintGrid);
+                }
+                if (mClickCol >= 0) {
+                    mPaintGrid.setColor(Color.argb(31, 255, 255, 255));
+                    c.drawRect(mClickCol * cellSize, 0,
+                            (mClickCol + 1) * cellSize, getHeight(), mPaintGrid);
                 }
             }
         }

@@ -32,16 +32,16 @@ public class SideScrollView extends ScrollView {
     private SheetData mData = null;
     private SideView mChild = null;
     private int mFocusRow = -1;
+    private int mClickRow = -1;
 
     /*----------------------------------------------------------------------*/
 
-    class SideView extends View {
+    class SideView extends View implements OnLongClickListener {
 
         private View mParent = null;
         private Paint mPaintGrid = new Paint();
         private Paint mPaintText = new Paint(Paint.ANTI_ALIAS_FLAG);
-        private boolean mIsFocus;
-        private int[] mRowCols;
+        private int[] mRowColors;
 
         public SideView(View parent) {
             super(parent.getContext());
@@ -49,11 +49,14 @@ public class SideScrollView extends ScrollView {
             mPaintGrid.setStyle(Paint.Style.FILL_AND_STROKE);
             mPaintText.setColor(Color.LTGRAY);
 
-            TypedArray colArys = getResources().obtainTypedArray(R.array.cell_colors);
-            mRowCols = new int[] {
-                    colArys.getColor(3, Color.TRANSPARENT),
-                    colArys.getColor(4, Color.TRANSPARENT),
+            TypedArray colorsAry = getResources().obtainTypedArray(R.array.cell_colors);
+            mRowColors = new int[] {
+                    colorsAry.getColor(3, Color.TRANSPARENT),
+                    colorsAry.getColor(4, Color.TRANSPARENT),
             };
+
+            setLongClickable(true);
+            setOnLongClickListener(this);
         }
 
         @Override
@@ -68,30 +71,39 @@ public class SideScrollView extends ScrollView {
                 if (mData != null) {
                     int row = (int) event.getY() / mData.cellSize;
                     if (row >= 0 && row < mData.entries.size()) {
-                        mIsFocus = true;
-                        mFocusRow = (int) event.getY() / mData.cellSize;
-                        ((MainActivity) getContext()).handleFocus(mParent, mFocusRow, -1);
+                        mClickRow = (int) event.getY() / mData.cellSize;
                         postInvalidate();
                     }
                 }
                 break;
             case MotionEvent.ACTION_UP:
-                if (mIsFocus) {
-                    ((MainActivity) getContext()).handleClick(mParent, mFocusRow, -1);
+                if (mClickRow >= 0) {
+                    mFocusRow = mClickRow;
+                    mClickRow = -1;
+                    ((MainActivity) getContext()).handleClick(mParent, mFocusRow, -1, false);
                     postInvalidate();
-                    mIsFocus = false;
                 }
                 break;
             case MotionEvent.ACTION_CANCEL:
-                if (mIsFocus) {
-                    mFocusRow = -1;
-                    ((MainActivity) getContext()).handleFocus(mParent, -1, -1);
+                if (mClickRow >= 0) {
+                    mClickRow = -1;
                     postInvalidate();
-                    mIsFocus = false;
                 }
                 break;
             }
-            return (mIsFocus) ? true : super.onTouchEvent(event);
+            //return (mClickRow >= 0) ? true : super.onTouchEvent(event);
+            return super.onTouchEvent(event);
+        }
+
+        @Override
+        public boolean onLongClick(View v) {
+            if (mClickRow >= 0) {
+                ((MainActivity) getContext()).handleClick(mParent, mClickRow, -1, true);
+                mClickRow = -1;
+                postInvalidate();
+                return true;
+            }
+            return false;
         }
 
         @Override
@@ -115,7 +127,7 @@ public class SideScrollView extends ScrollView {
                     int y = row * cellSize;
 
                     /*  Background  */
-                    mPaintGrid.setColor(mRowCols[row & 1]);
+                    mPaintGrid.setColor(mRowColors[row & 1]);
                     c.drawRect(0, y, width, y + cellSize, mPaintGrid);
 
                     /*  Name  */
@@ -128,12 +140,16 @@ public class SideScrollView extends ScrollView {
                     c.drawLine(0, row * cellSize, width, row * cellSize, mPaintGrid);
                 }
 
-                /*  Focus  */
+                /*  Highlight */
                 if (mFocusRow >= 0) {
-                    mPaintGrid.setColor(mIsFocus ?
-                            Color.argb(63, 255, 255, 0) : Color.argb(31, 255, 255, 0));
+                    mPaintGrid.setColor(Color.argb(31, 255, 255, 0));
                     c.drawRect(0, mFocusRow * cellSize,
                             getWidth(), (mFocusRow + 1) * cellSize, mPaintGrid);
+                }
+                if (mClickRow >= 0) {
+                    mPaintGrid.setColor(Color.argb(31, 255, 255, 255));
+                    c.drawRect(0, mClickRow * cellSize,
+                            getWidth(), (mClickRow + 1) * cellSize, mPaintGrid);
                 }
             }
         }

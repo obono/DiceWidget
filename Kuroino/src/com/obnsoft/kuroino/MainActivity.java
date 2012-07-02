@@ -71,8 +71,8 @@ public class MainActivity extends Activity {
     private static final int REQUEST_ID_IMPORT = 1;
     private static final int REQUEST_ID_EXPORT = 2;
 
-    private int mTargetRow;
-    private int mTargetCol;
+    private int mTargetRow = -1;
+    private int mTargetCol = -1;
 
     private HeaderScrollView    mHeader;
     private SideScrollView      mSide;
@@ -227,14 +227,27 @@ public class MainActivity extends Activity {
         }
     }
 
-    protected void handleClick(View v, int row, int col) {
-        mTargetRow = row;
-        mTargetCol = col;
+    protected void handleClick(View v, int row, int col, boolean longPress) {
         if (v == mHeader) {
-            openContextMenu(mHeader);
+            boolean twice = (col == mTargetCol);
+            mTargetCol = col;
+            if (longPress || twice) {
+                openContextMenu(mHeader);
+            } else {
+                handleFocus(v, mTargetRow, col);
+            }
         } else if (v == mSide) {
-            openContextMenu(mSide);
+            boolean twice = (row == mTargetRow);
+            mTargetRow = row;
+            if (longPress || twice) {
+                openContextMenu(mSide);
+            } else {
+                handleFocus(v, row, mTargetCol);
+            }
         } else if (v == mSheet) {
+            mTargetRow = row;
+            mTargetCol = col;
+            handleFocus(v, row, col);
             String[] symbolStrs = getResources().getStringArray(R.array.symbol_strings);
             ArrayList<String> attends = mData.entries.get(row).attends;
             if (symbolStrs.length == 0 || attends.size() - 1 < col) {
