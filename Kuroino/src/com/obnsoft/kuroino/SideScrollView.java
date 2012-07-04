@@ -33,6 +33,7 @@ public class SideScrollView extends ScrollView {
     private SideView mChild = null;
     private int mFocusRow = SheetData.POS_GONE;
     private int mClickRow = SheetData.POS_GONE;
+    private boolean mReserveScroll = false;
 
     /*----------------------------------------------------------------------*/
 
@@ -55,7 +56,6 @@ public class SideScrollView extends ScrollView {
                     colorsAry.getColor(4, Color.TRANSPARENT),
             };
 
-            setLongClickable(true);
             setOnLongClickListener(this);
         }
 
@@ -69,11 +69,9 @@ public class SideScrollView extends ScrollView {
             switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
                 if (mData != null) {
-                    int row = (int) event.getY() / mData.cellSize;
-                    if (row >= 0 && row < mData.entries.size()) {
-                        mClickRow = (int) event.getY() / mData.cellSize;
-                        postInvalidate();
-                    }
+                    ((MainActivity) getContext()).handleMouseDown(mParent);
+                    mClickRow = mData.getRowByCoord(event.getY());
+                    postInvalidate();
                 }
                 break;
             case MotionEvent.ACTION_UP:
@@ -160,7 +158,6 @@ public class SideScrollView extends ScrollView {
             int width = mParent.getWidth();
             int height = (mData != null) ? mData.entries.size() * mData.cellSize + 1 : 1;
             setMeasuredDimension(width, height);
-            layout(0, 0, width, height);
         }
     }
 
@@ -185,13 +182,30 @@ public class SideScrollView extends ScrollView {
 
     public void refreshView() {
         mChild.resize();
+        requestLayout();
         postInvalidate();
     }
 
-    public void setFocus(int row) {
+    public void setFocus(int row, boolean scroll) {
         if (row != SheetData.POS_KEEP) {
             mFocusRow = row;
             mChild.postInvalidate();
+            if (scroll && mFocusRow >= 0) {
+                if (isLayoutRequested()) {
+                    mReserveScroll = true;
+                } else {
+                    flyToFocusRow();
+                }
+            }
+        }
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        super.onLayout(changed, l, t, r, b);
+        if (mReserveScroll) {
+            flyToFocusRow();
+            mReserveScroll = false;
         }
     }
 
@@ -205,5 +219,18 @@ public class SideScrollView extends ScrollView {
         setVerticalScrollBarEnabled(false);
         mChild = new SideView(this);
         addView(mChild);
+    }
+
+    private void flyToFocusRow() {
+        if (mData != null) {
+            int h = getHeight();
+            int y = getScrollY();
+            int edge = getVerticalFadingEdgeLength();
+            int y1 = Math.min(mFocusRow * mData.cellSize - edge, mChild.getHeight() - h);
+            int y2 = Math.max((mFocusRow + 1) * mData.cellSize - h + edge, 0);
+            if (y > y1 || y < y2) {
+                smoothScrollTo(0, (Math.abs(y1 - y) < Math.abs(y2 - y)) ? y1 : y2);
+            }
+        }
     }
 }

@@ -96,6 +96,7 @@ public class WizardActivity extends Activity {
         data.createNewData(mCalFrom, mCalTo, mIntervalDays,
                 (mIntervalDays == 0) ? mDweekFlgs : null,
                 mEditTextMember.getText().toString().split("\n", SheetData.MAX_ROWS));
+        setResult(RESULT_OK);
         finish();
     }
 

@@ -37,6 +37,7 @@ public class HeaderScrollView extends HorizontalScrollView {
     private HeaderView mChild = null;
     private int mFocusCol = SheetData.POS_GONE;
     private int mClickCol = SheetData.POS_GONE;
+    private boolean mReserveScroll = false;
 
     /*----------------------------------------------------------------------*/
 
@@ -66,7 +67,6 @@ public class HeaderScrollView extends HorizontalScrollView {
                     colorsAry.getColor(1, Color.TRANSPARENT),
             };
 
-            setLongClickable(true);
             setOnLongClickListener(this);
         }
 
@@ -80,11 +80,9 @@ public class HeaderScrollView extends HorizontalScrollView {
             switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
                 if (mData != null) {
-                    int col = (int) event.getX() / mData.cellSize;
-                    if (col >= 0 && col < mData.dates.size()) {
-                        mClickCol = col;
-                        postInvalidate();
-                    }
+                    ((MainActivity) getContext()).handleMouseDown(mParent);
+                    mClickCol = mData.getColumnByCoord(event.getX());
+                    postInvalidate();
                 }
                 break;
             case MotionEvent.ACTION_UP:
@@ -231,7 +229,6 @@ public class HeaderScrollView extends HorizontalScrollView {
             int width = (mData != null) ?  mData.dates.size() * mData.cellSize + 1 : 1;
             int height = mParent.getHeight();
             setMeasuredDimension(width, height);
-            layout(0, 0, width, height);
         }
     }
 
@@ -256,13 +253,30 @@ public class HeaderScrollView extends HorizontalScrollView {
 
     public void refreshView() {
         mChild.resize();
+        requestLayout();
         postInvalidate();
     }
 
-    public void setFocus(int col) {
+    public void setFocus(int col, boolean scroll) {
         if (col != SheetData.POS_KEEP) {
             mFocusCol = col;
             mChild.postInvalidate();
+            if (scroll && mFocusCol >= 0) {
+                if (isLayoutRequested()) {
+                    mReserveScroll = true;
+                } else {
+                    flyToFocusColumn();
+                }
+            }
+        }
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        super.onLayout(changed, l, t, r, b);
+        if (mReserveScroll) {
+            flyToFocusColumn();
+            mReserveScroll = false;
         }
     }
 
@@ -277,4 +291,18 @@ public class HeaderScrollView extends HorizontalScrollView {
         mChild = new HeaderView(this);
         addView(mChild);
     }
+
+    private void flyToFocusColumn() {
+        if (mData != null) {
+            int w = getWidth();
+            int x = getScrollX();
+            int edge = getHorizontalFadingEdgeLength();
+            int x1 = Math.min(mFocusCol * mData.cellSize - edge, mChild.getWidth() - w);
+            int x2 = Math.max((mFocusCol + 1) * mData.cellSize - w + edge, 0);
+            if (x > x1 || x < x2) {
+                smoothScrollTo((Math.abs(x1 - x) < Math.abs(x2 - x)) ? x1 : x2, 0);
+            }
+        }
+    }
+
 }

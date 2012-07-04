@@ -63,14 +63,10 @@ public class SheetScrollView extends FreeScrollView {
             switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
                 if (mData != null) {
-                    int row = (int) event.getY() / mData.cellSize;
-                    int col = (int) event.getX() / mData.cellSize;
-                    if (row >= 0 && row < mData.entries.size() &&
-                            col >= 0 && col < mData.dates.size()) {
-                        mClickRow = row;
-                        mClickCol = col;
-                        postInvalidate();
-                    }
+                    ((MainActivity) getContext()).handleMouseDown(mParent);
+                    mClickRow = mData.getRowByCoord(event.getY());
+                    mClickCol = mData.getColumnByCoord(event.getX());
+                    postInvalidate();
                 }
                 break;
             case MotionEvent.ACTION_UP:
@@ -168,7 +164,6 @@ public class SheetScrollView extends FreeScrollView {
                 height = mData.entries.size() * mData.cellSize + 1;
             }
             setMeasuredDimension(width, height);
-            layout(0, 0, width, height);
         }
     }
 
@@ -193,6 +188,7 @@ public class SheetScrollView extends FreeScrollView {
 
     public void refreshView() {
         mChild.resize();
+        requestLayout();
         postInvalidate();
     }
 

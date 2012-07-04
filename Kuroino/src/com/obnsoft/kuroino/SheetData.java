@@ -74,6 +74,20 @@ public class SheetData {
 
     /*----------------------------------------------------------------------*/
 
+    public int getRowByCoord(float y) {
+        int row = (int) y / cellSize;
+        if (row < 0) row = 0;
+        if (row >= entries.size()) row = entries.size() - 1;
+        return row;
+    }
+
+    public int getColumnByCoord(float x) {
+        int col = (int) x / cellSize;
+        if (col < 0) col = 0;
+        if (col >= dates.size()) col = dates.size() - 1;
+        return col;
+    }
+
     public void createNewData(Calendar begin, Calendar end,
             int often, boolean[] weekFlgs, String[] names) {
         clearAll();

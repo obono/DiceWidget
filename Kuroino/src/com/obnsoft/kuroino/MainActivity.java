@@ -68,8 +68,9 @@ public class MainActivity extends Activity {
     private static final int MENU_ID_EXPORT         = 14;
     private static final int MENU_ID_ABOUT          = 15;
 
-    private static final int REQUEST_ID_IMPORT = 1;
-    private static final int REQUEST_ID_EXPORT = 2;
+    private static final int REQUEST_ID_CREATE = 1;
+    private static final int REQUEST_ID_IMPORT = 2;
+    private static final int REQUEST_ID_EXPORT = 3;
 
     private int mTargetRow = -1;
     private int mTargetCol = -1;
@@ -95,14 +96,17 @@ public class MainActivity extends Activity {
         mData.cellSize = (int) (48f * getResources().getDisplayMetrics().density);
         mData.fileEncode = getText(R.string.file_encoding).toString();
 
+        Calendar calNow = new GregorianCalendar();
+        int year = calNow.get(Calendar.YEAR);
+        int month = calNow.get(Calendar.MONTH);
+        int day = calNow.get(Calendar.DAY_OF_MONTH);
+        calNow.clear();
+        calNow.set(year, month, day);
+
         if ((new File(getLocalFileName())).exists()) {
             mData.importExternalData(getLocalFileName());
         } else {
-            Calendar calFrom = new GregorianCalendar();
-            int year = calFrom.get(Calendar.YEAR);
-            int month = calFrom.get(Calendar.MONTH);
-            calFrom.clear();
-            calFrom.set(year, month, 1);
+            Calendar calFrom = new GregorianCalendar(year, month, 1);
             Calendar calTo = new GregorianCalendar(
                     year, month, calFrom.getActualMaximum(Calendar.DAY_OF_MONTH));
             mData.createNewData(calFrom, calTo, 1, null,
@@ -111,6 +115,12 @@ public class MainActivity extends Activity {
         mHeader.setSheetData(mData);
         mSide.setSheetData(mData);
         mSheet.setSheetData(mData);
+
+        int col = mData.searchDate(calNow, false);
+        if (col >= mData.dates.size()) {
+            col = mData.dates.size() - 1;
+        }
+        handleFocus(null, SheetData.POS_KEEP, col, true);
     }
 
     @Override
@@ -197,11 +207,19 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_ID_CREATE) {
+            if (resultCode == RESULT_OK) {
+                handleFocus(null, SheetData.POS_GONE, SheetData.POS_GONE, false);
+                mSheet.scrollTo(0, 0);
+            }
+        }
         if (requestCode == REQUEST_ID_IMPORT) {
             if (resultCode == RESULT_OK) {
                 String path = data.getStringExtra(MyFilePickerActivity.INTENT_EXTRA_SELECTPATH);
                 mData.importExternalData(path);
                 refreshViews();
+                handleFocus(null, SheetData.POS_GONE, SheetData.POS_GONE, false);
+                mSheet.scrollTo(0, 0);
             }
         }
         if (requestCode == REQUEST_ID_EXPORT) {
@@ -212,17 +230,26 @@ public class MainActivity extends Activity {
         }
     }
 
-    protected void handleFocus(View v, int row, int col) {
+    protected void handleFocus(View v, int row, int col, boolean scroll) {
         if (v != mHeader) {
-            mHeader.setFocus(col);
-            mHeader.fling(0);
+            mHeader.setFocus(col, scroll);
         }
         if (v != mSide) {
-            mSide.setFocus(row);
-            mSide.fling(0);
+            mSide.setFocus(row, scroll);
         }
         if (v != mSheet) {
             mSheet.setFocus(row, col);
+        }
+    }
+
+    protected void handleMouseDown(View v) {
+        if (v != mHeader) {
+            mHeader.fling(0);
+        }
+        if (v != mSide) {
+            mSide.fling(0);
+        }
+        if (v != mSheet) {
             mSheet.fling(0, 0);
         }
     }
@@ -233,19 +260,19 @@ public class MainActivity extends Activity {
                 mTargetCol = col;
                 openContextMenu(mHeader);
             } else {
-                handleFocus(v, SheetData.POS_KEEP, col);
+                handleFocus(v, SheetData.POS_KEEP, col, false);
             }
         } else if (v == mSide) {
             if (extra) {
                 mTargetRow = row;
                 openContextMenu(mSide);
             } else {
-                handleFocus(v, row, SheetData.POS_KEEP);
+                handleFocus(v, row, SheetData.POS_KEEP, false);
             }
         } else if (v == mSheet) {
             mTargetRow = row;
             mTargetCol = col;
-            handleFocus(v, row, col);
+            handleFocus(v, row, col, false);
             String[] symbolStrs = getResources().getStringArray(R.array.symbol_strings);
             ArrayList<String> attends = mData.entries.get(row).attends;
             if (symbolStrs.length == 0 || attends.size() - 1 < col) {
@@ -292,7 +319,7 @@ public class MainActivity extends Activity {
                     Calendar cal1 = new GregorianCalendar(year, month, day);
                     if (mData.insertDate(cal1)) {
                         refreshViews();
-                        handleFocus(null, SheetData.POS_KEEP, mData.searchDate(cal1, true));
+                        handleFocus(null, SheetData.POS_KEEP, mData.searchDate(cal1, true), true);
                     }
                 }
             };
@@ -307,7 +334,7 @@ public class MainActivity extends Activity {
                 public void onDateSet(DatePicker view, int year, int month, int day) {
                     Calendar cal2 = new GregorianCalendar(year, month, day);
                     mData.moveDate(mTargetCol, cal2);
-                    handleFocus(null, SheetData.POS_KEEP, mData.searchDate(cal2, true));
+                    handleFocus(null, SheetData.POS_KEEP, mData.searchDate(cal2, true), true);
                 }
             };
             MyApplication.showDatePickerDialog(
@@ -320,7 +347,7 @@ public class MainActivity extends Activity {
                 public void onClick(DialogInterface dialog, int whichButton) {
                     mData.deleteDate(mTargetCol);
                     refreshViews();
-                    handleFocus(null, SheetData.POS_KEEP, SheetData.POS_GONE);
+                    handleFocus(null, SheetData.POS_KEEP, SheetData.POS_GONE, false);
                 }
             };
             MyApplication.showYesNoDialog(
@@ -342,8 +369,8 @@ public class MainActivity extends Activity {
                 @Override
                 public void onClick(DialogInterface dialog, int whichButton) {
                     mData.insertEntry(mTargetRow, ev1.getText().toString());
-                    handleFocus(null, mTargetRow, SheetData.POS_KEEP);
                     refreshViews();
+                    handleFocus(null, mTargetRow, SheetData.POS_KEEP, true);
                 }
             };
             MyApplication.showCustomDialog(
@@ -371,13 +398,13 @@ public class MainActivity extends Activity {
 
         case MENU_ID_MOVEUPMEMBER:
             if (mData.moveEntry(mTargetRow, -1)) {
-                handleFocus(null, mTargetRow - 1, SheetData.POS_KEEP);
+                handleFocus(null, mTargetRow - 1, SheetData.POS_KEEP, true);
             }
             return true;
 
         case MENU_ID_MOVEDOWNMEMBER:
             if (mData.moveEntry(mTargetRow, 1)) {
-                handleFocus(null, mTargetRow + 1, SheetData.POS_KEEP);
+                handleFocus(null, mTargetRow + 1, SheetData.POS_KEEP, true);
             }
             return true;
 
@@ -387,7 +414,7 @@ public class MainActivity extends Activity {
                 public void onClick(DialogInterface dialog, int whichButton) {
                     mData.deleteEntry(mTargetRow);
                     refreshViews();
-                    handleFocus(null, SheetData.POS_GONE, SheetData.POS_KEEP);
+                    handleFocus(null, SheetData.POS_GONE, SheetData.POS_KEEP, false);
                 }
             };
             MyApplication.showYesNoDialog(
@@ -404,7 +431,7 @@ public class MainActivity extends Activity {
             DialogInterface.OnClickListener cl4 = new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int whichButton) {
-                    startActivity(intent0);
+                    startActivityForResult(intent0, REQUEST_ID_CREATE);
                 }
             };
             MyApplication.showYesNoDialog(
