@@ -135,12 +135,12 @@ public class SideScrollView extends ScrollView {
 
                 /*  Highlight */
                 if (mFocusRow >= 0) {
-                    mPaintGrid.setColor(mData.focusColor);
+                    mPaintGrid.setColor(SheetData.FOCUS_COLOR);
                     c.drawRect(0, mFocusRow * cellSize,
                             getWidth(), (mFocusRow + 1) * cellSize, mPaintGrid);
                 }
                 if (mClickRow >= 0) {
-                    mPaintGrid.setColor(mData.clickColor);
+                    mPaintGrid.setColor(SheetData.CLICK_COLOR);
                     c.drawRect(0, mClickRow * cellSize,
                             getWidth(), (mClickRow + 1) * cellSize, mPaintGrid);
                 }

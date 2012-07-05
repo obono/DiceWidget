@@ -140,7 +140,7 @@ public class SheetScrollView extends FreeScrollView {
             }
 
             /*  Highlight  */
-            mPaintGrid.setColor(mData.focusColor);
+            mPaintGrid.setColor(SheetData.FOCUS_COLOR);
             if (mFocusRow >= 0) {
                 c.drawRect(scrollX, mFocusRow * cellSize,
                         scrollX + scrollWidth, (mFocusRow + 1) * cellSize, mPaintGrid);
@@ -150,7 +150,7 @@ public class SheetScrollView extends FreeScrollView {
                         (mFocusCol + 1) * cellSize, scrollY + scrollHeight, mPaintGrid);
             }
             if (mClickRow >= 0 && mClickCol >= 0) {
-                mPaintGrid.setColor(mData.clickColor);
+                mPaintGrid.setColor(SheetData.CLICK_COLOR);
                 c.drawRect(mClickCol * cellSize, mClickRow * cellSize,
                         (mClickCol + 1) * cellSize, (mClickRow + 1) * cellSize, mPaintGrid);
             }

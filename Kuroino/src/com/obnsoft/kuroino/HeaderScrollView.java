@@ -202,12 +202,12 @@ public class HeaderScrollView extends HorizontalScrollView {
 
                 /*  Highlight  */
                 if (mFocusCol >= 0) {
-                    mPaintGrid.setColor(mData.focusColor);
+                    mPaintGrid.setColor(SheetData.FOCUS_COLOR);
                     c.drawRect(mFocusCol * cellSize, 0,
                             (mFocusCol + 1) * cellSize, getHeight(), mPaintGrid);
                 }
                 if (mClickCol >= 0) {
-                    mPaintGrid.setColor(mData.clickColor);
+                    mPaintGrid.setColor(SheetData.CLICK_COLOR);
                     c.drawRect(mClickCol * cellSize, 0,
                             (mClickCol + 1) * cellSize, getHeight(), mPaintGrid);
                 }

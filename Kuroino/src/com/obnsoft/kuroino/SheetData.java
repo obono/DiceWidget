@@ -41,12 +41,13 @@ public class SheetData {
     public static final int POS_KEEP = -1;
     public static final int POS_GONE = -2;
 
+    public static final int FOCUS_COLOR = 0x1FFFFF00;
+    public static final int CLICK_COLOR = 0x1FFFFFFF;
+
     public int cellSize;
     public ArrayList<Calendar> dates = new ArrayList<Calendar>();
     public ArrayList<EntryData> entries = new ArrayList<EntryData>();
     public String fileEncode = "UTF-8";
-    public int focusColor = 0x1FFFFF00;
-    public int clickColor = 0x1FFFFFFF;
 
     private static final String DATE_FORMAT = "yyyy/MM/dd";
     private static final String LF = "\r\n"; // System.getProperty("line.separator");
