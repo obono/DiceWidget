@@ -2,6 +2,9 @@
 <resources>
     <string name="app_code">OBN-A06</string>
     <string name="app_name">Roll book</string>
+    <string name="file_encoding">ISO-8859-1</string>
+    <string name="default_stamps">出欠遅早</string>
+
     <string name="title_import">Choose the file to import from</string>
     <string name="title_export">Choose the file to export to</string>
 
@@ -21,6 +24,11 @@
     <string name="menu_export">Export</string>
     <string name="menu_version">Version info</string>
 
+    <string name="text_stamp_toggle">Toggle</string>
+    <string name="text_stamp_other">Other</string>
+    <string name="text_stamp_erase">Erase</string>
+    <string name="text_stamp_config">Modify varieties</string>
+    <string name="text_stamp_format">\'%c\'</string>
     <string name="text_period">Period</string>
     <string name="text_period_from">from</string>
     <string name="text_period_to">to</string>
@@ -35,6 +43,9 @@
     <string name="button_create">Create</string>
     <string name="button_share">Share</string>
 
+    <string name="msg_stamp_select">Choose a stamp</string>
+    <string name="msg_stamp_other">Enter a character as stamp</string>
+    <string name="msg_stamp_config">Enter characters as varieties of stamps</string>
     <string name="msg_newmembername">Enter the member name</string>
     <string name="msg_newfilename">Enter the file name</string>
     <string name="msg_period_often">Choose the repetition</string>
@@ -46,6 +57,4 @@
     <string name="msg_delete">Are you sure to delete?</string>
     <string name="msg_overwrite">Are you sure to overwrite?</string>
     <string name="msg_newsheet">The current data will be lost. Are you sure?</string>
-
-    <string name="file_encoding">ISO-8859-1</string>
 </resources>

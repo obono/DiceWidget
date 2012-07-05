@@ -32,10 +32,13 @@ import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.text.InputFilter;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
@@ -47,6 +50,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 public class MainActivity extends Activity {
+
+    private static final String PREFS_KEY_STAMPS    = "stamps";
+    private static final String PREFS_KEY_CURSTAMP  = "current_stamp";
 
     private static final int MENU_GID_OPTION    = 1;
     private static final int MENU_GID_HEADER    = 2;
@@ -74,6 +80,8 @@ public class MainActivity extends Activity {
 
     private int mTargetRow = SheetData.POS_GONE;
     private int mTargetCol = SheetData.POS_GONE;
+    private String mStamps;
+    private String mCurStamp;
 
     private HeaderScrollView    mHeader;
     private SideScrollView      mSide;
@@ -84,6 +92,11 @@ public class MainActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        mStamps = prefs.getString(PREFS_KEY_STAMPS,
+                getText(R.string.default_stamps).toString());
+        mCurStamp = prefs.getString(PREFS_KEY_CURSTAMP, mStamps);
 
         mHeader = (HeaderScrollView) findViewById(R.id.view_head);
         mSide = (SideScrollView) findViewById(R.id.view_side);
@@ -121,6 +134,7 @@ public class MainActivity extends Activity {
             col = mData.dates.size() - 1;
         }
         handleFocus(null, SheetData.POS_KEEP, col, true);
+        setStampLabel(mCurStamp);
     }
 
     @Override
@@ -269,30 +283,8 @@ public class MainActivity extends Activity {
                 handleFocus(v, row, SheetData.POS_KEEP, false);
             }
         } else if (v == mSheet) {
-            mTargetRow = row;
-            mTargetCol = col;
             handleFocus(v, row, col, false);
-            String[] symbolStrs = getResources().getStringArray(R.array.symbol_strings);
-            ArrayList<String> attends = mData.entries.get(row).attends;
-            if (symbolStrs.length == 0 || attends.size() - 1 < col) {
-                return;
-            }
-            String attend = attends.get(col);
-            if (attend == null) {
-                attends.set(col, symbolStrs[0]);
-            } else {
-                boolean match = false;
-                for (int i = 0; i < symbolStrs.length - 1; i++) {
-                    if (symbolStrs[i].equals(attend)) {
-                        attends.set(col, symbolStrs[i + 1]);
-                        match = true;
-                        break;
-                    }
-                }
-                if (!match) {
-                    attends.set(col, null);
-                }
-            }
+            changeStamp(row, col, mCurStamp);
         }
     }
 
@@ -358,6 +350,10 @@ public class MainActivity extends Activity {
         return false;
     }
 
+    public void onSelectStamp(View v) {
+        selectStamp();
+    }
+
     /*----------------------------------------------------------------------*/
 
     private void addDate() {
@@ -402,21 +398,20 @@ public class MainActivity extends Activity {
     }
 
     private void showDateStats(int col) {
-        class SymbolStats {
+        class StampStats {
             int count = 0;
             StringBuffer buf = new StringBuffer();
         }
-        LinkedHashMap<String, SymbolStats> map = new LinkedHashMap<String, SymbolStats>();
-        String[] symbols = getResources().getStringArray(R.array.symbol_strings);
-        for (String key : symbols) {
-            map.put(key, new SymbolStats());
+        LinkedHashMap<String, StampStats> map = new LinkedHashMap<String, StampStats>();
+        for (int i = 0; i < mStamps.length(); i++) {
+            map.put(mStamps.substring(i, i + 1), new StampStats());
         }
         for (EntryData entry : mData.entries) {
             String key = entry.attends.get(col);
             if (key != null) {
-                SymbolStats stats = map.get(key);
+                StampStats stats = map.get(key);
                 if (stats == null) {
-                    stats = new SymbolStats();
+                    stats = new StampStats();
                     map.put(key, stats);
                 }
                 stats.count++;
@@ -428,7 +423,7 @@ public class MainActivity extends Activity {
             if (msgBuf.length() > 0) {
                 msgBuf.append("\n\n");
             }
-            SymbolStats stats = map.get(key);
+            StampStats stats = map.get(key);
             msgBuf.append(key).append(": ")
                 .append(String.format(getText(R.string.text_member_count).toString(), stats.count))
                 .append(stats.buf);
@@ -494,19 +489,18 @@ public class MainActivity extends Activity {
     }
 
     private void showMemberStats(int row) {
-        class SymbolStats {
+        class StampStats {
             int count = 0;
         }
-        LinkedHashMap<String, SymbolStats> map = new LinkedHashMap<String, SymbolStats>();
-        String[] symbols = getResources().getStringArray(R.array.symbol_strings);
-        for (String key : symbols) {
-            map.put(key, new SymbolStats());
+        LinkedHashMap<String, StampStats> map = new LinkedHashMap<String, StampStats>();
+        for (int i = 0; i < mStamps.length(); i++) {
+            map.put(mStamps.substring(i, i + 1), new StampStats());
         }
         for (String key : mData.entries.get(row).attends) {
             if (key != null) {
-                SymbolStats stats = map.get(key);
+                StampStats stats = map.get(key);
                 if (stats == null) {
-                    stats = new SymbolStats();
+                    stats = new StampStats();
                     map.put(key, stats);
                 }
                 stats.count++;
@@ -586,6 +580,170 @@ public class MainActivity extends Activity {
         intent.putExtra(MyFilePickerActivity.INTENT_EXTRA_EXTENSION, "csv");
         intent.putExtra(MyFilePickerActivity.INTENT_EXTRA_WRITEMODE, true);
         startActivityForResult(intent, REQUEST_ID_EXPORT);
+    }
+
+    /*----------------------------------------------------------------------*/
+
+    private void changeStamp(int row, int col, String stamp) {
+        ArrayList<String> attends = mData.entries.get(row).attends;
+        if (attends.size() - 1 < col) {
+            return;
+        }
+        String attend = attends.get(col);
+        if (stamp == null || stamp.length() == 0) {
+            attends.set(col, null);
+        } else if (stamp.length() == 1) {
+            if (attend == null) {
+                attends.set(col, stamp);
+            } else if (stamp.equals(attend)) {
+                attends.set(col, null);
+            }
+        } else {
+            if (attend == null) {
+                attends.set(col, stamp.substring(0, 1));
+            } else {
+                int index = stamp.indexOf(attend);
+                if (index >= 0 && index < stamp.length() - 1) {
+                    attends.set(col, stamp.substring(index + 1, index + 2));
+                } else {
+                    attends.set(col, null);
+                }
+            }
+        }
+    }
+
+    private void selectStamp() {
+        final int count = mStamps.length();
+        final boolean notSingle = (count >= 2);
+
+        String[] items = new String[count + (notSingle ? 4 : 3)];
+        int index = 0;
+        if (notSingle) {
+            items[index++] = getText(R.string.text_stamp_toggle).toString();
+        }
+        String format = getText(R.string.text_stamp_format).toString();
+        for (int i = 0; i < count; i++) {
+            items[index++] = String.format(format, mStamps.charAt(i));
+        }
+        items[index++] = getText(R.string.text_stamp_other).toString();
+        items[index++] = getText(R.string.text_stamp_erase).toString();
+        items[index++] = getText(R.string.text_stamp_config).toString();
+
+        int choice = -1;
+        if (mCurStamp == null || mCurStamp.length() == 0) {
+            choice = count + 1;
+        } else if (mCurStamp.length() == 1) {
+            choice = mStamps.indexOf(mCurStamp);
+            if (choice == -1) {
+                choice = count;
+            }
+        }
+        if (notSingle) {
+            choice++;
+        }
+
+        DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                boolean close = true;
+                if (notSingle && --which == -1) { // Toggle
+                    mCurStamp = mStamps;
+                } else if (which < count) {
+                    mCurStamp = mStamps.substring(which, which + 1);
+                } else {
+                    which -= count;
+                    if (which == 0) { // Other
+                        selectStampOther(dialog);
+                        close = false;
+                    } else if (which == 1) { // Erase
+                        mCurStamp = "";
+                    } else if (which == 2) { // Configuration
+                        selectStampConfig(dialog);
+                        close = false;
+                    }
+                }
+                if (close) {
+                    setStampLabel(mCurStamp);
+                    dialog.dismiss();
+                }
+            }
+        };
+        MyApplication.showSingleChoiceDialog(
+                this, android.R.drawable.ic_dialog_alert,
+                R.string.msg_stamp_select, items, choice, listener);
+    }
+
+    private void selectStampOther(final DialogInterface parentDialog) {
+        final EditText editText = new EditText(this);
+        editText.setSingleLine();
+        editText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(1)});
+        if (mCurStamp != null && mCurStamp.length() == 1) {
+            editText.setText(mCurStamp);
+            editText.selectAll();
+        }
+        DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int whichButton) {
+                String str = editText.getText().toString();
+                if (str.length() == 1) {
+                    mCurStamp = str;
+                    setStampLabel(str);
+                    parentDialog.dismiss();
+                } else {
+                    // TODO
+                }
+            }
+        };
+        MyApplication.showCustomDialog(
+                this, android.R.drawable.ic_dialog_info,
+                R.string.msg_stamp_other, editText, listener);
+    }
+
+    private void selectStampConfig(final DialogInterface parentDialog) {
+        final EditText editText = new EditText(this);
+        editText.setSingleLine();
+        editText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(20)});
+        editText.setText(mStamps);
+        editText.setSelection(mStamps.length());
+        DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int whichButton) {
+                String str = editText.getText().toString();
+                StringBuffer buf = new StringBuffer();
+                for (int i = 0; i < str.length(); i++) {
+                    String substr = str.substring(i, i + 1);
+                    if (buf.indexOf(substr) == -1) {
+                        buf.append(substr);
+                    }
+                }
+                if (buf.length() > 0) {
+                    mStamps = buf.toString().replaceAll("[,\" \u3000]", "");
+                    mCurStamp = mStamps;
+                    setStampLabel(mCurStamp);
+                    parentDialog.dismiss();
+                    selectStamp();
+                } else {
+                    // TODO
+                }
+            }
+        };
+        MyApplication.showCustomDialog(
+                this, android.R.drawable.ic_dialog_info,
+                R.string.msg_stamp_config, editText, listener);
+    }
+
+    private void setStampLabel(String stamp) {
+        TextView textView = (TextView) findViewById(R.id.text_stamp);
+        if (stamp == null || stamp.length() == 0) {
+            textView.setTextAppearance(this, android.R.style.TextAppearance_Small);
+            textView.setText(R.string.text_stamp_erase);
+        } else if (stamp.length() == 1) {
+            textView.setTextAppearance(this, android.R.style.TextAppearance_Large);
+            textView.setText(stamp);
+        } else {
+            textView.setTextAppearance(this, android.R.style.TextAppearance_Small);
+            textView.setText(R.string.text_stamp_toggle);
+        }
     }
 
     /*----------------------------------------------------------------------*/

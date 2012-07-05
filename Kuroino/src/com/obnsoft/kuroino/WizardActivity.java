@@ -164,19 +164,19 @@ public class WizardActivity extends Activity {
     }
 
     private void modifyOftenEvery(final DialogInterface parentDialog) {
-        final EditText edittext = new EditText(this);
-        edittext.setSingleLine();
-        edittext.setInputType(InputType.TYPE_CLASS_NUMBER);
-        edittext.setFilters(new InputFilter[]{new InputFilter.LengthFilter(2)});
+        final EditText editText = new EditText(this);
+        editText.setSingleLine();
+        editText.setInputType(InputType.TYPE_CLASS_NUMBER);
+        editText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(2)});
         if (mIntervalDays >= 2) {
-            edittext.setText(Integer.toString(mIntervalDays));
-            edittext.selectAll();
+            editText.setText(Integer.toString(mIntervalDays));
+            editText.selectAll();
         }
         DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int whichButton) {
                 try {
-                    int value = Integer.parseInt(edittext.getText().toString());
+                    int value = Integer.parseInt(editText.getText().toString());
                     if (value > 0 && value < 100) {
                         mIntervalDays = value;
                     } else {
@@ -191,7 +191,7 @@ public class WizardActivity extends Activity {
         };
         MyApplication.showCustomDialog(
                 this, android.R.drawable.ic_dialog_info,
-                R.string.msg_period_interval_days, edittext, listener);
+                R.string.msg_period_interval_days, editText, listener);
     }
 
     private void setOftenLabel() {

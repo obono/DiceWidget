@@ -112,7 +112,7 @@ public class SheetScrollView extends FreeScrollView {
             int startCol = Math.max(scrollX / cellSize, 0);
             int endCol = Math.min((scrollX + scrollWidth - 1) / cellSize, cols - 1);
 
-            /*  Symbol  */
+            /*  Stamps  */
             mPaintText.setTextSize(mData.cellSize * 0.75f);
             FontMetrics fm = mPaintText.getFontMetrics();
             float strHeight = fm.ascent + fm.descent;

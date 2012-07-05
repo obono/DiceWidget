@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">出席簿</string>
+    <string name="file_encoding">Shift_JIS</string>
+
     <string name="title_import">インポートするファイルを選択</string>
     <string name="title_export">エクスポートするファイルを選択</string>
 
@@ -20,6 +22,11 @@
     <string name="menu_export">エクスポート</string>
     <string name="menu_version">バージョン情報</string>
 
+    <string name="text_stamp_toggle">切換え</string>
+    <string name="text_stamp_other">その他</string>
+    <string name="text_stamp_erase">消去</string>
+    <string name="text_stamp_config">種類を変更</string>
+    <string name="text_stamp_format">「%c」</string>
     <string name="text_period">期間</string>
     <string name="text_period_from">開始</string>
     <string name="text_period_to">終了</string>
@@ -34,6 +41,9 @@
     <string name="button_create">作成</string>
     <string name="button_share">共有</string>
 
+    <string name="msg_stamp_select">印を選択</string>
+    <string name="msg_stamp_other">印の1文字を入力</string>
+    <string name="msg_stamp_config">印の種類を入力</string>
     <string name="msg_newmembername">メンバー名を入力</string>
     <string name="msg_newfilename">ファイル名を入力</string>
     <string name="msg_period_often">頻度を選択</string>
@@ -45,6 +55,4 @@
     <string name="msg_delete">削除してよろしいですか?</string>
     <string name="msg_overwrite">上書きしてよろしいですか?</string>
     <string name="msg_newsheet">現在編集中のデータは失われますが、よろしいですか?</string>
-
-    <string name="file_encoding">Shift_JIS</string>
 </resources>
