@@ -21,8 +21,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.obnsoft.app.FilePickerActivity;
@@ -42,6 +42,9 @@ public class MyFilePickerActivity extends FilePickerActivity {
                 setTitle(id);
             }
         }
+        setResourceId(R.drawable.ic_menu_archive,
+                isWriteMode() ? R.drawable.ic_menu_export : R.drawable.ic_menu_import,
+                R.drawable.ic_menu_newfile, R.string.msg_createfile);
     }
 
     @Override
@@ -49,9 +52,9 @@ public class MyFilePickerActivity extends FilePickerActivity {
         super.onCurrentDirectoryChanged(path);
         TextView tv = (TextView) findViewById(R.id.text_current_directory);
         tv.setText(getTrimmedCurrentDirectory(path));
-        Button btn = (Button) findViewById(R.id.button_back_directory);
+        ImageButton btn = (ImageButton) findViewById(R.id.button_back_directory);
         btn.setEnabled(getLastDirectory() != null);
-        btn = (Button) findViewById(R.id.button_upper_directory);
+        btn = (ImageButton) findViewById(R.id.button_upper_directory);
         btn.setEnabled(getUpperDirectory() != null);
     }
 
@@ -87,9 +90,7 @@ public class MyFilePickerActivity extends FilePickerActivity {
                 setResultAndFinish(newPath);
             }
         };
-        MyApplication.showCustomDialog(
-                this, android.R.drawable.ic_dialog_info,
-                R.string.msg_newfilename, editText, listener);
+        MyApplication.showCustomDialog(this, 0, R.string.msg_newfilename, editText, listener);
     }
 
     public void onBackDirectory(View v) {

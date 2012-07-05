@@ -173,11 +173,11 @@ public class MainActivity extends Activity {
         menu.add(MENU_GID_OPTION, MENU_ID_ADDMEMBER, Menu.NONE, R.string.menu_addmember)
             .setIcon(android.R.drawable.ic_menu_my_calendar);
         menu.add(MENU_GID_OPTION, MENU_ID_CREATE, Menu.NONE, R.string.menu_new)
-            .setIcon(android.R.drawable.ic_menu_agenda);
+            .setIcon(R.drawable.ic_menu_newfile);
         menu.add(MENU_GID_OPTION, MENU_ID_IMPORT, Menu.NONE, R.string.menu_import)
-            .setIcon(android.R.drawable.ic_menu_set_as);
+            .setIcon(R.drawable.ic_menu_import);
         menu.add(MENU_GID_OPTION, MENU_ID_EXPORT, Menu.NONE, R.string.menu_export)
-            .setIcon(android.R.drawable.ic_menu_save);
+            .setIcon(R.drawable.ic_menu_export);
         menu.add(MENU_GID_OPTION, MENU_ID_ABOUT, Menu.NONE, R.string.menu_version)
             .setIcon(android.R.drawable.ic_menu_info_details);
         return ret;
@@ -197,12 +197,14 @@ public class MainActivity extends Activity {
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
         if (v == mHeader) {
+            menu.setHeaderIcon(R.drawable.ic_dialog_date);
             menu.setHeaderTitle(MyApplication.getDateString(this, mData.dates.get(mTargetCol)));
             menu.add(MENU_GID_HEADER, MENU_ID_MODIFYDATE, Menu.NONE, R.string.menu_modify);
             menu.add(MENU_GID_HEADER, MENU_ID_DELETEDATE, Menu.NONE, R.string.menu_delete);
             menu.add(MENU_GID_HEADER, MENU_ID_INFODATE, Menu.NONE, R.string.menu_info);
             menu.add(MENU_GID_HEADER, MENU_ID_ADDDATE, Menu.NONE, R.string.menu_adddate);
         } else if (v == mSide) {
+            menu.setHeaderIcon(R.drawable.ic_dialog_member);
             menu.setHeaderTitle(mData.entries.get(mTargetRow).name);
             menu.add(MENU_GID_SIDE, MENU_ID_MODIFYMEMBER, Menu.NONE, R.string.menu_modify);
             if (mTargetRow > 0) {
@@ -447,7 +449,7 @@ public class MainActivity extends Activity {
                 .append(String.format(getText(R.string.text_member_count).toString(), stats.count))
                 .append(stats.buf);
         }
-        MyApplication.showShareDialog(this, android.R.drawable.ic_dialog_info,
+        MyApplication.showShareDialog(this, R.drawable.ic_dialog_date,
                 MyApplication.getDateString(this, mData.dates.get(col)), msgBuf);
     }
 
@@ -466,7 +468,7 @@ public class MainActivity extends Activity {
             }
         };
         MyApplication.showCustomDialog(
-                this, android.R.drawable.ic_dialog_info,
+                this, R.drawable.ic_dialog_member,
                 R.string.msg_newmembername, editText, listener);
     }
 
@@ -485,7 +487,7 @@ public class MainActivity extends Activity {
             }
         };
         MyApplication.showCustomDialog(
-                this, android.R.drawable.ic_dialog_info,
+                this, R.drawable.ic_dialog_member,
                 R.string.msg_newmembername, editText, listener);
     }
 
@@ -536,7 +538,7 @@ public class MainActivity extends Activity {
             msgBuf.append('\n').append(key).append(": ").append(String.format(
                     getText(R.string.text_times_count).toString(), map.get(key).count));
         }
-        MyApplication.showShareDialog(this, android.R.drawable.ic_dialog_info,
+        MyApplication.showShareDialog(this, R.drawable.ic_dialog_member,
                 mData.entries.get(row).name, msgBuf);
     }
 
@@ -694,7 +696,7 @@ public class MainActivity extends Activity {
             }
         };
         MyApplication.showSingleChoiceDialog(
-                this, android.R.drawable.ic_dialog_alert,
+                this, R.drawable.ic_dialog_stamp,
                 R.string.msg_stamp_select, items, choice, listener);
     }
 
@@ -721,8 +723,7 @@ public class MainActivity extends Activity {
             }
         };
         MyApplication.showCustomDialog(
-                this, android.R.drawable.ic_dialog_info,
-                R.string.msg_stamp_other, editText, listener);
+                this, R.drawable.ic_dialog_stamp, R.string.msg_stamp_other, editText, listener);
     }
 
     private void selectStampConfig(final DialogInterface parentDialog) {
@@ -755,8 +756,7 @@ public class MainActivity extends Activity {
             }
         };
         MyApplication.showCustomDialog(
-                this, android.R.drawable.ic_dialog_info,
-                R.string.msg_stamp_config, editText, listener);
+                this, R.drawable.ic_dialog_stamp, R.string.msg_stamp_config, editText, listener);
     }
 
     private void setStampLabel(String stamp) {

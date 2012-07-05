@@ -28,18 +28,18 @@
         >
         <requestFocus/>
     </TextView>
-    <Button
+    <ImageButton
         android:id="@+id/button_back_directory"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/button_back"
+        android:src="@drawable/ic_btn_back"
         android:onClick="onBackDirectory"
         />
-    <Button
+    <ImageButton
         android:id="@+id/button_upper_directory"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/button_upper"
+        android:src="@drawable/ic_btn_upper"
         android:onClick="onUpperDirectory"
         />
 </LinearLayout>

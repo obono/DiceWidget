@@ -66,8 +66,10 @@ public class MyApplication extends Application {
 
     public static void showDatePickerDialog(
             Context context, Calendar cal, DatePickerDialog.OnDateSetListener listener) {
-        new DatePickerDialog(context, listener, cal.get(Calendar.YEAR),
-                cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)).show();
+        DatePickerDialog dlg = new DatePickerDialog(context, listener,
+                cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH));
+        dlg.setIcon(R.drawable.ic_dialog_date);
+        dlg.show();
     }
 
     public static void showYesNoDialog(

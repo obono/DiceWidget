@@ -134,7 +134,7 @@ public class WizardActivity extends Activity {
             }
         };
         MyApplication.showSingleChoiceDialog(
-                this, android.R.drawable.ic_dialog_alert,
+                this, R.drawable.ic_dialog_date,
                 R.string.msg_period_often, items, choice, listener);
     }
 
@@ -159,7 +159,7 @@ public class WizardActivity extends Activity {
             }
         };
         MyApplication.showMultiChoiceDialog(
-                this, android.R.drawable.ic_dialog_alert,
+                this, R.drawable.ic_dialog_date,
                 R.string.msg_period_days_of_week, items, flgs, listener);
     }
 
@@ -190,7 +190,7 @@ public class WizardActivity extends Activity {
             }
         };
         MyApplication.showCustomDialog(
-                this, android.R.drawable.ic_dialog_info,
+                this, R.drawable.ic_dialog_date,
                 R.string.msg_period_interval_days, editText, listener);
     }
 

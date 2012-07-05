@@ -38,8 +38,6 @@
     <string name="text_member_count">%d person(s)</string>
     <string name="text_times_count">%d time(s)</string>
 
-    <string name="button_back">Back</string>
-    <string name="button_upper">Upper</string>
     <string name="button_create">Create</string>
     <string name="button_share">Share</string>
 

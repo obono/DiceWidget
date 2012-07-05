@@ -36,8 +36,6 @@
     <string name="text_member_count">%d人</string>
     <string name="text_times_count">%d回</string>
 
-    <string name="button_back">戻る</string>
-    <string name="button_upper">上へ</string>
     <string name="button_create">作成</string>
     <string name="button_share">共有</string>
 
