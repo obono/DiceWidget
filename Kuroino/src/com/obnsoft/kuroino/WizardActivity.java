@@ -233,6 +233,10 @@ public class WizardActivity extends Activity {
         button.setEnabled(mMemberCount > 0 && mCalFrom.before(mCalTo));
     }
 
+    private static boolean isTruncateChar(char c) {
+        return (c == '\n' || c == ' ' || c == MyApplication.IDEOGRAPHICS_SPACE);
+    }
+
     /*----------------------------------------------------------------------*/
 
     class MyInputFilter implements InputFilter {
@@ -276,7 +280,8 @@ public class WizardActivity extends Activity {
     class MyTextWatcher implements TextWatcher {
 
         private static final int MSG_UPDATE_COUNT = 1;
-        private Handler handler = new Handler() {
+        private static final int MSEC_TIMEOUT_UPDATE_COUNT = 1000;
+        private Handler mTimeoutHandler = new Handler() {
             @Override  
             public void dispatchMessage(Message msg) {
                 if (msg.what == MSG_UPDATE_COUNT) {
@@ -308,12 +313,8 @@ public class WizardActivity extends Activity {
         }
         @Override
         public void afterTextChanged(Editable s) {
-            handler.removeMessages(MSG_UPDATE_COUNT);
-            handler.sendEmptyMessageDelayed(MSG_UPDATE_COUNT, 1000);
+            mTimeoutHandler.removeMessages(MSG_UPDATE_COUNT);
+            mTimeoutHandler.sendEmptyMessageDelayed(MSG_UPDATE_COUNT, MSEC_TIMEOUT_UPDATE_COUNT);
         }
-    }
-
-    private static boolean isTruncateChar(char c) {
-        return (c == '\n' || c == ' ' || c == MyApplication.IDEOGRAPHICS_SPACE);
     }
 }

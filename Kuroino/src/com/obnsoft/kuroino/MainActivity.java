@@ -37,6 +37,8 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.preference.PreferenceManager;
 import android.text.InputFilter;
 import android.view.ContextMenu;
@@ -78,10 +80,23 @@ public class MainActivity extends Activity {
     private static final int REQUEST_ID_IMPORT = 2;
     private static final int REQUEST_ID_EXPORT = 3;
 
+    private static final int MSG_AUTOSAVE = 1;
+    private static final int MSEC_TIMEOUT_AUTOSAVE = 60 * 1000;
+
     private int mTargetRow = SheetData.POS_GONE;
     private int mTargetCol = SheetData.POS_GONE;
     private String mStamps;
     private String mCurStamp;
+    private boolean mIsDirtySheetData = false;
+    private boolean mIsDirtyPreferences = false;
+    private Handler mTimeoutHandler = new Handler() {
+        @Override  
+        public void dispatchMessage(Message msg) {
+            if (msg.what == MSG_AUTOSAVE) {
+                autoSave();
+            }
+        }
+    };
 
     private HeaderScrollView    mHeader;
     private SideScrollView      mSide;
@@ -145,10 +160,9 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onPause() {
+        mTimeoutHandler.removeMessages(MSG_AUTOSAVE);
+        autoSave();
         super.onPause();
-        if (true) {
-            mData.exportDataToFile(getLocalFileName());
-        }
     }
 
     @Override
@@ -219,6 +233,7 @@ public class MainActivity extends Activity {
         switch (requestCode) {
         case REQUEST_ID_CREATE:
             if (resultCode == RESULT_OK) {
+                setSheetDataIsDirty();
                 handleFocus(null, SheetData.POS_GONE, SheetData.POS_GONE, false);
                 mSheet.scrollTo(0, 0);
             }
@@ -227,6 +242,7 @@ public class MainActivity extends Activity {
             if (resultCode == RESULT_OK) {
                 String path = data.getStringExtra(MyFilePickerActivity.INTENT_EXTRA_SELECTPATH);
                 mData.importDataFromFile(path);
+                setSheetDataIsDirty();
                 refreshViews();
                 handleFocus(null, SheetData.POS_GONE, SheetData.POS_GONE, false);
                 mSheet.scrollTo(0, 0);
@@ -362,6 +378,7 @@ public class MainActivity extends Activity {
             public void onDateSet(DatePicker view, int year, int month, int day) {
                 Calendar cal = new GregorianCalendar(year, month, day);
                 if (mData.insertDate(cal)) {
+                    setSheetDataIsDirty();
                     refreshViews();
                     handleFocus(null, SheetData.POS_KEEP, mData.searchDate(cal, true), true);
                 }
@@ -376,6 +393,7 @@ public class MainActivity extends Activity {
             public void onDateSet(DatePicker view, int year, int month, int day) {
                 Calendar cal = new GregorianCalendar(year, month, day);
                 mData.moveDate(col, cal);
+                setSheetDataIsDirty();
                 handleFocus(null, SheetData.POS_KEEP, mData.searchDate(cal, true), true);
             }
         };
@@ -387,6 +405,7 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(DialogInterface dialog, int whichButton) {
                 mData.deleteDate(col);
+                setSheetDataIsDirty();
                 refreshViews();
                 handleFocus(null, SheetData.POS_KEEP, SheetData.POS_GONE, false);
             }
@@ -441,6 +460,7 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(DialogInterface dialog, int whichButton) {
                 mData.insertEntry(row, editText.getText().toString());
+                setSheetDataIsDirty();
                 refreshViews();
                 handleFocus(null, row, SheetData.POS_KEEP, true);
             }
@@ -460,6 +480,7 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(DialogInterface dialog, int whichButton) {
                 mData.modifyEntry(row, editText.getText().toString());
+                setSheetDataIsDirty();
                 refreshViews();
             }
         };
@@ -470,6 +491,7 @@ public class MainActivity extends Activity {
 
     private void moveMember(int row, int distance) {
         if (mData.moveEntry(row, distance)) {
+            setSheetDataIsDirty();
             handleFocus(null, row + distance, SheetData.POS_KEEP, true);
         }
     }
@@ -479,6 +501,7 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(DialogInterface dialog, int whichButton) {
                 mData.deleteEntry(row);
+                setSheetDataIsDirty();
                 refreshViews();
                 handleFocus(null, SheetData.POS_GONE, SheetData.POS_KEEP, false);
             }
@@ -610,6 +633,7 @@ public class MainActivity extends Activity {
                 }
             }
         }
+        setSheetDataIsDirty();
     }
 
     private void selectStamp() {
@@ -663,6 +687,7 @@ public class MainActivity extends Activity {
                     }
                 }
                 if (close) {
+                    setPreferencesIsDirty();
                     setStampLabel(mCurStamp);
                     dialog.dismiss();
                 }
@@ -687,6 +712,7 @@ public class MainActivity extends Activity {
                 String str = editText.getText().toString();
                 if (str.length() == 1) {
                     mCurStamp = str;
+                    setPreferencesIsDirty();
                     setStampLabel(str);
                     parentDialog.dismiss();
                 } else {
@@ -719,6 +745,7 @@ public class MainActivity extends Activity {
                 if (buf.length() > 0) {
                     mStamps = buf.toString().replaceAll("[,\" \u3000]", "");
                     mCurStamp = mStamps;
+                    setPreferencesIsDirty();
                     setStampLabel(mCurStamp);
                     parentDialog.dismiss();
                     selectStamp();
@@ -747,6 +774,33 @@ public class MainActivity extends Activity {
     }
 
     /*----------------------------------------------------------------------*/
+
+    private void setSheetDataIsDirty() {
+        mIsDirtySheetData = true;
+        mTimeoutHandler.removeMessages(MSG_AUTOSAVE);
+        mTimeoutHandler.sendEmptyMessageDelayed(MSG_AUTOSAVE, MSEC_TIMEOUT_AUTOSAVE);
+    }
+
+    private void setPreferencesIsDirty() {
+        mIsDirtyPreferences = true;
+        mTimeoutHandler.removeMessages(MSG_AUTOSAVE);
+        mTimeoutHandler.sendEmptyMessageDelayed(MSG_AUTOSAVE, MSEC_TIMEOUT_AUTOSAVE);
+    }
+
+    private void autoSave() {
+        if (mIsDirtySheetData) {
+            mIsDirtySheetData = false;
+            mData.exportDataToFile(getLocalFileName());
+        }
+        if (mIsDirtyPreferences) {
+            mIsDirtyPreferences = false;
+            SharedPreferences.Editor editor =
+                PreferenceManager.getDefaultSharedPreferences(this).edit();
+            editor.putString(PREFS_KEY_STAMPS, mStamps);
+            editor.putString(PREFS_KEY_CURSTAMP, mCurStamp);
+            editor.commit();
+        }
+    }
 
     private void refreshViews() {
         mHeader.refreshView();
