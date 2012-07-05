@@ -74,13 +74,13 @@ public class MyFilePickerActivity extends FilePickerActivity {
 
     @Override
     public void onNewFileRequested(final String directory, final String extension) {
-        final EditText edittext = new EditText(this);
-        edittext.setSingleLine();
-        edittext.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
+        final EditText editText = new EditText(this);
+        editText.setSingleLine();
+        editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
         DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int whichButton) {
-                String newPath = directory + MyApplication.trimUni(edittext.getText().toString());
+                String newPath = directory + MyApplication.trimUni(editText.getText().toString());
                 if (extension != null && !newPath.endsWith(extension)) {
                     newPath += extension;
                 }
@@ -89,7 +89,7 @@ public class MyFilePickerActivity extends FilePickerActivity {
         };
         MyApplication.showCustomDialog(
                 this, android.R.drawable.ic_dialog_info,
-                R.string.msg_newfilename, edittext, listener);
+                R.string.msg_newfilename, editText, listener);
     }
 
     public void onBackDirectory(View v) {

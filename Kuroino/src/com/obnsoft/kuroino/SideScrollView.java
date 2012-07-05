@@ -17,7 +17,6 @@
 package com.obnsoft.kuroino;
 
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -28,6 +27,8 @@ import android.view.View;
 import android.widget.ScrollView;
 
 public class SideScrollView extends ScrollView {
+
+    private static final int[] ROW_COLORS = {0xFF1F271F, 0xFF1F2F1F};
 
     private SheetData mData = null;
     private SideView mChild = null;
@@ -42,20 +43,12 @@ public class SideScrollView extends ScrollView {
         private View mParent = null;
         private Paint mPaintGrid = new Paint();
         private Paint mPaintText = new Paint(Paint.ANTI_ALIAS_FLAG);
-        private int[] mRowColors;
 
         public SideView(View parent) {
             super(parent.getContext());
             mParent = parent;
             mPaintGrid.setStyle(Paint.Style.FILL_AND_STROKE);
             mPaintText.setColor(Color.LTGRAY);
-
-            TypedArray colorsAry = getResources().obtainTypedArray(R.array.cell_colors);
-            mRowColors = new int[] {
-                    colorsAry.getColor(3, Color.TRANSPARENT),
-                    colorsAry.getColor(4, Color.TRANSPARENT),
-            };
-
             setOnLongClickListener(this);
         }
 
@@ -127,7 +120,7 @@ public class SideScrollView extends ScrollView {
                     int y = row * cellSize;
 
                     /*  Background  */
-                    mPaintGrid.setColor(mRowColors[row & 1]);
+                    mPaintGrid.setColor(ROW_COLORS[row & 1]);
                     c.drawRect(0, y, width, y + cellSize, mPaintGrid);
 
                     /*  Name  */
@@ -142,12 +135,12 @@ public class SideScrollView extends ScrollView {
 
                 /*  Highlight */
                 if (mFocusRow >= 0) {
-                    mPaintGrid.setColor(Color.argb(31, 255, 255, 0));
+                    mPaintGrid.setColor(mData.focusColor);
                     c.drawRect(0, mFocusRow * cellSize,
                             getWidth(), (mFocusRow + 1) * cellSize, mPaintGrid);
                 }
                 if (mClickRow >= 0) {
-                    mPaintGrid.setColor(Color.argb(31, 255, 255, 255));
+                    mPaintGrid.setColor(mData.clickColor);
                     c.drawRect(0, mClickRow * cellSize,
                             getWidth(), (mClickRow + 1) * cellSize, mPaintGrid);
                 }

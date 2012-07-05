@@ -19,7 +19,6 @@ package com.obnsoft.kuroino;
 import java.util.Calendar;
 
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -32,6 +31,9 @@ import android.widget.HorizontalScrollView;
 public class HeaderScrollView extends HorizontalScrollView {
 
     private static final String MONTH_YEAR_FORMAT = "%s '%02d";
+    private static final int[] DWEEK_COLORS = {
+        0xFF2F1F1F, 0xFF1F1F1F, 0xFF1F1F1F, 0xFF1F1F1F, 0xFF1F1F1F, 0xFF1F1F1F, 0xFF1F1F3F
+    };
 
     private SheetData mData = null;
     private HeaderView mChild = null;
@@ -48,25 +50,12 @@ public class HeaderScrollView extends HorizontalScrollView {
         private Paint mPaintText = new Paint(Paint.ANTI_ALIAS_FLAG);
         private String[] mMonthStrs = getResources().getStringArray(R.array.month_strings);
         private String[] mDweekStrs = getResources().getStringArray(R.array.dweek_strings);
-        private int[] mDweekColors;
 
         public HeaderView(View parent) {
             super(parent.getContext());
             mParent = parent;
             mPaintGrid.setStyle(Paint.Style.FILL_AND_STROKE);
             mPaintText.setColor(Color.LTGRAY);
-
-            TypedArray colorsAry = getResources().obtainTypedArray(R.array.cell_colors);
-            mDweekColors = new int[] {
-                    colorsAry.getColor(2, Color.TRANSPARENT),
-                    colorsAry.getColor(0, Color.TRANSPARENT),
-                    colorsAry.getColor(0, Color.TRANSPARENT),
-                    colorsAry.getColor(0, Color.TRANSPARENT),
-                    colorsAry.getColor(0, Color.TRANSPARENT),
-                    colorsAry.getColor(0, Color.TRANSPARENT),
-                    colorsAry.getColor(1, Color.TRANSPARENT),
-            };
-
             setOnLongClickListener(this);
         }
 
@@ -132,7 +121,7 @@ public class HeaderScrollView extends HorizontalScrollView {
                 int endCol = Math.min((scrollX + scrollWidth - 1) / cellSize, cols - 1);
 
                 /*  Background  */
-                mPaintGrid.setColor(mDweekColors[1]);
+                mPaintGrid.setColor(DWEEK_COLORS[1]);
                 c.drawRect(scrollX, 0, scrollX + scrollWidth, height, mPaintGrid);
 
                 int lastYear = 0;
@@ -152,7 +141,7 @@ public class HeaderScrollView extends HorizontalScrollView {
 
                     /*  Background  */
                     mPaintText.setTextSize(height / 2f);
-                    mPaintGrid.setColor(mDweekColors[dweek]);
+                    mPaintGrid.setColor(DWEEK_COLORS[dweek]);
                     float y = fm.descent - fm.ascent;
                     c.drawRect(x, y, x + cellSize, height, mPaintGrid);
 
@@ -213,12 +202,12 @@ public class HeaderScrollView extends HorizontalScrollView {
 
                 /*  Highlight  */
                 if (mFocusCol >= 0) {
-                    mPaintGrid.setColor(Color.argb(31, 255, 255, 0));
+                    mPaintGrid.setColor(mData.focusColor);
                     c.drawRect(mFocusCol * cellSize, 0,
                             (mFocusCol + 1) * cellSize, getHeight(), mPaintGrid);
                 }
                 if (mClickCol >= 0) {
-                    mPaintGrid.setColor(Color.argb(31, 255, 255, 255));
+                    mPaintGrid.setColor(mData.clickColor);
                     c.drawRect(mClickCol * cellSize, 0,
                             (mClickCol + 1) * cellSize, getHeight(), mPaintGrid);
                 }

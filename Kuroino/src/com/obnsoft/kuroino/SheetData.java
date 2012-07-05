@@ -45,6 +45,8 @@ public class SheetData {
     public ArrayList<Calendar> dates = new ArrayList<Calendar>();
     public ArrayList<EntryData> entries = new ArrayList<EntryData>();
     public String fileEncode = "UTF-8";
+    public int focusColor = 0x1FFFFF00;
+    public int clickColor = 0x1FFFFFFF;
 
     private static final String DATE_FORMAT = "yyyy/MM/dd";
     private static final String LF = "\r\n"; // System.getProperty("line.separator");
@@ -88,6 +90,8 @@ public class SheetData {
         return col;
     }
 
+    /*----------------------------------------------------------------------*/
+
     public void createNewData(Calendar begin, Calendar end,
             int often, boolean[] weekFlgs, String[] names) {
         clearAll();
@@ -124,7 +128,7 @@ public class SheetData {
         }
     }
 
-    public boolean importExternalData(String filePath) {
+    public boolean importDataFromFile(String filePath) {
         clearAll();
         BufferedReader in;
         try {
@@ -194,7 +198,7 @@ public class SheetData {
         return ret;
     }
 
-    public boolean exportCurrentData(String filePath) {
+    public boolean exportDataToFile(String filePath) {
         boolean ret = false;
         try {
             BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
@@ -226,6 +230,8 @@ public class SheetData {
         }
         return ret;
     }
+
+    /*----------------------------------------------------------------------*/
 
     public boolean insertDate(Calendar cal) {
         if (cal == null || this.dates.size() >= MAX_COLS) {
@@ -300,6 +306,8 @@ public class SheetData {
         return false;
     }
 
+    /*----------------------------------------------------------------------*/
+
     public boolean insertEntry(String name) {
         return insertEntry(this.entries.size(), name);
     }
@@ -345,6 +353,8 @@ public class SheetData {
         this.entries.remove(index);
         return true;
     }
+
+    /*----------------------------------------------------------------------*/
 
     public void clearAll() {
         for (EntryData entry : this.entries) {

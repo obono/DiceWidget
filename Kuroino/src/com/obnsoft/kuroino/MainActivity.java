@@ -72,8 +72,8 @@ public class MainActivity extends Activity {
     private static final int REQUEST_ID_IMPORT = 2;
     private static final int REQUEST_ID_EXPORT = 3;
 
-    private int mTargetRow = -1;
-    private int mTargetCol = -1;
+    private int mTargetRow = SheetData.POS_GONE;
+    private int mTargetCol = SheetData.POS_GONE;
 
     private HeaderScrollView    mHeader;
     private SideScrollView      mSide;
@@ -104,7 +104,7 @@ public class MainActivity extends Activity {
         calNow.set(year, month, day);
 
         if ((new File(getLocalFileName())).exists()) {
-            mData.importExternalData(getLocalFileName());
+            mData.importDataFromFile(getLocalFileName());
         } else {
             Calendar calFrom = new GregorianCalendar(year, month, 1);
             Calendar calTo = new GregorianCalendar(
@@ -133,7 +133,7 @@ public class MainActivity extends Activity {
     protected void onPause() {
         super.onPause();
         if (true) {
-            mData.exportCurrentData(getLocalFileName());
+            mData.exportDataToFile(getLocalFileName());
         }
     }
 
@@ -153,11 +153,6 @@ public class MainActivity extends Activity {
         menu.add(MENU_GID_OPTION, MENU_ID_ABOUT, Menu.NONE, R.string.menu_version)
             .setIcon(android.R.drawable.ic_menu_info_details);
         return ret;
-    }
-
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
@@ -207,28 +202,32 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_ID_CREATE) {
+        switch (requestCode) {
+        case REQUEST_ID_CREATE:
             if (resultCode == RESULT_OK) {
                 handleFocus(null, SheetData.POS_GONE, SheetData.POS_GONE, false);
                 mSheet.scrollTo(0, 0);
             }
-        }
-        if (requestCode == REQUEST_ID_IMPORT) {
+            break;
+        case REQUEST_ID_IMPORT:
             if (resultCode == RESULT_OK) {
                 String path = data.getStringExtra(MyFilePickerActivity.INTENT_EXTRA_SELECTPATH);
-                mData.importExternalData(path);
+                mData.importDataFromFile(path);
                 refreshViews();
                 handleFocus(null, SheetData.POS_GONE, SheetData.POS_GONE, false);
                 mSheet.scrollTo(0, 0);
             }
-        }
-        if (requestCode == REQUEST_ID_EXPORT) {
+            break;
+        case REQUEST_ID_EXPORT:
             if (resultCode == RESULT_OK) {
                 String path = data.getStringExtra(MyFilePickerActivity.INTENT_EXTRA_SELECTPATH);
-                mData.exportCurrentData(path);
+                mData.exportDataToFile(path);
             }
+            break;
         }
     }
+
+    /*----------------------------------------------------------------------*/
 
     protected void handleFocus(View v, int row, int col, boolean scroll) {
         if (v != mHeader) {
@@ -310,163 +309,96 @@ public class MainActivity extends Activity {
 
     private boolean executeFunction(int menuId) {
         switch (menuId) {
-
         case MENU_ID_ADDDATE:
-            DatePickerDialog.OnDateSetListener dl1 =
-                    new DatePickerDialog.OnDateSetListener() {
-                @Override
-                public void onDateSet(DatePicker view, int year, int month, int day) {
-                    Calendar cal1 = new GregorianCalendar(year, month, day);
-                    if (mData.insertDate(cal1)) {
-                        refreshViews();
-                        handleFocus(null, SheetData.POS_KEEP, mData.searchDate(cal1, true), true);
-                    }
-                }
-            };
-            MyApplication.showDatePickerDialog(
-                    this, new GregorianCalendar(), dl1);
+            addDate();
             return true;
-
         case MENU_ID_MODIFYDATE:
-            DatePickerDialog.OnDateSetListener dl2 =
-                    new DatePickerDialog.OnDateSetListener() {
-                @Override
-                public void onDateSet(DatePicker view, int year, int month, int day) {
-                    Calendar cal2 = new GregorianCalendar(year, month, day);
-                    mData.moveDate(mTargetCol, cal2);
-                    handleFocus(null, SheetData.POS_KEEP, mData.searchDate(cal2, true), true);
-                }
-            };
-            MyApplication.showDatePickerDialog(
-                    this, mData.dates.get(mTargetCol), dl2);
+            modifyDate(mTargetCol);
             return true;
-
         case MENU_ID_DELETEDATE:
-            DialogInterface.OnClickListener cl0 = new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int whichButton) {
-                    mData.deleteDate(mTargetCol);
-                    refreshViews();
-                    handleFocus(null, SheetData.POS_KEEP, SheetData.POS_GONE, false);
-                }
-            };
-            MyApplication.showYesNoDialog(
-                    this, android.R.drawable.ic_dialog_alert,
-                    MyApplication.getDateString(this, mData.dates.get(mTargetCol)),
-                    R.string.msg_delete, cl0);
+            deleteDate(mTargetCol);
             return true;
-
         case MENU_ID_INFODATE:
             showDateStats(mTargetCol);
             return true;
-
         case MENU_ID_ADDMEMBER:
-            mTargetRow = mData.entries.size();
-        case MENU_ID_INSERTMEMBER:
-            final EditText ev1 = new EditText(this);
-            ev1.setSingleLine();
-            DialogInterface.OnClickListener cl1 = new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int whichButton) {
-                    mData.insertEntry(mTargetRow, ev1.getText().toString());
-                    refreshViews();
-                    handleFocus(null, mTargetRow, SheetData.POS_KEEP, true);
-                }
-            };
-            MyApplication.showCustomDialog(
-                    this, android.R.drawable.ic_dialog_info,
-                    R.string.msg_newmembername, ev1, cl1);
+            addMember(mData.entries.size());
             return true;
-
         case MENU_ID_MODIFYMEMBER:
-            final EditText ev2 = new EditText(this);
-            ev2.setSingleLine();
-            String name = mData.entries.get(mTargetRow).name;
-            ev2.setText(name);
-            ev2.selectAll();
-            DialogInterface.OnClickListener cl2 = new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int whichButton) {
-                    mData.modifyEntry(mTargetRow, ev2.getText().toString());
-                    refreshViews();
-                }
-            };
-            MyApplication.showCustomDialog(
-                    this, android.R.drawable.ic_dialog_info,
-                    R.string.msg_newmembername, ev2, cl2);
+            modifyMember(mTargetRow);
             return true;
-
         case MENU_ID_MOVEUPMEMBER:
-            if (mData.moveEntry(mTargetRow, -1)) {
-                handleFocus(null, mTargetRow - 1, SheetData.POS_KEEP, true);
-            }
+            moveMember(mTargetRow, -1);
             return true;
-
         case MENU_ID_MOVEDOWNMEMBER:
-            if (mData.moveEntry(mTargetRow, 1)) {
-                handleFocus(null, mTargetRow + 1, SheetData.POS_KEEP, true);
-            }
+            moveMember(mTargetRow, 1);
             return true;
-
         case MENU_ID_DELETEMEMBER:
-            DialogInterface.OnClickListener cl3 = new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int whichButton) {
-                    mData.deleteEntry(mTargetRow);
-                    refreshViews();
-                    handleFocus(null, SheetData.POS_GONE, SheetData.POS_KEEP, false);
-                }
-            };
-            MyApplication.showYesNoDialog(
-                    this, android.R.drawable.ic_dialog_alert,
-                    mData.entries.get(mTargetRow).name, R.string.msg_delete, cl3);
+            deleteMember(mTargetRow);
             return true;
-
         case MENU_ID_INFOMEMBER:
             showMemberStats(mTargetRow);
             return true;
-
+        case MENU_ID_INSERTMEMBER:
+            addMember(mTargetRow);
+            return true;
         case MENU_ID_CREATE:
-            final Intent intent0 = new Intent(this, WizardActivity.class);
-            DialogInterface.OnClickListener cl4 = new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int whichButton) {
-                    startActivityForResult(intent0, REQUEST_ID_CREATE);
-                }
-            };
-            MyApplication.showYesNoDialog(
-                    this, android.R.drawable.ic_dialog_alert,
-                    R.string.menu_new, R.string.msg_newsheet, cl4);
+            startWizardActivity();
             return true;
-
         case MENU_ID_IMPORT:
-            final Intent intent1 = new Intent(this, MyFilePickerActivity.class);
-            intent1.putExtra(MyFilePickerActivity.INTENT_EXTRA_TITLEID, R.string.title_import);
-            intent1.putExtra(MyFilePickerActivity.INTENT_EXTRA_EXTENSION, "csv");
-            DialogInterface.OnClickListener cl5 = new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int whichButton) {
-                    startActivityForResult(intent1, REQUEST_ID_IMPORT);
-                }
-            };
-            MyApplication.showYesNoDialog(
-                    this, android.R.drawable.ic_dialog_alert,
-                    R.string.menu_import, R.string.msg_newsheet, cl5);
+            startFilePickerActivityToImport();
             return true;
-
         case MENU_ID_EXPORT:
-            Intent intent2 = new Intent(this, MyFilePickerActivity.class);
-            intent2.putExtra(MyFilePickerActivity.INTENT_EXTRA_TITLEID, R.string.title_export);
-            intent2.putExtra(MyFilePickerActivity.INTENT_EXTRA_EXTENSION, "csv");
-            intent2.putExtra(MyFilePickerActivity.INTENT_EXTRA_WRITEMODE, true);
-            startActivityForResult(intent2, REQUEST_ID_EXPORT);
+            startFilePickerActivityToExport();
             return true;
-
         case MENU_ID_ABOUT:
             showVersion();
             return true;
         }
         return false;
+    }
+
+    /*----------------------------------------------------------------------*/
+
+    private void addDate() {
+        DatePickerDialog.OnDateSetListener listener = new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker view, int year, int month, int day) {
+                Calendar cal = new GregorianCalendar(year, month, day);
+                if (mData.insertDate(cal)) {
+                    refreshViews();
+                    handleFocus(null, SheetData.POS_KEEP, mData.searchDate(cal, true), true);
+                }
+            }
+        };
+        MyApplication.showDatePickerDialog(this, new GregorianCalendar(), listener);
+    }
+
+    private void modifyDate(final int col) {
+        DatePickerDialog.OnDateSetListener listener = new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker view, int year, int month, int day) {
+                Calendar cal = new GregorianCalendar(year, month, day);
+                mData.moveDate(col, cal);
+                handleFocus(null, SheetData.POS_KEEP, mData.searchDate(cal, true), true);
+            }
+        };
+        MyApplication.showDatePickerDialog(this, mData.dates.get(col), listener);
+    }
+
+    private void deleteDate(final int col) {
+        DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int whichButton) {
+                mData.deleteDate(col);
+                refreshViews();
+                handleFocus(null, SheetData.POS_KEEP, SheetData.POS_GONE, false);
+            }
+        };
+        MyApplication.showYesNoDialog(
+                this, android.R.drawable.ic_dialog_alert,
+                MyApplication.getDateString(this, mData.dates.get(col)),
+                R.string.msg_delete, listener);
     }
 
     private void showDateStats(int col) {
@@ -503,6 +435,62 @@ public class MainActivity extends Activity {
         }
         MyApplication.showShareDialog(this, android.R.drawable.ic_dialog_info,
                 MyApplication.getDateString(this, mData.dates.get(col)), msgBuf);
+    }
+
+    /*----------------------------------------------------------------------*/
+
+    private void addMember(final int row) {
+        final EditText editText = new EditText(this);
+        editText.setSingleLine();
+        DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int whichButton) {
+                mData.insertEntry(row, editText.getText().toString());
+                refreshViews();
+                handleFocus(null, row, SheetData.POS_KEEP, true);
+            }
+        };
+        MyApplication.showCustomDialog(
+                this, android.R.drawable.ic_dialog_info,
+                R.string.msg_newmembername, editText, listener);
+    }
+
+    private void modifyMember(final int row) {
+        final EditText editText = new EditText(this);
+        editText.setSingleLine();
+        String name = mData.entries.get(row).name;
+        editText.setText(name);
+        editText.setSelection(name.length());
+        DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int whichButton) {
+                mData.modifyEntry(row, editText.getText().toString());
+                refreshViews();
+            }
+        };
+        MyApplication.showCustomDialog(
+                this, android.R.drawable.ic_dialog_info,
+                R.string.msg_newmembername, editText, listener);
+    }
+
+    private void moveMember(int row, int distance) {
+        if (mData.moveEntry(row, distance)) {
+            handleFocus(null, row + distance, SheetData.POS_KEEP, true);
+        }
+    }
+
+    private void deleteMember(final int row) {
+        DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int whichButton) {
+                mData.deleteEntry(row);
+                refreshViews();
+                handleFocus(null, SheetData.POS_GONE, SheetData.POS_KEEP, false);
+            }
+        };
+        MyApplication.showYesNoDialog(
+                this, android.R.drawable.ic_dialog_alert,
+                mData.entries.get(row).name, R.string.msg_delete, listener);
     }
 
     private void showMemberStats(int row) {
@@ -561,6 +549,46 @@ public class MainActivity extends Activity {
         MyApplication.showCustomDialog(this, android.R.drawable.ic_dialog_info,
                 R.string.menu_version, aboutView, null);
     }
+
+    /*----------------------------------------------------------------------*/
+
+    private void startWizardActivity() {
+        final Intent intent = new Intent(this, WizardActivity.class);
+        DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int whichButton) {
+                startActivityForResult(intent, REQUEST_ID_CREATE);
+            }
+        };
+        MyApplication.showYesNoDialog(
+                this, android.R.drawable.ic_dialog_alert,
+                R.string.menu_new, R.string.msg_newsheet, listener);
+    }
+
+    private void startFilePickerActivityToImport() {
+        final Intent intent = new Intent(this, MyFilePickerActivity.class);
+        intent.putExtra(MyFilePickerActivity.INTENT_EXTRA_TITLEID, R.string.title_import);
+        intent.putExtra(MyFilePickerActivity.INTENT_EXTRA_EXTENSION, "csv");
+        DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int whichButton) {
+                startActivityForResult(intent, REQUEST_ID_IMPORT);
+            }
+        };
+        MyApplication.showYesNoDialog(
+                this, android.R.drawable.ic_dialog_alert,
+                R.string.menu_import, R.string.msg_newsheet, listener);
+    }
+
+    private void startFilePickerActivityToExport() {
+        Intent intent = new Intent(this, MyFilePickerActivity.class);
+        intent.putExtra(MyFilePickerActivity.INTENT_EXTRA_TITLEID, R.string.title_export);
+        intent.putExtra(MyFilePickerActivity.INTENT_EXTRA_EXTENSION, "csv");
+        intent.putExtra(MyFilePickerActivity.INTENT_EXTRA_WRITEMODE, true);
+        startActivityForResult(intent, REQUEST_ID_EXPORT);
+    }
+
+    /*----------------------------------------------------------------------*/
 
     private void refreshViews() {
         mHeader.refreshView();

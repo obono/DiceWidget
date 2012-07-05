@@ -56,12 +56,4 @@
         <item>Friday</item>
         <item>Saturday</item>
     </string-array>
-
-    <array name="cell_colors">
-        <item>#FF1F1F1F</item>
-        <item>#FF1F1F3F</item>
-        <item>#FF2F1F1F</item>
-        <item>#FF1F271F</item>
-        <item>#FF1F2F1F</item>
-    </array>
 </resources>
