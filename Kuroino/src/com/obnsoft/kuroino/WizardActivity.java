@@ -77,6 +77,26 @@ public class WizardActivity extends Activity {
         mEditTextMember.setFilters(new InputFilter[] {new MyInputFilter()});
         mEditTextMember.addTextChangedListener(new MyTextWatcher());
         setMemberCountLabel();
+
+        final SheetData data = ((MyApplication) getApplication()).getSheetData();
+        if (data.entries.size() > 0) {
+            DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    StringBuffer buf = new StringBuffer();
+                    for (SheetData.EntryData entry : data.entries) {
+                        if (buf.length() > 0) {
+                            buf.append('\n');
+                        }
+                        buf.append(entry.name);
+                    }
+                    mEditTextMember.setText(buf.toString());
+                }
+            };
+            MyApplication.showYesNoDialog(
+                    this, R.drawable.ic_dialog_member,
+                    getText(R.string.menu_newsheet), R.string.msg_copymember, listener);
+        }
     }
 
     public void onPickDate(View view) {

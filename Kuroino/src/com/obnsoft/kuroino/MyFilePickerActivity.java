@@ -16,9 +16,12 @@
 
 package com.obnsoft.kuroino;
 
+import java.io.File;
+
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
 import android.text.InputType;
 import android.view.View;
 import android.widget.EditText;
@@ -30,11 +33,20 @@ import com.obnsoft.app.FilePickerActivity;
 public class MyFilePickerActivity extends FilePickerActivity {
 
     public static final String INTENT_EXTRA_TITLEID = "titleId";
+    public static final String DEFAULT_DIRECTORY =
+        Environment.getExternalStorageDirectory().getPath() +
+        File.separator + "RollBook" + File.separator;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         setContentView(R.layout.file_picker);
+        File file = new File(DEFAULT_DIRECTORY);
+        if (!file.exists()) {
+            file.mkdir();
+        }
+
         super.onCreate(savedInstanceState);
+
         Intent intent = getIntent();
         if (intent != null) {
             int id = intent.getIntExtra(INTENT_EXTRA_TITLEID, 0);

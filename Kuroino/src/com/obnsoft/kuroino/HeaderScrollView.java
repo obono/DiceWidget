@@ -127,7 +127,7 @@ public class HeaderScrollView extends HorizontalScrollView {
                 int lastYear = 0;
                 int lastMonth = 0;
                 int lastDatePos = -1;
-                FontMetrics fm = mPaintText.getFontMetrics();
+                FontMetrics fm;
                 String str;
                 float strWidth;
 
@@ -140,21 +140,15 @@ public class HeaderScrollView extends HorizontalScrollView {
                     int x = col * cellSize;
 
                     /*  Background  */
-                    mPaintText.setTextSize(height / 2f);
-                    mPaintGrid.setColor(DWEEK_COLORS[dweek]);
+                    mPaintText.setTextSize(height / 4f);
+                    fm = mPaintText.getFontMetrics();
                     float y = fm.descent - fm.ascent;
+                    mPaintGrid.setColor(DWEEK_COLORS[dweek]);
                     c.drawRect(x, y, x + cellSize, height, mPaintGrid);
 
                     /*  Grid  */
                     mPaintGrid.setColor(Color.WHITE);
                     c.drawLine(x, isNewMonth ? 0 : y, x, height, mPaintGrid);
-
-                    /*  Day of month  */
-                    fm = mPaintText.getFontMetrics();
-                    str = String.valueOf(cal.get(Calendar.DAY_OF_MONTH));
-                    strWidth = mPaintText.measureText(str);
-                    c.drawText(str, x + (cellSize - strWidth) / 2f,
-                            (height - fm.ascent - fm.descent) / 2f, mPaintText);
 
                     /*  Day of week  */
                     mPaintText.setTextSize(height / 4f);
@@ -182,6 +176,14 @@ public class HeaderScrollView extends HorizontalScrollView {
                         lastMonth = month;
                         lastDatePos = col;
                     }
+
+                    /*  Day of month  */
+                    mPaintText.setTextSize(height / 2f);
+                    fm = mPaintText.getFontMetrics();
+                    str = String.valueOf(cal.get(Calendar.DAY_OF_MONTH));
+                    strWidth = mPaintText.measureText(str);
+                    c.drawText(str, x + (cellSize - strWidth) / 2f,
+                            (height - fm.ascent - fm.descent) / 2f, mPaintText);
                 }
 
                 /*  Final grid  */
@@ -192,6 +194,8 @@ public class HeaderScrollView extends HorizontalScrollView {
 
                 /*  Final month and Year  */
                 if (lastDatePos >= 0) {
+                    mPaintText.setTextSize(height / 4f);
+                    fm = mPaintText.getFontMetrics();
                     str = String.format(MONTH_YEAR_FORMAT,
                             mMonthStrs[lastMonth], lastYear % 100);
                     strWidth = mPaintText.measureText(str);

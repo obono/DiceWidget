@@ -16,7 +16,9 @@
 
 package com.obnsoft.kuroino;
 
+import java.io.File;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 import android.app.AlertDialog;
 import android.app.Application;
@@ -38,8 +40,37 @@ public class MyApplication extends Application {
         mData = new SheetData();
     }
 
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+        mData.cellSize = (int) (48f * getResources().getDisplayMetrics().density);
+        mData.fileEncode = getText(R.string.file_encoding).toString();
+        if ((new File(getLocalFileName())).exists()) {
+            mData.importDataFromFile(getLocalFileName());
+        } else {
+            Calendar calFrom = new GregorianCalendar();
+            int year = calFrom.get(Calendar.YEAR);
+            int month = calFrom.get(Calendar.MONTH);
+            calFrom.clear();
+            calFrom.set(year, month, 1);
+            Calendar calTo = new GregorianCalendar(
+                    year, month, calFrom.getActualMaximum(Calendar.DAY_OF_MONTH));
+            mData.createNewData(calFrom, calTo, 1, null,
+                    getResources().getStringArray(R.array.sample_members));
+        }
+    }
+
     protected SheetData getSheetData() {
         return mData;
+    }
+
+    protected boolean saveSheetData() {
+        return mData.exportDataToFile(getLocalFileName());
+    }
+
+    protected String getLocalFileName() {
+        return getFilesDir() + File.separator + "work.csv";
     }
 
     /*----------------------------------------------------------------------*/

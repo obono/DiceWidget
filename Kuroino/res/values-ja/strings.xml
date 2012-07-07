@@ -53,4 +53,5 @@
     <string name="msg_delete">削除してよろしいですか?</string>
     <string name="msg_overwrite">上書きしてよろしいですか?</string>
     <string name="msg_newsheet">現在編集中のデータは失われますが、よろしいですか?</string>
+    <string name="msg_copymember">現在編集中のデータからメンバーをコピーしますか?</string>
 </resources>

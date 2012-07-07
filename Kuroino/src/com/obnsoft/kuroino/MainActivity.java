@@ -26,8 +26,6 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.LinkedHashMap;
 
-import com.obnsoft.kuroino.SheetData.EntryData;
-
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.DialogInterface;
@@ -55,6 +53,7 @@ public class MainActivity extends Activity {
 
     private static final String PREFS_KEY_STAMPS    = "stamps";
     private static final String PREFS_KEY_CURSTAMP  = "current_stamp";
+    private static final String PREFS_KEY_CURDIR    = "current_directory";
 
     private static final int MENU_GID_OPTION    = 1;
     private static final int MENU_GID_HEADER    = 2;
@@ -87,6 +86,7 @@ public class MainActivity extends Activity {
     private int mTargetCol = SheetData.POS_GONE;
     private String mStamps;
     private String mCurStamp;
+    private String mCurDir;
     private boolean mIsDirtySheetData = false;
     private boolean mIsDirtyPreferences = false;
     private Handler mTimeoutHandler = new Handler() {
@@ -112,6 +112,7 @@ public class MainActivity extends Activity {
         mStamps = prefs.getString(PREFS_KEY_STAMPS,
                 getText(R.string.default_stamps).toString());
         mCurStamp = prefs.getString(PREFS_KEY_CURSTAMP, mStamps);
+        mCurDir = prefs.getString(PREFS_KEY_CURDIR, MyFilePickerActivity.DEFAULT_DIRECTORY);
 
         mHeader = (HeaderScrollView) findViewById(R.id.view_head);
         mSide = (SideScrollView) findViewById(R.id.view_side);
@@ -121,8 +122,9 @@ public class MainActivity extends Activity {
         registerForContextMenu(mSide);
 
         mData = ((MyApplication) getApplication()).getSheetData();
-        mData.cellSize = (int) (48f * getResources().getDisplayMetrics().density);
-        mData.fileEncode = getText(R.string.file_encoding).toString();
+        mHeader.setSheetData(mData);
+        mSide.setSheetData(mData);
+        mSheet.setSheetData(mData);
 
         Calendar calNow = new GregorianCalendar();
         int year = calNow.get(Calendar.YEAR);
@@ -130,20 +132,6 @@ public class MainActivity extends Activity {
         int day = calNow.get(Calendar.DAY_OF_MONTH);
         calNow.clear();
         calNow.set(year, month, day);
-
-        if ((new File(getLocalFileName())).exists()) {
-            mData.importDataFromFile(getLocalFileName());
-        } else {
-            Calendar calFrom = new GregorianCalendar(year, month, 1);
-            Calendar calTo = new GregorianCalendar(
-                    year, month, calFrom.getActualMaximum(Calendar.DAY_OF_MONTH));
-            mData.createNewData(calFrom, calTo, 1, null,
-                    getResources().getStringArray(R.array.sample_members));
-        }
-        mHeader.setSheetData(mData);
-        mSide.setSheetData(mData);
-        mSheet.setSheetData(mData);
-
         int col = mData.searchDate(calNow, false);
         if (col >= mData.dates.size()) {
             col = mData.dates.size() - 1;
@@ -244,7 +232,9 @@ public class MainActivity extends Activity {
             if (resultCode == RESULT_OK) {
                 String path = data.getStringExtra(MyFilePickerActivity.INTENT_EXTRA_SELECTPATH);
                 mData.importDataFromFile(path);
+                mCurDir = path.substring(0, path.lastIndexOf(File.separatorChar) + 1);
                 setSheetDataIsDirty();
+                setPreferencesIsDirty();
                 refreshViews();
                 handleFocus(null, SheetData.POS_GONE, SheetData.POS_GONE, false);
                 mSheet.scrollTo(0, 0);
@@ -254,6 +244,8 @@ public class MainActivity extends Activity {
             if (resultCode == RESULT_OK) {
                 String path = data.getStringExtra(MyFilePickerActivity.INTENT_EXTRA_SELECTPATH);
                 mData.exportDataToFile(path);
+                mCurDir = path.substring(0, path.lastIndexOf(File.separatorChar) + 1);
+                setPreferencesIsDirty();
             }
             break;
         }
@@ -427,7 +419,7 @@ public class MainActivity extends Activity {
         for (int i = 0; i < mStamps.length(); i++) {
             map.put(mStamps.substring(i, i + 1), new StampStats());
         }
-        for (EntryData entry : mData.entries) {
+        for (SheetData.EntryData entry : mData.entries) {
             String key = entry.attends.get(col);
             if (key != null) {
                 StampStats stats = map.get(key);
@@ -587,6 +579,7 @@ public class MainActivity extends Activity {
     private void startFilePickerActivityToImport() {
         final Intent intent = new Intent(this, MyFilePickerActivity.class);
         intent.putExtra(MyFilePickerActivity.INTENT_EXTRA_TITLEID, R.string.title_import);
+        intent.putExtra(MyFilePickerActivity.INTENT_EXTRA_DIRECTORY, mCurDir);
         intent.putExtra(MyFilePickerActivity.INTENT_EXTRA_EXTENSION, "csv");
         DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
             @Override
@@ -602,6 +595,7 @@ public class MainActivity extends Activity {
     private void startFilePickerActivityToExport() {
         Intent intent = new Intent(this, MyFilePickerActivity.class);
         intent.putExtra(MyFilePickerActivity.INTENT_EXTRA_TITLEID, R.string.title_export);
+        intent.putExtra(MyFilePickerActivity.INTENT_EXTRA_DIRECTORY, mCurDir);
         intent.putExtra(MyFilePickerActivity.INTENT_EXTRA_EXTENSION, "csv");
         intent.putExtra(MyFilePickerActivity.INTENT_EXTRA_WRITEMODE, true);
         startActivityForResult(intent, REQUEST_ID_EXPORT);
@@ -790,7 +784,7 @@ public class MainActivity extends Activity {
     private void autoSave() {
         if (mIsDirtySheetData) {
             mIsDirtySheetData = false;
-            mData.exportDataToFile(getLocalFileName());
+            ((MyApplication) getApplication()).saveSheetData();
         }
         if (mIsDirtyPreferences) {
             mIsDirtyPreferences = false;
@@ -798,6 +792,7 @@ public class MainActivity extends Activity {
                 PreferenceManager.getDefaultSharedPreferences(this).edit();
             editor.putString(PREFS_KEY_STAMPS, mStamps);
             editor.putString(PREFS_KEY_CURSTAMP, mCurStamp);
+            editor.putString(PREFS_KEY_CURDIR, mCurDir);
             editor.commit();
         }
     }
@@ -808,7 +803,4 @@ public class MainActivity extends Activity {
         mSheet.refreshView();
     }
 
-    private String getLocalFileName() {
-        return getFilesDir() + File.pathSeparator + "work.csv";
-    }
 }

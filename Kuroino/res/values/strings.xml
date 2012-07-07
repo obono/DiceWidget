@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_code">OBN-A06</string>
-    <string name="app_name">Roll book</string>
+    <string name="app_name">Roll Book</string>
     <string name="file_encoding">ISO-8859-1</string>
     <string name="default_stamps">出欠遅早</string>
 
@@ -55,4 +55,5 @@
     <string name="msg_delete">Are you sure to delete?</string>
     <string name="msg_overwrite">Are you sure to overwrite?</string>
     <string name="msg_newsheet">The current data will be lost. Are you sure?</string>
+    <string name="msg_copymember">Would you like to copy members from current sheet?</string>
 </resources>
