@@ -30,6 +30,7 @@ import android.text.format.DateFormat;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
+import android.widget.Toast;
 
 public class MyApplication extends Application {
 
@@ -200,6 +201,10 @@ public class MyApplication extends Application {
             });
         }
         dlg.show();
+    }
+
+    public static void showToast(Context context, int msgId) {
+        Toast.makeText(context, msgId, Toast.LENGTH_SHORT).show();
     }
 
     /*----------------------------------------------------------------------*/

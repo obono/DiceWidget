@@ -2,6 +2,7 @@
 <resources>
     <string name="app_name">出席簿</string>
     <string name="file_encoding">Shift_JIS</string>
+    <string name="default_stamps">出欠遅早</string>
 
     <string name="title_import">インポートするファイルを選択</string>
     <string name="title_export">エクスポートするファイルを選択</string>
@@ -54,4 +55,7 @@
     <string name="msg_overwrite">上書きしてよろしいですか?</string>
     <string name="msg_newsheet">現在編集中のデータは失われますが、よろしいですか?</string>
     <string name="msg_copymember">現在編集中のデータからメンバーをコピーしますか?</string>
+    <string name="msg_success">処理は問題なく完了しました。</string>
+    <string name="msg_error">処理中にエラーが発生しました。</string>
+    <string name="msg_invalid">無効な値が入力されました。</string>
 </resources>

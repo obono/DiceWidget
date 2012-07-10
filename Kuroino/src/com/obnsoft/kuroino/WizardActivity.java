@@ -91,6 +91,7 @@ public class WizardActivity extends Activity {
                         buf.append(entry.name);
                     }
                     mEditTextMember.setText(buf.toString());
+                    mEditTextMember.setSelection(buf.length());
                 }
             };
             MyApplication.showYesNoDialog(
@@ -199,11 +200,11 @@ public class WizardActivity extends Activity {
                     int value = Integer.parseInt(editText.getText().toString());
                     if (value > 0 && value < 100) {
                         mIntervalDays = value;
+                        setOftenLabel();
+                        parentDialog.dismiss();
                     } else {
-                        // TODO: notice error
+                        MyApplication.showToast(WizardActivity.this, R.string.msg_invalid);
                     }
-                    setOftenLabel();
-                    parentDialog.dismiss();
                 } catch(NumberFormatException e) {
                     e.printStackTrace();
                 }

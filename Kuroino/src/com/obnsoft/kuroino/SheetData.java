@@ -93,11 +93,11 @@ public class SheetData {
 
     /*----------------------------------------------------------------------*/
 
-    public void createNewData(Calendar begin, Calendar end,
+    public boolean createNewData(Calendar begin, Calendar end,
             int often, boolean[] weekFlgs, String[] names) {
         clearAll();
         if (begin == null || end == null) {
-            return;
+            return false;
         }
         if (weekFlgs != null || often < 1) {
             often = 1;
@@ -127,6 +127,7 @@ public class SheetData {
                 }
             }
         }
+        return true;
     }
 
     public boolean importDataFromFile(String filePath) {
@@ -304,7 +305,7 @@ public class SheetData {
         for (EntryData entry : this.entries) {
             entry.attends.remove(index);
         }
-        return false;
+        return true;
     }
 
     /*----------------------------------------------------------------------*/

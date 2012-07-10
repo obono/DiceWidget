@@ -220,32 +220,40 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        boolean ret;
         switch (requestCode) {
         case REQUEST_ID_CREATE:
             if (resultCode == RESULT_OK) {
                 setSheetDataIsDirty();
                 handleFocus(null, SheetData.POS_GONE, SheetData.POS_GONE, false);
                 mSheet.scrollTo(0, 0);
+                showResultToast(true);
             }
             break;
         case REQUEST_ID_IMPORT:
             if (resultCode == RESULT_OK) {
                 String path = data.getStringExtra(MyFilePickerActivity.INTENT_EXTRA_SELECTPATH);
-                mData.importDataFromFile(path);
-                mCurDir = path.substring(0, path.lastIndexOf(File.separatorChar) + 1);
+                ret = mData.importDataFromFile(path);
+                if (ret) {
+                    mCurDir = path.substring(0, path.lastIndexOf(File.separatorChar) + 1);
+                    setPreferencesIsDirty();
+                }
                 setSheetDataIsDirty();
-                setPreferencesIsDirty();
                 refreshViews();
                 handleFocus(null, SheetData.POS_GONE, SheetData.POS_GONE, false);
                 mSheet.scrollTo(0, 0);
+                showResultToast(ret);
             }
             break;
         case REQUEST_ID_EXPORT:
             if (resultCode == RESULT_OK) {
                 String path = data.getStringExtra(MyFilePickerActivity.INTENT_EXTRA_SELECTPATH);
-                mData.exportDataToFile(path);
-                mCurDir = path.substring(0, path.lastIndexOf(File.separatorChar) + 1);
-                setPreferencesIsDirty();
+                ret = mData.exportDataToFile(path);
+                if (ret) {
+                    mCurDir = path.substring(0, path.lastIndexOf(File.separatorChar) + 1);
+                    setPreferencesIsDirty();
+                }
+                showResultToast(ret);
             }
             break;
         }
@@ -375,6 +383,8 @@ public class MainActivity extends Activity {
                     setSheetDataIsDirty();
                     refreshViews();
                     handleFocus(null, SheetData.POS_KEEP, mData.searchDate(cal, true), true);
+                } else {
+                    showResultToast(false);
                 }
             }
         };
@@ -386,9 +396,12 @@ public class MainActivity extends Activity {
             @Override
             public void onDateSet(DatePicker view, int year, int month, int day) {
                 Calendar cal = new GregorianCalendar(year, month, day);
-                mData.moveDate(col, cal);
-                setSheetDataIsDirty();
-                handleFocus(null, SheetData.POS_KEEP, mData.searchDate(cal, true), true);
+                if (mData.moveDate(col, cal)) {
+                    setSheetDataIsDirty();
+                    handleFocus(null, SheetData.POS_KEEP, mData.searchDate(cal, true), true);
+                } else {
+                    showResultToast(false);
+                }
             }
         };
         MyApplication.showDatePickerDialog(this, mData.dates.get(col), listener);
@@ -398,10 +411,13 @@ public class MainActivity extends Activity {
         DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int whichButton) {
-                mData.deleteDate(col);
-                setSheetDataIsDirty();
-                refreshViews();
-                handleFocus(null, SheetData.POS_KEEP, SheetData.POS_GONE, false);
+                if (mData.deleteDate(col)) {
+                    setSheetDataIsDirty();
+                    refreshViews();
+                    handleFocus(null, SheetData.POS_KEEP, SheetData.POS_GONE, false);
+                } else {
+                    showResultToast(false);
+                }
             }
         };
         MyApplication.showYesNoDialog(
@@ -453,10 +469,13 @@ public class MainActivity extends Activity {
         DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int whichButton) {
-                mData.insertEntry(row, editText.getText().toString());
-                setSheetDataIsDirty();
-                refreshViews();
-                handleFocus(null, row, SheetData.POS_KEEP, true);
+                if (mData.insertEntry(row, editText.getText().toString())) {
+                    setSheetDataIsDirty();
+                    refreshViews();
+                    handleFocus(null, row, SheetData.POS_KEEP, true);
+                } else {
+                    showResultToast(false);
+                }
             }
         };
         MyApplication.showCustomDialog(
@@ -473,9 +492,12 @@ public class MainActivity extends Activity {
         DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int whichButton) {
-                mData.modifyEntry(row, editText.getText().toString());
-                setSheetDataIsDirty();
-                refreshViews();
+                if (mData.modifyEntry(row, editText.getText().toString())) {
+                    setSheetDataIsDirty();
+                    refreshViews();
+                } else {
+                    showResultToast(false);
+                }
             }
         };
         MyApplication.showCustomDialog(
@@ -487,6 +509,8 @@ public class MainActivity extends Activity {
         if (mData.moveEntry(row, distance)) {
             setSheetDataIsDirty();
             handleFocus(null, row + distance, SheetData.POS_KEEP, true);
+        } else {
+            showResultToast(false);
         }
     }
 
@@ -494,10 +518,13 @@ public class MainActivity extends Activity {
         DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int whichButton) {
-                mData.deleteEntry(row);
-                setSheetDataIsDirty();
-                refreshViews();
-                handleFocus(null, SheetData.POS_GONE, SheetData.POS_KEEP, false);
+                if (mData.deleteEntry(row)) {
+                    setSheetDataIsDirty();
+                    refreshViews();
+                    handleFocus(null, SheetData.POS_GONE, SheetData.POS_KEEP, false);
+                } else {
+                    showResultToast(false);
+                }
             }
         };
         MyApplication.showYesNoDialog(
@@ -559,6 +586,10 @@ public class MainActivity extends Activity {
         }
         MyApplication.showCustomDialog(this, android.R.drawable.ic_dialog_info,
                 R.string.menu_version, aboutView, null);
+    }
+
+    private void showResultToast(boolean success) {
+        MyApplication.showToast(this, success ? R.string.msg_success : R.string.msg_error);
     }
 
     /*----------------------------------------------------------------------*/
@@ -712,7 +743,7 @@ public class MainActivity extends Activity {
                     setStampLabel(str);
                     parentDialog.dismiss();
                 } else {
-                    // TODO
+                    MyApplication.showToast(MainActivity.this, R.string.msg_invalid);
                 }
             }
         };
@@ -745,7 +776,7 @@ public class MainActivity extends Activity {
                     parentDialog.dismiss();
                     selectStamp();
                 } else {
-                    // TODO
+                    MyApplication.showToast(MainActivity.this, R.string.msg_invalid);
                 }
             }
         };
