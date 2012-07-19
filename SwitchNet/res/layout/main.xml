@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:gravity="center"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+    <Button
+            android:id="@+id/btn_unknown"
+            android:background="@drawable/btn_unknown"
+            android:layout_gravity="center"
+            android:layout_height="48dip"
+            android:layout_width="72dip"
+            android:text="@string/state_unknown" />
+    <Button
+            android:id="@+id/btn_wifi"
+            android:background="@drawable/btn_wifi"
+            android:layout_gravity="center"
+            android:layout_height="48dip"
+            android:layout_width="72dip"
+            android:text="@string/state_wifi" />
+    <Button
+            android:id="@+id/btn_mobile"
+            android:background="@drawable/btn_mobile"
+            android:layout_gravity="center"
+            android:layout_height="48dip"
+            android:layout_width="72dip"
+            android:text="@string/state_mobile" />
+</FrameLayout>
