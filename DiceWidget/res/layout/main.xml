@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/group_dice"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:clickable="true"
+    >
+
+<LinearLayout
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:gravity="center"
+    >
+
+    <LinearLayout
+        android:id="@+id/space_top"
+        android:layout_width="fill_parent"
+        android:layout_height="4dip"
+        android:visibility="gone"
+        />
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        >
+        <ImageView
+            android:id="@+id/image_dice1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="1dip"
+            android:src="@drawable/dice"
+            android:visibility="gone"
+            />
+        <ImageView
+            android:id="@+id/image_dice2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="1dip"
+            android:src="@drawable/dice"
+            android:visibility="gone"
+            />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        >
+        <ImageView
+            android:id="@+id/image_dice3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="1dip"
+            android:src="@drawable/dice"
+            android:visibility="gone"
+            />
+        <ImageView
+            android:id="@+id/image_dice4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="1dip"
+            android:src="@drawable/dice"
+            android:visibility="gone"
+            />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/space_bottom"
+        android:layout_width="fill_parent"
+        android:layout_height="4dip"
+        />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="18dip"
+        android:layout_gravity="bottom|right"
+        >
+        <TextView
+            android:id="@+id/text_number_white"
+            android:layout_width="18dip"
+            android:layout_height="18dip"
+            android:gravity="center"
+            android:background="#9BBB"
+            android:textColor="#000"
+            android:visibility="gone"
+            />
+        <TextView
+            android:id="@+id/text_number_black"
+            android:layout_width="18dip"
+            android:layout_height="18dip"
+            android:gravity="center"
+            android:background="#9444"
+            android:textColor="#FFF"
+            android:visibility="gone"
+            />
+        <TextView
+            android:id="@+id/text_number_red"
+            android:layout_width="18dip"
+            android:layout_height="18dip"
+            android:gravity="center"
+            android:background="#9B22"
+            android:textColor="#FFF"
+            android:visibility="gone"
+            />
+        <TextView
+            android:id="@+id/text_number_blue"
+            android:layout_width="18dip"
+            android:layout_height="18dip"
+            android:gravity="center"
+            android:background="#92BB"
+            android:textColor="#000"
+            android:visibility="gone"
+            />
+    </LinearLayout>
+
+</LinearLayout>
+
+<ImageButton
+    android:id="@+id/button_config"
+    android:layout_width="36dip"
+    android:layout_height="24dip"
+    android:layout_gravity="bottom|left"
+    android:background="@drawable/btn_config"
+    android:src="@android:drawable/ic_menu_preferences"
+    android:scaleType="fitCenter"
+    android:tint="#440"
+    />
+
+</FrameLayout>
