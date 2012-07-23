@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Dice Widget</string>
+    <string name="config_title">Dice Widget Config</string>
+    <string name="dice_none">None</string>
+    <string name="dice_white">White</string>
+    <string name="dice_black">Black</string>
+    <string name="dice_red">Red</string>
+    <string name="dice_blue">Blue</string>
+    <string name="config_sound">Sound</string>
 </resources>

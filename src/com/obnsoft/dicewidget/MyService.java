@@ -50,6 +50,7 @@ public class MyService extends Service {
 
     private int[]   mDieLevel = new int[4];
     private int[]   mDieColor = new int[4];
+    private boolean mSound = false;
 
     private RemoteViews     mRemoteViews;
     private ComponentName   mComponent;
@@ -92,6 +93,8 @@ public class MyService extends Service {
 
     private void initialize(Context context) {
         myLog("initialize");
+        mSound = ConfigActivity.loadConfig(context, mDieColor);
+
         mRemoteViews = new RemoteViews(getPackageName(), R.layout.main);
         mComponent = new ComponentName(context, MyWidgetProvider.class);
         mRandom = new Random();
@@ -108,7 +111,6 @@ public class MyService extends Service {
     private void controlVisibilty(Context context) {
         int[] count = new int[4];
         for (int i = 0; i < 4; i++) {
-            mDieColor[i] = (i < 2) ? 0 : -1; //mRandom.nextInt(4);
             if (mDieColor[i] >= 0) {
                 count[mDieColor[i]]++;
                 mRemoteViews.setViewVisibility(IMAGE_IDS[i], View.VISIBLE);
