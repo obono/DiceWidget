@@ -20,12 +20,33 @@ import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
 public class MyWidgetProvider extends AppWidgetProvider {
+
+    protected static boolean sLaunched = false;
 
     @Override
     public void onUpdate(Context context, AppWidgetManager awm, int[] awi) {
         super.onUpdate(context, awm, awi);
-        context.startService(new Intent(context, MyService.class));
+        if (!sLaunched) {
+            context.startService(new Intent(context, MyService.class));
+            sLaunched = true;
+        }
+        Log.i("HOGE", "onUpdate");
+    }
+
+    @Override
+    public void onDeleted(Context context, int[] appWidgetIds) {
+        super.onDeleted(context, appWidgetIds);
+        sLaunched = false;
+        context.stopService(new Intent(context, MyService.class));
+        Log.i("HOGE", "onDeleted");
+    }
+
+    @Override
+    public void onDisabled(Context context) {
+        super.onDisabled(context);
+        Log.i("HOGE", "onDisabled");
     }
 }

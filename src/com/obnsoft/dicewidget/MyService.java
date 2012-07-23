@@ -24,6 +24,8 @@ import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
@@ -50,7 +52,7 @@ public class MyService extends Service {
 
     private int[]   mDieLevel = new int[4];
     private int[]   mDieColor = new int[4];
-    private boolean mSound = false;
+    private boolean mIsSndEnable = false;
 
     private RemoteViews     mRemoteViews;
     private ComponentName   mComponent;
@@ -93,7 +95,7 @@ public class MyService extends Service {
 
     private void initialize(Context context) {
         myLog("initialize");
-        mSound = ConfigActivity.loadConfig(context, mDieColor);
+        mIsSndEnable = ConfigActivity.loadConfig(context, mDieColor);
 
         mRemoteViews = new RemoteViews(getPackageName(), R.layout.main);
         mComponent = new ComponentName(context, MyWidgetProvider.class);
@@ -132,6 +134,12 @@ public class MyService extends Service {
                     myLog("shakeDice start");
                     sIsShaking = true;
                     hideNumbers(context);
+                    MediaPlayer player = null;
+                    if (mIsSndEnable) {
+                        player = MediaPlayer.create(context, R.raw.sound);
+                        player.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                        player.start();
+                    }
                     for (int i = LOOP_COUNT; i > 0; i--) {
                         updateDice(context, ((i & 1) == 1));
                         try {
@@ -141,6 +149,9 @@ public class MyService extends Service {
                         }
                     }
                     showNumbers(context);
+                    if (mIsSndEnable) {
+                        player.release();
+                    }
                     sIsShaking = false;
                     myLog("shakeDice end");
                 }
