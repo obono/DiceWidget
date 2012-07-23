@@ -15,7 +15,10 @@
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
-            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget" />
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget"
+                />
         </receiver>
         <service android:name=".MyService">
             <intent-filter>
@@ -27,6 +30,10 @@
             android:label="@string/config_title"
             android:theme="@android:style/Theme.Dialog"
             android:configChanges="keyboard|keyboardHidden|orientation"
-            />
+            >
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
     </application>
 </manifest>
