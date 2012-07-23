@@ -1,15 +1,92 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    android:gravity="center"
+    android:orientation="vertical"
     >
 
-    <Button
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@android:string/ok"
-        android:onClick="onClickOK"
+        android:orientation="vertical"
+        >
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            >
+            <include
+                android:id="@+id/group_config_dice1"
+                layout="@layout/config_item"
+                />
+            <View
+                android:layout_width="1dip"
+                android:layout_height="fill_parent"
+                android:background="#444"
+                />
+            <include
+                android:id="@+id/group_config_dice2"
+                layout="@layout/config_item"
+                />
+        </LinearLayout>
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dip"
+            android:paddingLeft="4dip"
+            android:paddingRight="4dip"
+            android:background="#444"
+            />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            >
+            <include
+                android:id="@+id/group_config_dice3"
+                layout="@layout/config_item"
+                />
+            <View
+                android:layout_width="1dip"
+                android:layout_height="fill_parent"
+                android:background="#444"
+                />
+            <include
+                android:id="@+id/group_config_dice4"
+                layout="@layout/config_item"
+                />
+        </LinearLayout>
+    </LinearLayout>
+
+    <CheckBox
+        android:id="@+id/checkbox_config_sound"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/config_sound"
         />
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="4dip"
+        android:paddingLeft="2dip"
+        android:paddingRight="2dip"
+        android:background="#777"
+        >
+        <Button
+            android:id="@+id/button_config_ok"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@android:string/ok"
+            android:onClick="onClickButton"
+            />
+        <Button
+            android:id="@+id/button_config_cancel"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@android:string/cancel"
+            android:onClick="onClickButton"
+            />
+     </LinearLayout>
 
 </LinearLayout>
