@@ -22,7 +22,7 @@
             <View
                 android:layout_width="1dip"
                 android:layout_height="fill_parent"
-                android:background="#444"
+                android:background="#777"
                 />
             <include
                 android:id="@+id/group_config_dice2"
@@ -34,7 +34,7 @@
             android:layout_height="1dip"
             android:paddingLeft="4dip"
             android:paddingRight="4dip"
-            android:background="#444"
+            android:background="#777"
             />
         <LinearLayout
             android:layout_width="wrap_content"
@@ -47,7 +47,7 @@
             <View
                 android:layout_width="1dip"
                 android:layout_height="fill_parent"
-                android:background="#444"
+                android:background="#777"
                 />
             <include
                 android:id="@+id/group_config_dice4"
