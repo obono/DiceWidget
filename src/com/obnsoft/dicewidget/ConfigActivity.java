@@ -43,6 +43,7 @@ public class ConfigActivity extends Activity {
         R.string.dice_white, R.string.dice_black,
         R.string.dice_red,   R.string.dice_blue,
     };
+    private static final int[] DIE_LEVELS = { 2, 18, 28, 44 };
 
     private int[]   mDieColor = new int[4];
     private Button      mButtonOK;
@@ -135,7 +136,7 @@ public class ConfigActivity extends Activity {
         TextView tv = (TextView) v.findViewById(R.id.text_config_dice);
         if (color >= 0) {
             iv.setVisibility(View.VISIBLE);
-            iv.getDrawable().setLevel(color * 12);
+            iv.getDrawable().setLevel(DIE_LEVELS[color]);
             tv.setText(STRING_IDS[color]);
         } else {
             iv.setVisibility(View.GONE);
