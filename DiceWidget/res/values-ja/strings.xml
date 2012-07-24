@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="config_title">Dice Widget 設定</string>
+    <string name="dice_none">なし</string>
+    <string name="dice_white">白虎</string>
+    <string name="dice_black">玄武</string>
+    <string name="dice_red">朱雀</string>
+    <string name="dice_blue">青龍</string>
+    <string name="config_sound">効果音</string>
+    <string name="msg_double">Dice Widget は既に配置されています</string>
+</resources>
