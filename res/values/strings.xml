@@ -8,4 +8,5 @@
     <string name="dice_red">Red</string>
     <string name="dice_blue">Blue</string>
     <string name="config_sound">Sound</string>
+    <string name="msg_double">Dice Widget is already allocated.</string>
 </resources>

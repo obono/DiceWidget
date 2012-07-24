@@ -18,17 +18,18 @@ package com.obnsoft.dicewidget;
 
 import android.app.Activity;
 import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class ConfigActivity extends Activity {
 
@@ -50,30 +51,29 @@ public class ConfigActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        /*  Control launching to avoid double widgets.  */
         Intent intent = getIntent();
-        if (intent != null &&
-                AppWidgetManager.ACTION_APPWIDGET_CONFIGURE.equals(intent.getAction())) {
-            int widgetId = intent.getIntExtra(
-                    AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
-            if (!MyWidgetProvider.sLaunched && widgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
-                setResult(RESULT_OK,
-                        new Intent().putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId));
-                Log.i("HOGE", "RESULT OK " + MyWidgetProvider.sLaunched);
-            } else {
-                setResult(RESULT_CANCELED);
-                Log.i("HOGE", "RESULT CANCELED " + MyWidgetProvider.sLaunched);
+        if (AppWidgetManager.ACTION_APPWIDGET_CONFIGURE.equals(intent.getAction())) {
+            int ret = RESULT_OK;
+            if (AppWidgetManager.getInstance(this).getAppWidgetIds(
+                    new ComponentName(this, MyWidgetProvider.class)).length >= 2) {
+                Toast.makeText(this, R.string.msg_double, Toast.LENGTH_LONG).show();
+                ret = RESULT_CANCELED;
             }
+            setResult(ret, new Intent().putExtras(intent.getExtras()));
             finish();
             return;
         }
 
+        /*  Show configuration dialog.  */
         boolean sound = loadConfig(this, mDieColor);
         setContentView(R.layout.config);
         mButtonOK = (Button) findViewById(R.id.button_config_ok);
-        mCheckBoxSound = (CheckBox) findViewById(R.id.checkbox_config_sound);
         for (int i = 0; i < 4; i++) {
             setDiceInfo(findViewById(GROUP_IDS[i]), mDieColor[i]);
         }
+        mCheckBoxSound = (CheckBox) findViewById(R.id.checkbox_config_sound);
         mCheckBoxSound.setChecked(sound);
     }
 
