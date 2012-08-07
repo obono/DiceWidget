@@ -13,13 +13,17 @@ import javax.microedition.khronos.opengles.GL10;
 import javax.microedition.khronos.opengles.GL11;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.opengl.GLUtils;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
 public class MyRenderer {
+
+    static private final int BYTES_FLOAT = 4;
+
+    static final float QUAD_VERTICES[] = {
+        -0.05f,  0.05f, 0.00f,     -0.05f, -0.05f, 0.00f,
+         0.05f,  0.05f, 0.00f,      0.05f, -0.05f, 0.00f,
+    };
 
     private Context         mContext;
 
@@ -32,11 +36,10 @@ public class MyRenderer {
     private int             mWindowWidth = -1;
     private int             mWindowHeight = -1;
 
-    int mVertexBufferObject = 0;
-    int mTextureID          = 0;
-    int mTextureHeight      = 0;
-    int mTextureWidth       = 0;
-    float mDegree = 0;
+    private float mDegX = 0;
+    private float mDegY = 0;
+    private float mDegZ = 0;
+    private float mDegR = 0;
 
     public MyRenderer(Context context) {
         mContext = context;
@@ -126,19 +129,12 @@ public class MyRenderer {
     private void initializeObject(GL10 gl10) {
         myLog("initializeObject");
 
-        float vertices[] = {
-            -0.5f,  0.5f, 0.0f, 0.0f, 0.0f,
-            -0.5f, -0.5f, 0.0f, 0.0f, 1.0f,
-             0.5f,  0.5f, 0.0f, 1.0f, 0.0f,
-             0.5f, -0.5f, 0.0f, 1.0f, 1.0f,
-        };
-
-        ByteBuffer bb = ByteBuffer.allocateDirect(vertices.length * 4);
+        /*  Manage array  */
+        ByteBuffer bb = ByteBuffer.allocateDirect(QUAD_VERTICES.length * BYTES_FLOAT);
         bb.order(ByteOrder.nativeOrder());
         FloatBuffer vbo = bb.asFloatBuffer();
-        vbo.put(vertices);
+        vbo.put(QUAD_VERTICES);
         vbo.position(0);
-
         gl10.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
         gl10.glEnableClientState(GL10.GL_VERTEX_ARRAY);
 
@@ -146,64 +142,51 @@ public class MyRenderer {
         GL11 gl11 = (GL11) gl10;
         int[] buffers = new int[1];
         gl11.glGenBuffers(1, buffers, 0);
-        mVertexBufferObject = buffers[0];
-        gl11.glBindBuffer(GL11.GL_ARRAY_BUFFER, mVertexBufferObject);
-        gl11.glBufferData(GL11.GL_ARRAY_BUFFER, vbo.capacity() * 4, vbo, GL11.GL_STATIC_DRAW);
-        gl11.glVertexPointer(3, GL10.GL_FLOAT, 4 * 5, 0);
-        gl11.glTexCoordPointer(2, GL10.GL_FLOAT, 4 * 5, 4 * 3);
+        gl11.glBindBuffer(GL11.GL_ARRAY_BUFFER, buffers[0]);
+        gl11.glBufferData(GL11.GL_ARRAY_BUFFER,
+                vbo.capacity() * BYTES_FLOAT, vbo, GL11.GL_STATIC_DRAW);
+        gl11.glVertexPointer(3, GL10.GL_FLOAT, BYTES_FLOAT * 3, 0);
         gl11.glBindBuffer(GL11.GL_ARRAY_BUFFER, 0);
-
-        /*  Texture  */
-        Bitmap bitmap = BitmapFactory.decodeResource(
-                mContext.getResources(), R.drawable.image_512);
-        gl10.glEnable(GL10.GL_TEXTURE_2D);
-        //int[] buffers = new int[1];
-        gl10.glGenTextures(1, buffers, 0);
-        mTextureID = buffers[0];
-        mTextureWidth = bitmap.getWidth();
-        mTextureHeight = bitmap.getHeight();
-
-        gl10.glBindTexture(GL10.GL_TEXTURE_2D, mTextureID);
-        GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, bitmap, 0);
-        gl10.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_NEAREST);
-        gl10.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_NEAREST);
-        bitmap.recycle();
     }
 
     private void drawFrame(GL10 gl10) {
-        mDegree += 4f;
+        mDegX += 4f;
+        mDegY += 3f;
+        mDegZ += 2f;
+        mDegR += 1f;
 
         gl10.glViewport(0, 0, mWindowWidth, mWindowHeight);
-        gl10.glClearColor(0.25f, 0.0f, 0.5f, 1);
+        gl10.glClearColor(0f, 0f, 0f, 1f);
         gl10.glClear(GL10.GL_COLOR_BUFFER_BIT);
-        setTextureArea(gl10, 0, 0, 512, 512);
-        drawQuad(gl10, mWindowWidth / 2 - 128, mWindowHeight / 2 - 128, 256, 256);
+        //gl10.glClear(GL10.GL_ALPHA_BITS);
+        //gl10.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE);
+
+        int LEVEL = 5;
+        for (int i = -LEVEL; i <= LEVEL; i++) {
+            int jRange = LEVEL - Math.abs(i);
+            for (int j = -jRange; j <= jRange; j++) {
+                int kRange = jRange - Math.abs(j);
+                for (int k = -kRange; k <= kRange; k++) {
+                    drawQuad(gl10,
+                            (float) i / (float) LEVEL,
+                            (float) j / (float) LEVEL,
+                            (float) k / (float) LEVEL,
+                            (float) Math.cos(Math.toRadians(mDegR)));
+                }
+            }
+        }
         mEGL.eglSwapBuffers(mEGLDisplay, mEGLSurface);
     }
 
-    private void setTextureArea(GL10 gl10, int x, int y, int w, int h) {
-        float tw = (float) w / (float) mTextureWidth;
-        float th = (float) h / (float) mTextureHeight;
-        float tx = (float) x / (float) mTextureWidth;
-        float ty = (float) y / (float) mTextureHeight;
-
-        gl10.glMatrixMode(GL10.GL_TEXTURE);
+    private void drawQuad(GL10 gl10, float x, float y, float z, float r) {
         gl10.glLoadIdentity();
-        gl10.glTranslatef(tx, ty, 0.0f);
-        gl10.glScalef(tw, th, 1.0f);
-        gl10.glMatrixMode(GL10.GL_MODELVIEW);
-    }
-
-    private void drawQuad(GL10 gl10, int x, int y, int w, int h) {
-        float sizeX = (float) w / (float) mWindowWidth * 2;
-        float sizeY = (float) h / (float) mWindowHeight * 2;
-        float sx = (float) x / (float) mWindowWidth * 2;
-        float sy = (float) y / (float) mWindowHeight * 2;
-
-        gl10.glLoadIdentity();
-        gl10.glRotatef(mDegree, 0.0f, 0.0f, 1.0f);
-        gl10.glTranslatef(-1.0f + sizeX / 2.0f + sx, 1.0f - sizeY / 2.0f - sy, 0.0f);
-        gl10.glScalef(sizeX, sizeY, 1.0f );
+        gl10.glEnable(GL10.GL_ALPHA);
+        gl10.glRotatef(mDegX, 1.0f, 0.0f, 0.0f);
+        gl10.glRotatef(mDegY, 0.0f, 1.0f, 0.0f);
+        gl10.glRotatef(mDegZ, 0.0f, 0.0f, 1.0f);
+        gl10.glColor4f((x + 1f) / 4f, (y + 1f) / 4f, (z + 1f) / 4f, 0.25f);
+        gl10.glTranslatef(x * r, y * r, z * r);
+        //gl10.glScalef(sizeX, sizeY, 1.0f );
         gl10.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4);
     }
 
