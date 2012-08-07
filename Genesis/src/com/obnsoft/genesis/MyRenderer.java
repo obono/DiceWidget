@@ -16,13 +16,12 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.opengl.GLUtils;
-import android.service.wallpaper.WallpaperService.Engine;
 import android.util.Log;
+import android.view.SurfaceHolder;
 
 public class MyRenderer {
 
     private Context         mContext;
-    private Engine          mParent;
 
     private EGL10           mEGL;
     private EGLContext      mEGLContext = null;
@@ -39,9 +38,12 @@ public class MyRenderer {
     int mTextureWidth       = 0;
     float mDegree = 0;
 
-    public MyRenderer(Context context, Engine parent) {
+    public MyRenderer(Context context) {
         mContext = context;
-        mParent = parent;
+    }
+
+    public void onInitialize() {
+        initializeGL();
     }
 
     public void onSurfaceChanged(int width, int height) {
@@ -49,13 +51,17 @@ public class MyRenderer {
         mWindowHeight = height;
     }
 
-    public void onInitialize() {
-        initializeGL(mParent);
+    public void onStartDrawing(SurfaceHolder holder) {
+        initializeSurface(holder);
         initializeObject(mGL10);
     }
 
     public void onDrawFrame() {
         drawFrame(mGL10);
+    }
+
+    public void onFinishDrawing() {
+        finalizeSurface();
     }
 
     public void onDispose() {
@@ -64,7 +70,7 @@ public class MyRenderer {
 
     /*-----------------------------------------------------------------------*/
 
-    private void initializeGL(Engine engine) {
+    private void initializeGL() {
         myLog("initializeGL");
 
         /*  Initialize  */
@@ -93,18 +99,22 @@ public class MyRenderer {
             return;
         }
 
+        /*  Get GLES interface  */
+        mGL10 = (GL10) mEGLContext.getGL();
+    }
+
+    private void initializeSurface(SurfaceHolder holder) {
+        myLog("initializeSurface");
+
         /*  Create surface  */
         mEGL.eglMakeCurrent(mEGLDisplay, EGL10.EGL_NO_SURFACE,
                 EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_CONTEXT);
         mEGLSurface = mEGL.eglCreateWindowSurface(
-                mEGLDisplay, mEGLConfig, engine.getSurfaceHolder(), null);
+                mEGLDisplay, mEGLConfig, holder, null);
         if (mEGLSurface == EGL10.EGL_NO_SURFACE) {
             myLog("glSurface == EGL10.EGL_NO_SURFACE");
             return;
         }
-
-        /*  Get GLES interface  */
-        mGL10 = (GL10) mEGLContext.getGL();
 
         /*  Attach surface to context  */
         if (!mEGL.eglMakeCurrent(mEGLDisplay, mEGLSurface, mEGLSurface, mEGLContext)) {
@@ -195,6 +205,17 @@ public class MyRenderer {
         gl10.glTranslatef(-1.0f + sizeX / 2.0f + sx, 1.0f - sizeY / 2.0f - sy, 0.0f);
         gl10.glScalef(sizeX, sizeY, 1.0f );
         gl10.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4);
+    }
+
+    private void finalizeSurface() {
+        myLog("finalizeSurface");
+
+        if (mEGLSurface != null) {
+            mEGL.eglMakeCurrent(mEGLDisplay, EGL10.EGL_NO_SURFACE,
+                    EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_CONTEXT);
+            mEGL.eglDestroySurface(mEGLDisplay, mEGLSurface);
+            mEGLSurface = null;
+        }
     }
 
     private void finalizeGL() {
