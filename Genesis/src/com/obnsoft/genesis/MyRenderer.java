@@ -28,21 +28,25 @@ import javax.microedition.khronos.egl.EGLDisplay;
 import javax.microedition.khronos.egl.EGLSurface;
 import javax.microedition.khronos.opengles.GL10;
 import javax.microedition.khronos.opengles.GL11;
+import javax.microedition.khronos.opengles.GL11ExtensionPack;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.opengl.GLU;
+import android.preference.PreferenceManager;
 import android.view.SurfaceHolder;
 
-public class MyRenderer {
+public class MyRenderer implements OnSharedPreferenceChangeListener {
 
-    private static final int LEVEL = 5;
     private static final int BYTES_FLOAT = 4;
     private static final float QUAD_VERTICES[] = {
         -1f, 1f, 0f,   -1f, -1f, 0f,   1f, 1f, 0f,   1f, -1f, 0f,
     };
 
-    private Context         mContext;
-
+    private Context             mContext;
+    private SharedPreferences   mPrefs;
+    
     private EGL10           mEGL;
     private EGLContext      mEGLContext = null;
     private EGLDisplay      mEGLDisplay = null;
@@ -52,17 +56,24 @@ public class MyRenderer {
     private int             mWindowWidth = -1;
     private int             mWindowHeight = -1;
 
-    private float mRotX;
-    private float mRotY;
-    private float mRotZ;
-    private float mRotR;
-    private long mStartTime;
+    private int     mLevel;
+    private float   mAlpha;
+    private float   mScale;
+    private boolean mInvert;
+
+    private float   mRotX;
+    private float   mRotY;
+    private float   mRotZ;
+    private float   mRotR;
+    private long    mStartTime;
 
     public MyRenderer(Context context) {
         mContext = context;
     }
 
     public void onInitialize() {
+        mPrefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+        mPrefs.registerOnSharedPreferenceChangeListener(this);
         initializeGL();
     }
 
@@ -86,6 +97,12 @@ public class MyRenderer {
 
     public void onDispose() {
         finalizeGL();
+        mPrefs.unregisterOnSharedPreferenceChangeListener(this);
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+        applyPrefs(prefs);
     }
 
     /*-----------------------------------------------------------------------*/
@@ -154,6 +171,10 @@ public class MyRenderer {
         /*  Other settings  */
         gl10.glEnable(GL10.GL_BLEND);
         gl10.glEnable(GL10.GL_ALPHA);
+        if (mInvert) {
+            GL11ExtensionPack gl11ep = (GL11ExtensionPack) mGL10;
+            gl11ep.glBlendEquation(GL11ExtensionPack.GL_FUNC_REVERSE_SUBTRACT);
+        }
         gl10.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE);
     }
 
@@ -180,6 +201,7 @@ public class MyRenderer {
         gl11.glBindBuffer(GL11.GL_ARRAY_BUFFER, 0);
 
         /*  Parameters  */
+        applyPrefs(mPrefs);
         Random random = new Random();
         mRotX = random.nextFloat() * 64f - 32f;
         mRotY = random.nextFloat() * 64f - 32f;
@@ -188,11 +210,22 @@ public class MyRenderer {
         mStartTime = System.currentTimeMillis();
     }
 
+    private void applyPrefs(SharedPreferences prefs) {
+        mLevel = Integer.parseInt(prefs.getString("level", "3"));
+        mAlpha = Float.parseFloat(prefs.getString("alpha", "0.2f"));
+        mScale = Float.parseFloat(prefs.getString("scale", "1f"));
+        mInvert = Boolean.parseBoolean(prefs.getString("invert", "false"));
+    }
+
     private void drawFrame(GL10 gl10) {
         float tick = (float) ((System.currentTimeMillis() - mStartTime) / 1000.0);
 
         /*  Clear  */
-        gl10.glClearColor(0f, 0f, 0f, 1f);
+        if (mInvert) {
+            gl10.glClearColor(1f, 1f, 1f, 1f);
+        } else {
+            gl10.glClearColor(0f, 0f, 0f, 1f);
+        }
         gl10.glClear(GL10.GL_COLOR_BUFFER_BIT);
 
         /*  Rotate  */
@@ -202,15 +235,15 @@ public class MyRenderer {
         gl10.glRotatef(mRotZ * tick, 0.0f, 0.0f, 1.0f);
 
         /*  Draw quadrangles  */
-        for (int i = -LEVEL; i <= LEVEL; i++) {
-            int jRange = LEVEL - Math.abs(i);
+        for (int i = -mLevel; i <= mLevel; i++) {
+            int jRange = mLevel - Math.abs(i);
             for (int j = -jRange; j <= jRange; j++) {
                 int kRange = jRange - Math.abs(j);
                 for (int k = -kRange; k <= kRange; k++) {
                     drawQuad(gl10,
-                            (float) i / (float) LEVEL,
-                            (float) j / (float) LEVEL,
-                            (float) k / (float) LEVEL,
+                            (float) i / (float) mLevel,
+                            (float) j / (float) mLevel,
+                            (float) k / (float) mLevel,
                             (float) Math.cos(Math.toRadians(mRotR * tick)) * 48f);
                 }
             }
@@ -222,9 +255,11 @@ public class MyRenderer {
 
     private void drawQuad(GL10 gl10, float x, float y, float z, float r) {
         gl10.glPushMatrix();
-        gl10.glColor4f((x + 1f) / 4f, (y + 1f) / 4f, (z + 1f) / 4f, 0.25f);
+        gl10.glColor4f((x + 1f) / 2f, (y + 1f) / 2f, (z + 1f) / 2f, mAlpha);
         gl10.glTranslatef(x * r, y * r, z * r);
-        //gl10.glScalef(sizeX, sizeY, 1f);
+        if (mScale != 1f) {
+            gl10.glScalef(mScale, mScale, 1f);
+        }
         gl10.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4);
         gl10.glPopMatrix();
     }

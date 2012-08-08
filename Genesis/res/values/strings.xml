@@ -2,4 +2,10 @@
 <resources>
     <string name="app_name">Genesis</string>
     <string name="summary">Wallpaper summary</string>
+
+    <string name="prefs_title">Genesis - Configuration</string>
+    <string name="prefs_invert">Background</string>
+    <string name="prefs_level">Level</string>
+    <string name="prefs_alpha">Thickness</string>
+    <string name="prefs_scale">Scale</string>
 </resources>
