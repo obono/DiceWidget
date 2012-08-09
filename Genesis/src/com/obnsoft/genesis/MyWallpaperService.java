@@ -65,7 +65,7 @@ public class MyWallpaperService extends WallpaperService {
 
         @Override
         public void onVisibilityChanged(boolean visible) {
-            myLog("onVisibilityChanged : " + visible);
+            myLog("onVisibilityChanged: " + visible);
             super.onVisibilityChanged(visible);
             if (visible) {
                 mThread = new MyThread(mRenderer);

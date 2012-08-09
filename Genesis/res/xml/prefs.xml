@@ -28,4 +28,9 @@
         android:entries="@array/entries_scale"
         android:entryValues="@array/entryvalues_scale"
         />
+    <Preference
+        android:key="about"
+        android:title="@string/prefs_about"
+        android:persistent="false"
+        />
 </PreferenceScreen>

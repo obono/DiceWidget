@@ -40,21 +40,20 @@ import android.view.SurfaceHolder;
 public class MyRenderer implements OnSharedPreferenceChangeListener {
 
     private static final int BYTES_FLOAT = 4;
-    private static final float QUAD_VERTICES[] = {
-        -1f, 1f, 0f,   -1f, -1f, 0f,   1f, 1f, 0f,   1f, -1f, 0f,
-    };
 
     private Context             mContext;
     private SharedPreferences   mPrefs;
     
-    private EGL10           mEGL;
-    private EGLContext      mEGLContext = null;
-    private EGLDisplay      mEGLDisplay = null;
-    private EGLSurface      mEGLSurface = null;
-    private EGLConfig       mEGLConfig  = null;
-    private GL10            mGL10       = null;
-    private int             mWindowWidth = -1;
-    private int             mWindowHeight = -1;
+    private EGL10       mEGL        = null;
+    private EGLContext  mEGLContext = null;
+    private EGLDisplay  mEGLDisplay = null;
+    private EGLSurface  mEGLSurface = null;
+    private EGLConfig   mEGLConfig  = null;
+    private GL10        mGL10       = null;
+
+    private int     mWindowWidth    = -1;
+    private int     mWindowHeight   = -1;
+    private int     mBufferIndex    = 0;
 
     private int     mLevel;
     private float   mAlpha;
@@ -102,7 +101,7 @@ public class MyRenderer implements OnSharedPreferenceChangeListener {
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
-        applyPrefs(prefs);
+        initializeObject(mGL10);
     }
 
     /*-----------------------------------------------------------------------*/
@@ -168,6 +167,13 @@ public class MyRenderer implements OnSharedPreferenceChangeListener {
         GLU.gluLookAt(gl10, 0f, 0f, -32f, 0f, 0f, 0f, 0f, 1f, 0f);
         gl10.glMatrixMode(GL10.GL_MODELVIEW);
 
+        /*  Get buffer index  */
+        gl10.glEnableClientState(GL10.GL_VERTEX_ARRAY);
+        //gl10.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
+        int[] buf = new int[1];
+        ((GL11) gl10).glGenBuffers(1, buf, 0);
+        mBufferIndex = buf[0];
+
         /*  Other settings  */
         gl10.glEnable(GL10.GL_BLEND);
         gl10.glEnable(GL10.GL_ALPHA);
@@ -181,25 +187,6 @@ public class MyRenderer implements OnSharedPreferenceChangeListener {
     private void initializeObject(GL10 gl10) {
         myLog("initializeObject");
 
-        /*  Manage array  */
-        ByteBuffer bb = ByteBuffer.allocateDirect(QUAD_VERTICES.length * BYTES_FLOAT);
-        bb.order(ByteOrder.nativeOrder());
-        FloatBuffer vbo = bb.asFloatBuffer();
-        vbo.put(QUAD_VERTICES);
-        vbo.position(0);
-        gl10.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
-        gl10.glEnableClientState(GL10.GL_VERTEX_ARRAY);
-
-        /*  Vertex  */
-        GL11 gl11 = (GL11) gl10;
-        int[] buffers = new int[1];
-        gl11.glGenBuffers(1, buffers, 0);
-        gl11.glBindBuffer(GL11.GL_ARRAY_BUFFER, buffers[0]);
-        gl11.glBufferData(GL11.GL_ARRAY_BUFFER,
-                vbo.capacity() * BYTES_FLOAT, vbo, GL11.GL_STATIC_DRAW);
-        gl11.glVertexPointer(3, GL10.GL_FLOAT, BYTES_FLOAT * 3, 0);
-        gl11.glBindBuffer(GL11.GL_ARRAY_BUFFER, 0);
-
         /*  Parameters  */
         applyPrefs(mPrefs);
         Random random = new Random();
@@ -208,6 +195,23 @@ public class MyRenderer implements OnSharedPreferenceChangeListener {
         mRotZ = random.nextFloat() * 64f - 32f;
         mRotR = random.nextFloat() * 64f - 32f;
         mStartTime = System.currentTimeMillis();
+
+        /*  Define vertices of quadrangle  */
+        float v = (6f / mLevel) * mScale;
+        float ary[] = {-v, v, 0f,   -v, -v, 0f,   v, v, 0f,   v, -v, 0f};
+        ByteBuffer bb = ByteBuffer.allocateDirect(ary.length * BYTES_FLOAT);
+        bb.order(ByteOrder.nativeOrder());
+        FloatBuffer vbo = bb.asFloatBuffer();
+        vbo.put(ary);
+        vbo.position(0);
+
+        /*  Assign vertices array  */
+        GL11 gl11 = (GL11) gl10;
+        gl11.glBindBuffer(GL11.GL_ARRAY_BUFFER, mBufferIndex);
+        gl11.glBufferData(GL11.GL_ARRAY_BUFFER,
+                vbo.capacity() * BYTES_FLOAT, vbo, GL11.GL_STATIC_DRAW);
+        gl11.glVertexPointer(3, GL10.GL_FLOAT, 0/*GL10.GL_FLOAT * 3*/, 0);
+        gl11.glBindBuffer(GL11.GL_ARRAY_BUFFER, 0);
     }
 
     private void applyPrefs(SharedPreferences prefs) {
@@ -257,9 +261,7 @@ public class MyRenderer implements OnSharedPreferenceChangeListener {
         gl10.glPushMatrix();
         gl10.glColor4f((x + 1f) / 2f, (y + 1f) / 2f, (z + 1f) / 2f, mAlpha);
         gl10.glTranslatef(x * r, y * r, z * r);
-        if (mScale != 1f) {
-            gl10.glScalef(mScale, mScale, 1f);
-        }
+        //gl10.glScalef(mScale, mScale, 1f);
         gl10.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4);
         gl10.glPopMatrix();
     }
