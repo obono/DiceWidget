@@ -17,8 +17,6 @@
 package com.obnsoft.dicewidget;
 
 import android.app.Activity;
-import android.appwidget.AppWidgetManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -29,7 +27,6 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class ConfigActivity extends Activity {
 
@@ -52,24 +49,8 @@ public class ConfigActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        /*  Control launching to avoid double widgets.  */
-        Intent intent = getIntent();
-        if (AppWidgetManager.ACTION_APPWIDGET_CONFIGURE.equals(intent.getAction())) {
-            int ret = RESULT_OK;
-            if (AppWidgetManager.getInstance(this).getAppWidgetIds(
-                    new ComponentName(this, MyWidgetProvider.class)).length >= 2) {
-                Toast.makeText(this, R.string.msg_double, Toast.LENGTH_LONG).show();
-                ret = RESULT_CANCELED;
-            }
-            setResult(ret, new Intent().putExtras(intent.getExtras()));
-            finish();
-            return;
-        }
-
-        /*  Show configuration dialog.  */
-        boolean sound = loadConfig(this, mDieColor);
         setContentView(R.layout.config);
+        boolean sound = loadConfig(this, mDieColor);
         mButtonOK = (Button) findViewById(R.id.button_config_ok);
         for (int i = 0; i < 4; i++) {
             setDiceInfo(findViewById(GROUP_IDS[i]), mDieColor[i]);

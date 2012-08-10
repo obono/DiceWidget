@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.obnsoft.dicewidget"
-    android:versionCode="1"
-    android:versionName="0.0.1"
+    android:versionCode="2"
+    android:versionName="0.0.2"
     >
     <uses-sdk android:minSdkVersion="4" />
 
@@ -26,8 +26,8 @@
             </intent-filter>
         </service>
         <activity
-            android:name=".ConfigActivity"
-            android:label="@string/config_title"
+            android:name=".AboutActivity"
+            android:label="@string/about_title"
             android:theme="@android:style/Theme.Dialog"
             android:configChanges="keyboard|keyboardHidden|orientation"
             >
@@ -35,5 +35,11 @@
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".ConfigActivity"
+            android:label="@string/config_title"
+            android:theme="@android:style/Theme.Dialog"
+            android:configChanges="keyboard|keyboardHidden|orientation"
+            />
     </application>
 </manifest>

@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_code">OBN-A08</string>
     <string name="app_name">Dice Widget</string>
+    <string name="about_title">Version Info</string>
     <string name="config_title">Dice Widget Config</string>
     <string name="dice_none">None</string>
     <string name="dice_white">White</string>
