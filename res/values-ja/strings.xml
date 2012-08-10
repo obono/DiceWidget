@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="about_title">バージョン情報</string>
     <string name="config_title">Dice Widget 設定</string>
     <string name="dice_none">なし</string>
     <string name="dice_white">白虎</string>
