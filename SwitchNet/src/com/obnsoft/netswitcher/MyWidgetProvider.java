@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 OBN-soft
+ * Copyright (C) 2011-2012 OBN-soft
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,34 @@
 
 package com.obnsoft.netswitcher;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 
 public class MyWidgetProvider extends AppWidgetProvider {
+
+    public static final int NOTICE_ID_ABOUT = 1;
+
+    @Override
+    public void onEnabled(Context context) {
+        super.onEnabled(context);
+        NotificationManager noticeMan =
+            (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        Notification notice = new Notification(
+                R.drawable.icon, context.getText(R.string.app_name), System.currentTimeMillis());
+        PendingIntent pIntent = PendingIntent.getActivity(context, 0,
+                new Intent(context, AboutActivity.class), Intent.FLAG_ACTIVITY_NEW_TASK);
+        notice.setLatestEventInfo(
+                context, context.getText(R.string.app_name), getVersion(context), pIntent);
+        noticeMan.notify(NOTICE_ID_ABOUT, notice);
+    }
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager,
@@ -29,6 +51,18 @@ public class MyWidgetProvider extends AppWidgetProvider {
         super.onUpdate(context, appWidgetManager, appWidgetIds);
         Intent intent = new Intent(context, MyService.class);
         context.startService(intent);
+    }
+
+    public static String getVersion(Context context) {
+        String version = null;
+        try {
+            PackageInfo packageInfo = context.getPackageManager().getPackageInfo(
+                    context.getPackageName(), PackageManager.GET_META_DATA);
+            version = "Version " + packageInfo.versionName;
+        } catch (NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        return version;
     }
 
 }

@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_code">OBN-A07</string>
     <string name="app_name">Network Switcher Widget</string>
     <string name="state_unknown">Other</string>
     <string name="state_wifi">Wi-Fi</string>
     <string name="state_mobile">Mobile</string>
+    <string name="about_title">Version Info</string>
 </resources>

@@ -29,5 +29,15 @@
                 <action android:name="BUTTON_CLICK_ACTION" />
             </intent-filter>
         </service>
+        <activity
+            android:name=".AboutActivity"
+            android:label="@string/about_title"
+            android:theme="@android:style/Theme.Dialog"
+            android:configChanges="keyboard|keyboardHidden|orientation"
+            >
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
     </application>
 </manifest>
