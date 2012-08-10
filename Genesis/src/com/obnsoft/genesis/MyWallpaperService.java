@@ -22,12 +22,9 @@ import android.view.SurfaceHolder;
 
 public class MyWallpaperService extends WallpaperService {
 
-    private MyEngine mEngine;
-
     @Override
     public Engine onCreateEngine() {
-        mEngine = new MyEngine();
-        return mEngine;
+        return new MyEngine();
     }
 
     public static void myLog(String msg) {
@@ -37,7 +34,7 @@ public class MyWallpaperService extends WallpaperService {
     /*-----------------------------------------------------------------------*/
 
     class MyEngine extends Engine {
-        private MyRenderer  mRenderer = new MyRenderer(getApplicationContext());
+        private MyRenderer  mRenderer = null;
         private MyThread    mThread = null;
 
         @Override
@@ -46,13 +43,19 @@ public class MyWallpaperService extends WallpaperService {
             super.onCreate(holder);
 
             holder.setType(SurfaceHolder.SURFACE_TYPE_GPU);
-            mRenderer.onInitialize();
         }
 
         @Override
         public void onSurfaceCreated(SurfaceHolder holder) {
             myLog("onSurfaceCreated");
             super.onSurfaceCreated(holder);
+
+            if (mRenderer != null) {
+                myLog("Double renderer! Why?");
+                mRenderer.onDispose();
+            }
+            mRenderer = new MyRenderer();
+            mRenderer.onInitialize(getApplicationContext(), holder);
         }
 
         @Override
@@ -60,7 +63,7 @@ public class MyWallpaperService extends WallpaperService {
             myLog("onSurfaceChanged: " + width + "x" + height);
             super.onSurfaceChanged(holder, format, width, height);
 
-            mRenderer.onSurfaceChanged(width, height);
+            mRenderer.onSurfaceChanged(holder, format, width, height);
         }
 
         @Override
@@ -85,17 +88,16 @@ public class MyWallpaperService extends WallpaperService {
                 mThread.pause();
                 mThread = null;
             }
+            if (mRenderer != null) {
+                mRenderer.onDispose();
+                mRenderer = null;
+            }
         }
 
         @Override
         public void onDestroy() {
             myLog("onDestroy");
             super.onDestroy();
-
-            if (mRenderer != null) {
-                mRenderer.onDispose();
-                mRenderer = null;
-            }
         }
 
     }
@@ -106,8 +108,8 @@ public class MyWallpaperService extends WallpaperService {
 
         private static final int INTERVAL = 50;
 
-        private MyRenderer      mRenderer = null;
-        private boolean         mLoop = false;
+        private MyRenderer  mRenderer = null;
+        private boolean     mLoop = false;
 
         public MyThread(MyRenderer renderer) {
             mRenderer = renderer;
@@ -119,7 +121,7 @@ public class MyWallpaperService extends WallpaperService {
             mLoop = true;
 
             myLog("Thread loop start");
-            mRenderer.onStartDrawing(mEngine.getSurfaceHolder());
+            mRenderer.onStartDrawing();
             while (mLoop) {
                 mRenderer.onDrawFrame();
 

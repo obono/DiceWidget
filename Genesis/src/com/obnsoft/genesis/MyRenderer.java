@@ -32,16 +32,15 @@ import javax.microedition.khronos.opengles.GL11ExtensionPack;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.opengl.GLU;
 import android.preference.PreferenceManager;
 import android.view.SurfaceHolder;
 
-public class MyRenderer implements OnSharedPreferenceChangeListener {
+public class MyRenderer {
 
     private static final int BYTES_FLOAT = 4;
 
-    private Context             mContext;
+    private SurfaceHolder       mHolder;
     private SharedPreferences   mPrefs;
     
     private EGL10       mEGL        = null;
@@ -66,23 +65,20 @@ public class MyRenderer implements OnSharedPreferenceChangeListener {
     private float   mRotR;
     private long    mStartTime;
 
-    public MyRenderer(Context context) {
-        mContext = context;
-    }
-
-    public void onInitialize() {
-        mPrefs = PreferenceManager.getDefaultSharedPreferences(mContext);
-        mPrefs.registerOnSharedPreferenceChangeListener(this);
+    public void onInitialize(Context context, SurfaceHolder holder) {
+        mHolder = holder;
+        mPrefs = PreferenceManager.getDefaultSharedPreferences(context);
         initializeGL();
     }
 
-    public void onSurfaceChanged(int width, int height) {
+    public void onSurfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+        mHolder = holder;
         mWindowWidth = width;
         mWindowHeight = height;
     }
 
-    public void onStartDrawing(SurfaceHolder holder) {
-        initializeSurface(holder);
+    public void onStartDrawing() {
+        initializeSurface(mHolder);
         initializeObject(mGL10);
     }
 
@@ -91,17 +87,12 @@ public class MyRenderer implements OnSharedPreferenceChangeListener {
     }
 
     public void onFinishDrawing() {
+        clearFrame(mGL10);
         finalizeSurface();
     }
 
     public void onDispose() {
         finalizeGL();
-        mPrefs.unregisterOnSharedPreferenceChangeListener(this);
-    }
-
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
-        initializeObject(mGL10);
     }
 
     /*-----------------------------------------------------------------------*/
@@ -174,14 +165,9 @@ public class MyRenderer implements OnSharedPreferenceChangeListener {
         ((GL11) gl10).glGenBuffers(1, buf, 0);
         mBufferIndex = buf[0];
 
-        /*  Other settings  */
+        /*  Enable alpha-blending  */
         gl10.glEnable(GL10.GL_BLEND);
         gl10.glEnable(GL10.GL_ALPHA);
-        if (mInvert) {
-            GL11ExtensionPack gl11ep = (GL11ExtensionPack) mGL10;
-            gl11ep.glBlendEquation(GL11ExtensionPack.GL_FUNC_REVERSE_SUBTRACT);
-        }
-        gl10.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE);
     }
 
     private void initializeObject(GL10 gl10) {
@@ -212,6 +198,12 @@ public class MyRenderer implements OnSharedPreferenceChangeListener {
                 vbo.capacity() * BYTES_FLOAT, vbo, GL11.GL_STATIC_DRAW);
         gl11.glVertexPointer(3, GL10.GL_FLOAT, 0/*GL10.GL_FLOAT * 3*/, 0);
         gl11.glBindBuffer(GL11.GL_ARRAY_BUFFER, 0);
+
+        /*  Alpha-blending setting  */
+        GL11ExtensionPack gl11ep = (GL11ExtensionPack) mGL10;
+        gl11ep.glBlendEquation(mInvert ?
+                GL11ExtensionPack.GL_FUNC_REVERSE_SUBTRACT : GL11ExtensionPack.GL_FUNC_ADD);
+        gl10.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE);
     }
 
     private void applyPrefs(SharedPreferences prefs) {
@@ -219,20 +211,26 @@ public class MyRenderer implements OnSharedPreferenceChangeListener {
         mAlpha = Float.parseFloat(prefs.getString("alpha", "0.2f"));
         mScale = Float.parseFloat(prefs.getString("scale", "1f"));
         mInvert = Boolean.parseBoolean(prefs.getString("invert", "false"));
+        if (mInvert) {
+            mAlpha /= 2f;
+        }
     }
 
-    private void drawFrame(GL10 gl10) {
-        float tick = (float) ((System.currentTimeMillis() - mStartTime) / 1000.0);
-
-        /*  Clear  */
+    private void clearFrame(GL10 gl10) {
         if (mInvert) {
-            gl10.glClearColor(1f, 1f, 1f, 1f);
+            gl10.glClearColor(0.5f, 0.5f, 0.5f, 1f);
         } else {
             gl10.glClearColor(0f, 0f, 0f, 1f);
         }
         gl10.glClear(GL10.GL_COLOR_BUFFER_BIT);
+    }
+
+    private void drawFrame(GL10 gl10) {
+        /*  Clear  */
+        clearFrame(gl10);
 
         /*  Rotate  */
+        float tick = (float) ((System.currentTimeMillis() - mStartTime) / 1000.0);
         gl10.glLoadIdentity();
         gl10.glRotatef(mRotX * tick, 1.0f, 0.0f, 0.0f);
         gl10.glRotatef(mRotY * tick, 0.0f, 1.0f, 0.0f);
