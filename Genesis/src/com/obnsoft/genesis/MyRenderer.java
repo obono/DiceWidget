@@ -200,9 +200,13 @@ public class MyRenderer {
         gl11.glBindBuffer(GL11.GL_ARRAY_BUFFER, 0);
 
         /*  Alpha-blending setting  */
-        GL11ExtensionPack gl11ep = (GL11ExtensionPack) mGL10;
-        gl11ep.glBlendEquation(mInvert ?
-                GL11ExtensionPack.GL_FUNC_REVERSE_SUBTRACT : GL11ExtensionPack.GL_FUNC_ADD);
+        try {
+            GL11ExtensionPack gl11ep = (GL11ExtensionPack) mGL10;
+            gl11ep.glBlendEquation(mInvert ?
+                    GL11ExtensionPack.GL_FUNC_REVERSE_SUBTRACT : GL11ExtensionPack.GL_FUNC_ADD);
+        } catch (UnsupportedOperationException e) {
+            myLog("glBlendEquation() isn't supported.");
+        }
         gl10.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE);
     }
 
