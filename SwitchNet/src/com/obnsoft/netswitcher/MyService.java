@@ -36,8 +36,10 @@ import android.widget.RemoteViews;
 
 public class MyService extends Service {
 
+    protected static final String BUTTON_CLICK_ACTION = "com.obnsoft.netswitcher.action.CLICK";
+    protected static final String HIDE_NOTICE_ACTION  = "com.obnsoft.netswitcher.action.NOTICED";
+
     private static final String TAG = "netswitcher";
-    private static final String BUTTON_CLICK_ACTION = "BUTTON_CLICK_ACTION";
 
     private static final int STATE_CURRENT = -1;
     private static final int STATE_UNKNOWN = 0;
@@ -87,10 +89,13 @@ public class MyService extends Service {
         super.onStart(intent, startId);
 
         Context context = this.getApplicationContext();
+        if (HIDE_NOTICE_ACTION.equals(intent.getAction())) {
+            MyWidgetProvider.hideNotice(context);
+            return;
+        }
         if (mState == STATE_CURRENT) {
             initialize(context);
         }
-
         if (BUTTON_CLICK_ACTION.equals(intent.getAction())) {
             toggleNetwork();
         }

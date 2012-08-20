@@ -38,10 +38,10 @@ public class MyWidgetProvider extends AppWidgetProvider {
             (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         Notification notice = new Notification(
                 R.drawable.icon, context.getText(R.string.app_name), System.currentTimeMillis());
-        PendingIntent pIntent = PendingIntent.getActivity(context, 0,
-                new Intent(context, AboutActivity.class), Intent.FLAG_ACTIVITY_NEW_TASK);
-        notice.setLatestEventInfo(
-                context, context.getText(R.string.app_name), getVersion(context), pIntent);
+        PendingIntent pIntent = PendingIntent.getService(
+                context, 0, new Intent(MyService.HIDE_NOTICE_ACTION), 0);
+        notice.setLatestEventInfo(context, context.getText(R.string.app_name),
+                context.getText(R.string.app_code) + " " + getVersion(context), pIntent);
         noticeMan.notify(NOTICE_ID_ABOUT, notice);
     }
 
@@ -51,6 +51,18 @@ public class MyWidgetProvider extends AppWidgetProvider {
         super.onUpdate(context, appWidgetManager, appWidgetIds);
         Intent intent = new Intent(context, MyService.class);
         context.startService(intent);
+    }
+
+    @Override
+    public void onDisabled(Context context) {
+        super.onDisabled(context);
+        hideNotice(context);
+    }
+
+    public static void hideNotice(Context context) {
+        NotificationManager noticeMan =
+            (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        noticeMan.cancel(NOTICE_ID_ABOUT);
     }
 
     public static String getVersion(Context context) {

@@ -16,7 +16,7 @@
         android:label="@string/app_name"
         >
         <receiver
-            android:name="MyWidgetProvider"
+            android:name=".MyWidgetProvider"
             android:label="@string/app_name"
             >
             <intent-filter>
@@ -24,20 +24,15 @@
             </intent-filter>
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget" />
         </receiver>
-        <service android:name=".MyService">
-            <intent-filter>
-                <action android:name="BUTTON_CLICK_ACTION" />
-            </intent-filter>
-        </service>
-        <activity
-            android:name=".AboutActivity"
-            android:label="@string/about_title"
-            android:theme="@android:style/Theme.Dialog"
-            android:configChanges="keyboard|keyboardHidden|orientation"
+        <service
+            android:name=".MyService"
+            android:label="@string/app_name"
+            android:exported="false"
             >
             <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+                <action android:name="com.obnsoft.netswitcher.action.CLICK" />
+                <action android:name="com.obnsoft.netswitcher.action.NOTICED" />
             </intent-filter>
-        </activity>
+        </service>
     </application>
 </manifest>
