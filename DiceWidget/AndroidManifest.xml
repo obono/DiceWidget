@@ -20,7 +20,11 @@
                 android:resource="@xml/widget"
                 />
         </receiver>
-        <service android:name=".MyService">
+        <service
+            android:name=".MyService"
+            android:label="@string/app_name"
+            android:exported="false"
+            >
             <intent-filter>
                 <action android:name="com.obnsoft.dicewidget.action.SHAKE" />
             </intent-filter>
