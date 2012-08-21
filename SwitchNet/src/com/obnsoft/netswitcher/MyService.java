@@ -33,13 +33,12 @@ import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
+import android.widget.Toast;
 
 public class MyService extends Service {
 
     protected static final String BUTTON_CLICK_ACTION = "com.obnsoft.netswitcher.action.CLICK";
     protected static final String HIDE_NOTICE_ACTION  = "com.obnsoft.netswitcher.action.NOTICED";
-
-    private static final String TAG = "netswitcher";
 
     private static final int STATE_CURRENT = -1;
     private static final int STATE_UNKNOWN = 0;
@@ -70,11 +69,11 @@ public class MyService extends Service {
                     initialize(context);
                     refreshUI(context);
                 } else if (System.currentTimeMillis() - mLastModified >= 5000) {
-                    Log.d(TAG, "Handle state change");
+                    myLog("Handle state change");
                     updateState(STATE_CURRENT);
                     refreshUI(context);
                 } else {
-                    Log.d(TAG, "Ignore state change");
+                    myLog("Ignore state change");
                 }
             }
         };
@@ -91,6 +90,7 @@ public class MyService extends Service {
         Context context = this.getApplicationContext();
         if (HIDE_NOTICE_ACTION.equals(intent.getAction())) {
             MyWidgetProvider.hideNotice(context);
+            Toast.makeText(this, R.string.license_msg, Toast.LENGTH_LONG).show();
             return;
         }
         if (mState == STATE_CURRENT) {
@@ -146,7 +146,7 @@ public class MyService extends Service {
         }
 
         updateState(STATE_CURRENT);
-        Log.d(TAG, "Initialized");
+        myLog("Initialized");
     }
 
     private void toggleNetwork() {
@@ -154,12 +154,12 @@ public class MyService extends Service {
             mWifiMan.setWifiEnabled(true);
             setMobileDataEnabled(false);
             updateState(STATE_WIFI);
-            Log.d(TAG, "Wi-Fi mode");
+            myLog("Wi-Fi mode");
         } else {
             mWifiMan.setWifiEnabled(false);
             setMobileDataEnabled(true);
             updateState(STATE_MOBILE);
-            Log.d(TAG, "Mobile mode");
+            myLog("Mobile mode");
         }
         mLastModified = System.currentTimeMillis();
     }
@@ -203,15 +203,24 @@ public class MyService extends Service {
     }
 
     private void setMobileDataEnabled(boolean enable) {
+        boolean err = true;
         if (mSetMobileMethod != null) {
             try {
                 mSetMobileMethod.invoke(mConnMan, enable);
+                err = false;
             } catch (InvocationTargetException e) {
                 e.printStackTrace();
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
         }
+        if (err) {
+            Toast.makeText(this, R.string.error_msg, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void myLog(String msg) {
+        Log.d("netswitcher", msg);
     }
 
 }
