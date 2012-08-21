@@ -23,6 +23,7 @@ import java.util.GregorianCalendar;
 import android.app.AlertDialog;
 import android.app.Application;
 import android.app.DatePickerDialog;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -132,17 +133,17 @@ public class MyApplication extends Application {
                 .setIcon(iconId)
                 .setTitle(title)
                 .setMessage(msg)
-                .setPositiveButton(R.string.button_share, new DialogInterface.OnClickListener() {
+                .setPositiveButton(android.R.string.ok, null)
+                .setNeutralButton(R.string.button_share, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         try {
                             context.startActivity(intent);
-                        } catch (Exception e) {
-                            e.printStackTrace();
+                        } catch (ActivityNotFoundException e) {
+                            showToast(context, R.string.msg_error);
                         }
                     }
                 })
-                .setNeutralButton(android.R.string.ok, null)
                 .show();
     }
 

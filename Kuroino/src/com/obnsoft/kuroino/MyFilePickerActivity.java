@@ -95,11 +95,21 @@ public class MyFilePickerActivity extends FilePickerActivity {
         DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int whichButton) {
-                String newPath = directory + MyApplication.trimUni(editText.getText().toString());
+                String fileName = MyApplication.trimUni(editText.getText().toString());
+                if (fileName.length() == 0 || fileName.startsWith(".") ||
+                        fileName.contains(File.separator) || fileName.contains(File.pathSeparator)) {
+                    MyApplication.showToast(MyFilePickerActivity.this, R.string.msg_invalid);
+                    return;
+                }
+                String newPath = directory + fileName;
                 if (extension != null && !newPath.endsWith(extension)) {
                     newPath += extension;
                 }
-                setResultAndFinish(newPath);
+                if ((new File(newPath)).exists()) {
+                    onFileSelected(newPath);
+                } else {
+                    setResultAndFinish(newPath);
+                }
             }
         };
         MyApplication.showCustomDialog(this, 0, R.string.msg_newfilename, editText, listener);
