@@ -23,11 +23,12 @@
     <string name="menu_import">Import</string>
     <string name="menu_export">Export</string>
     <string name="menu_version">Version info</string>
+    <string name="menu_stamps">Stamps</string>
+    <string name="menu_upload">Upload</string>
 
     <string name="text_stamp_toggle">Toggle</string>
     <string name="text_stamp_other">Other</string>
     <string name="text_stamp_erase">Erase</string>
-    <string name="text_stamp_config">Modify varieties</string>
     <string name="text_stamp_format">\'%c\'</string>
     <string name="text_period">Period</string>
     <string name="text_period_from">from</string>

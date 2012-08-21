@@ -74,6 +74,8 @@ public class MainActivity extends Activity {
     private static final int MENU_ID_IMPORT         = 13;
     private static final int MENU_ID_EXPORT         = 14;
     private static final int MENU_ID_ABOUT          = 15;
+    private static final int MENU_ID_STAMPS         = 16;
+    private static final int MENU_ID_UPLOAD         = 17;
 
     private static final int REQUEST_ID_CREATE = 1;
     private static final int REQUEST_ID_IMPORT = 2;
@@ -160,6 +162,10 @@ public class MainActivity extends Activity {
             .setIcon(android.R.drawable.ic_menu_today);
         menu.add(MENU_GID_OPTION, MENU_ID_ADDMEMBER, Menu.NONE, R.string.menu_addmember)
             .setIcon(android.R.drawable.ic_menu_my_calendar);
+        menu.add(MENU_GID_OPTION, MENU_ID_STAMPS, Menu.NONE, R.string.menu_stamps)
+            .setIcon(R.drawable.ic_menu_stamp);
+        menu.add(MENU_GID_OPTION, MENU_ID_UPLOAD, Menu.NONE, R.string.menu_upload)
+            .setIcon(android.R.drawable.ic_menu_upload);
         menu.add(MENU_GID_OPTION, MENU_ID_CREATE, Menu.NONE, R.string.menu_new)
             .setIcon(R.drawable.ic_menu_newfile);
         menu.add(MENU_GID_OPTION, MENU_ID_IMPORT, Menu.NONE, R.string.menu_import)
@@ -363,6 +369,12 @@ public class MainActivity extends Activity {
             return true;
         case MENU_ID_ABOUT:
             showVersion();
+            return true;
+        case MENU_ID_STAMPS:
+            selectStampConfig();
+            return true;
+        case MENU_ID_UPLOAD:
+            // TODO
             return true;
         }
         return false;
@@ -667,7 +679,7 @@ public class MainActivity extends Activity {
         final int count = mStamps.length();
         final boolean notSingle = (count >= 2);
 
-        String[] items = new String[count + (notSingle ? 4 : 3)];
+        String[] items = new String[count + (notSingle ? 3 : 2)];
         int index = 0;
         if (notSingle) {
             items[index++] = getText(R.string.text_stamp_toggle).toString();
@@ -678,7 +690,6 @@ public class MainActivity extends Activity {
         }
         items[index++] = getText(R.string.text_stamp_other).toString();
         items[index++] = getText(R.string.text_stamp_erase).toString();
-        items[index++] = getText(R.string.text_stamp_config).toString();
 
         int choice = -1;
         if (mCurStamp == null || mCurStamp.length() == 0) {
@@ -708,9 +719,6 @@ public class MainActivity extends Activity {
                         close = false;
                     } else if (which == 1) { // Erase
                         mCurStamp = "";
-                    } else if (which == 2) { // Configuration
-                        selectStampConfig(dialog);
-                        close = false;
                     }
                 }
                 if (close) {
@@ -751,7 +759,7 @@ public class MainActivity extends Activity {
                 this, R.drawable.ic_dialog_stamp, R.string.msg_stamp_other, editText, listener);
     }
 
-    private void selectStampConfig(final DialogInterface parentDialog) {
+    private void selectStampConfig() {
         final EditText editText = new EditText(this);
         editText.setSingleLine();
         editText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(20)});
@@ -773,8 +781,6 @@ public class MainActivity extends Activity {
                     mCurStamp = mStamps;
                     setPreferencesIsDirty();
                     setStampLabel(mCurStamp);
-                    parentDialog.dismiss();
-                    selectStamp();
                 } else {
                     MyApplication.showToast(MainActivity.this, R.string.msg_invalid);
                 }
