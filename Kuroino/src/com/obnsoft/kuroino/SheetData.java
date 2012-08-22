@@ -19,7 +19,6 @@ package com.obnsoft.kuroino;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -130,15 +129,11 @@ public class SheetData {
         return true;
     }
 
-    public boolean importDataFromFile(String filePath) {
+    public boolean importDataFromFile(FileInputStream stream) {
         clearAll();
         BufferedReader in;
         try {
-            in = new BufferedReader(new InputStreamReader(
-                    new FileInputStream(filePath), fileEncode));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            return false;
+            in = new BufferedReader(new InputStreamReader(stream, fileEncode));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
             return false;
@@ -200,11 +195,10 @@ public class SheetData {
         return ret;
     }
 
-    public boolean exportDataToFile(String filePath) {
+    public boolean exportDataToFile(FileOutputStream stream) {
         boolean ret = false;
         try {
-            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
-                    new FileOutputStream(filePath), fileEncode));
+            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(stream, fileEncode));
             StringBuffer buf = new StringBuffer();
             DateFormat df = new SimpleDateFormat(DATE_FORMAT);
             for (Calendar cal : this.dates) {

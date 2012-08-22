@@ -16,7 +16,7 @@
 
 package com.obnsoft.kuroino;
 
-import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
@@ -27,6 +27,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.text.format.DateFormat;
 import android.view.View;
 import android.view.WindowManager;
@@ -34,6 +35,9 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 public class MyApplication extends Application {
+
+    private static final String FILENAME_WORK   = "work.csv";
+    private static final String FILENAME_UPLOAD = "rollbook.csv";
 
     private SheetData mData;
 
@@ -48,9 +52,9 @@ public class MyApplication extends Application {
 
         mData.cellSize = (int) (48f * getResources().getDisplayMetrics().density);
         mData.fileEncode = getText(R.string.file_encoding).toString();
-        if ((new File(getLocalFileName())).exists()) {
-            mData.importDataFromFile(getLocalFileName());
-        } else {
+        try {
+            mData.importDataFromFile(openFileInput(FILENAME_WORK));
+        } catch (FileNotFoundException e) {
             Calendar calFrom = new GregorianCalendar();
             int year = calFrom.get(Calendar.YEAR);
             int month = calFrom.get(Calendar.MONTH);
@@ -68,11 +72,29 @@ public class MyApplication extends Application {
     }
 
     protected boolean saveSheetData() {
-        return mData.exportDataToFile(getLocalFileName());
+        boolean ret = false;
+        try {
+            ret = mData.exportDataToFile(openFileOutput(FILENAME_WORK, MODE_PRIVATE));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        return ret;
     }
 
-    protected String getLocalFileName() {
-        return getFilesDir() + File.separator + "work.csv";
+    protected Intent prepareUploadSheetData() {
+        Intent intent = null;
+        try {
+            if (mData.exportDataToFile(openFileOutput(FILENAME_UPLOAD, MODE_WORLD_READABLE))) {
+                intent = new Intent(Intent.ACTION_SEND);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.setType("text/comma-separated-values");
+                intent.putExtra(Intent.EXTRA_STREAM,
+                        Uri.fromFile(getFileStreamPath(FILENAME_UPLOAD)));
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        return intent;
     }
 
     /*----------------------------------------------------------------------*/

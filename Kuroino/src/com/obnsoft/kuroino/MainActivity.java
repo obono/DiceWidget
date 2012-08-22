@@ -18,6 +18,9 @@ package com.obnsoft.kuroino;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -28,6 +31,7 @@ import java.util.LinkedHashMap;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -226,7 +230,7 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        boolean ret;
+        boolean ret = false;
         switch (requestCode) {
         case REQUEST_ID_CREATE:
             if (resultCode == RESULT_OK) {
@@ -239,7 +243,11 @@ public class MainActivity extends Activity {
         case REQUEST_ID_IMPORT:
             if (resultCode == RESULT_OK) {
                 String path = data.getStringExtra(MyFilePickerActivity.INTENT_EXTRA_SELECTPATH);
-                ret = mData.importDataFromFile(path);
+                try {
+                    ret = mData.importDataFromFile(new FileInputStream(path));
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
                 if (ret) {
                     mCurDir = path.substring(0, path.lastIndexOf(File.separatorChar) + 1);
                     setPreferencesIsDirty();
@@ -254,7 +262,11 @@ public class MainActivity extends Activity {
         case REQUEST_ID_EXPORT:
             if (resultCode == RESULT_OK) {
                 String path = data.getStringExtra(MyFilePickerActivity.INTENT_EXTRA_SELECTPATH);
-                ret = mData.exportDataToFile(path);
+                try {
+                    ret = mData.exportDataToFile(new FileOutputStream(path));
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
                 if (ret) {
                     mCurDir = path.substring(0, path.lastIndexOf(File.separatorChar) + 1);
                     setPreferencesIsDirty();
@@ -374,7 +386,7 @@ public class MainActivity extends Activity {
             selectStampConfig();
             return true;
         case MENU_ID_UPLOAD:
-            // TODO
+            startUploadActivity();
             return true;
         }
         return false;
@@ -642,6 +654,17 @@ public class MainActivity extends Activity {
         intent.putExtra(MyFilePickerActivity.INTENT_EXTRA_EXTENSION, "csv");
         intent.putExtra(MyFilePickerActivity.INTENT_EXTRA_WRITEMODE, true);
         startActivityForResult(intent, REQUEST_ID_EXPORT);
+    }
+
+    private void startUploadActivity() {
+        Intent intent = ((MyApplication) getApplication()).prepareUploadSheetData();
+        if (intent != null) {
+            try {
+                startActivity(intent);
+            } catch (ActivityNotFoundException e) {
+                showResultToast(false);
+            }
+        }
     }
 
     /*----------------------------------------------------------------------*/
