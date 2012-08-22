@@ -59,4 +59,5 @@
     <string name="msg_success">処理は問題なく完了しました。</string>
     <string name="msg_error">処理中にエラーが発生しました。</string>
     <string name="msg_invalid">無効な値が入力されました。</string>
+    <string name="msg_uploadcaution">注意: メールアプリではアップロードできない恐れがあります</string>
 </resources>

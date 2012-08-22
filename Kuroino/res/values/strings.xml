@@ -60,4 +60,5 @@
     <string name="msg_success">The process was successfully completed.</string>
     <string name="msg_error">An error occurred during process.</string>
     <string name="msg_invalid">You entered an invalid parameter.</string>
+    <string name="msg_uploadcaution">Caution: Uploading will fail if you use the mail application.</string>
 </resources>

@@ -657,13 +657,15 @@ public class MainActivity extends Activity {
     }
 
     private void startUploadActivity() {
-        Intent intent = ((MyApplication) getApplication()).prepareUploadSheetData();
+        Intent intent = ((MyApplication) getApplication()).prepareSheetDataToUpload();
         if (intent != null) {
             try {
                 startActivity(intent);
             } catch (ActivityNotFoundException e) {
                 showResultToast(false);
             }
+        } else {
+            showResultToast(false);
         }
     }
 

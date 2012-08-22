@@ -16,7 +16,9 @@
 
 package com.obnsoft.kuroino;
 
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
@@ -28,6 +30,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Environment;
 import android.text.format.DateFormat;
 import android.view.View;
 import android.view.WindowManager;
@@ -38,6 +41,8 @@ public class MyApplication extends Application {
 
     private static final String FILENAME_WORK   = "work.csv";
     private static final String FILENAME_UPLOAD = "rollbook.csv";
+    private static final String EXT_FILEPATH_UPLOAD =
+        ".RollBook" + File.separator + FILENAME_UPLOAD;
 
     private SheetData mData;
 
@@ -65,6 +70,13 @@ public class MyApplication extends Application {
             mData.createNewData(calFrom, calTo, 1, null,
                     getResources().getStringArray(R.array.sample_members));
         }
+        cleanSheetDataToUpload();
+    }
+
+    @Override
+    public void onTerminate() {
+        cleanSheetDataToUpload();
+        super.onTerminate();
     }
 
     protected SheetData getSheetData() {
@@ -81,20 +93,52 @@ public class MyApplication extends Application {
         return ret;
     }
 
-    protected Intent prepareUploadSheetData() {
+    protected Intent prepareSheetDataToUpload() {
         Intent intent = null;
+        boolean isExternal = isMountedExternalStorage();
+        File file = getUploadFile(isExternal);
+        FileOutputStream stream = null;
         try {
-            if (mData.exportDataToFile(openFileOutput(FILENAME_UPLOAD, MODE_WORLD_READABLE))) {
+            if (isExternal) {
+                file.getParentFile().mkdirs();
+                stream = new FileOutputStream(file.getPath());
+            } else {
+                stream = openFileOutput(file.getName(), MODE_WORLD_READABLE);
+            }
+            if (stream != null && mData.exportDataToFile(stream)) {
                 intent = new Intent(Intent.ACTION_SEND);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 intent.setType("text/comma-separated-values");
-                intent.putExtra(Intent.EXTRA_STREAM,
-                        Uri.fromFile(getFileStreamPath(FILENAME_UPLOAD)));
+                intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
+                if (!isExternal) {
+                    showToast(this, R.string.msg_uploadcaution);
+                }
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
         return intent;
+    }
+
+    protected void cleanSheetDataToUpload() {
+        File file = getUploadFile(false);
+        file.delete();
+        if (isMountedExternalStorage()) {
+            file = getUploadFile(true);
+            file.delete();
+            file.getParentFile().delete();
+        }
+    }
+
+    private File getUploadFile(boolean isExternal) {
+        if (isExternal) {
+            return new File(Environment.getExternalStorageDirectory(), EXT_FILEPATH_UPLOAD);
+        }
+        return getFileStreamPath(FILENAME_UPLOAD);
+    }
+
+    private boolean isMountedExternalStorage() {
+        return Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState());
     }
 
     /*----------------------------------------------------------------------*/
