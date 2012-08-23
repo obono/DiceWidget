@@ -32,8 +32,8 @@
         <View
             android:layout_width="fill_parent"
             android:layout_height="1dip"
-            android:paddingLeft="4dip"
-            android:paddingRight="4dip"
+            android:layout_marginLeft="8dip"
+            android:layout_marginRight="8dip"
             android:background="#777"
             />
         <LinearLayout
@@ -56,12 +56,29 @@
         </LinearLayout>
     </LinearLayout>
 
-    <CheckBox
-        android:id="@+id/checkbox_config_sound"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/config_sound"
-        />
+        android:gravity="center"
+        >
+        <CheckBox
+            android:id="@+id/checkbox_config_sound"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="18dip"
+            android:text="@string/config_sound"
+            />
+        <ImageButton
+            android:id="@+id/button_stats"
+            android:layout_width="36dip"
+            android:layout_height="36dip"
+            android:background="@drawable/btn_config"
+            android:src="@android:drawable/ic_menu_recent_history"
+            android:scaleType="fitCenter"
+            android:tint="#440"
+            android:onClick="onClickButton"
+            />
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="fill_parent"

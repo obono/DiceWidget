@@ -110,6 +110,9 @@ public class ConfigActivity extends Activity {
             startService(intent);
         }
         finish();
+        if (v == findViewById(R.id.button_stats)) {
+            startActivity(new Intent(this, StatsActivity.class));
+        }
     }
 
     private void setDiceInfo(View v, int color) {
