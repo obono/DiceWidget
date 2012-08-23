@@ -101,12 +101,8 @@ public class MyService extends Service {
         mComponent = new ComponentName(context, MyWidgetProvider.class);
         mRandom = new Random();
 
-        PendingIntent pendingIntent;
-        pendingIntent = PendingIntent.getService(context, 0, new Intent(ACTION_SHAKE), 0);
-        mRemoteViews.setOnClickPendingIntent(R.id.group_dice, pendingIntent);
-        pendingIntent = PendingIntent.getActivity(
-                context, 0, new Intent(this, ConfigActivity.class), 0);
-        mRemoteViews.setOnClickPendingIntent(R.id.button_config, pendingIntent);
+        mRemoteViews.setOnClickPendingIntent(R.id.group_dice,
+                PendingIntent.getService(context, 0, new Intent(ACTION_SHAKE), 0));
         controlVisibilty(context);
     }
 
@@ -124,6 +120,13 @@ public class MyService extends Service {
             mRemoteViews.setViewVisibility(TEXT_IDS[i],
                     (count[i] >= 2) ? View.VISIBLE : View.GONE);
         }
+
+        boolean hoge = true;
+        mRemoteViews.setImageViewResource(R.id.button_config, hoge ?
+                android.R.drawable.ic_menu_preferences : android.R.drawable.ic_menu_recent_history);
+        Intent intent = new Intent(this, hoge ? ConfigActivity.class : StatsActivity.class);
+        mRemoteViews.setOnClickPendingIntent(R.id.button_config,
+                PendingIntent.getActivity(context, 0, intent, 0));
     }
 
     private void shakeDice(final Context context) {

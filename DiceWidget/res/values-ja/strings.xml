@@ -2,11 +2,14 @@
 <resources>
     <string name="about_title">バージョン情報</string>
     <string name="config_title">Dice Widget 設定</string>
+    <string name="stats_title">Dice Widget 統計</string>
     <string name="dice_none">なし</string>
     <string name="dice_white">白虎</string>
     <string name="dice_black">玄武</string>
     <string name="dice_red">朱雀</string>
     <string name="dice_blue">青龍</string>
     <string name="config_sound">効果音</string>
+    <string name="stats_noentry">項目なし</string>
+    <string name="stats_counts">振られたダイスの数</string>
     <string name="msg_double">Dice Widget は既に配置されています</string>
 </resources>
