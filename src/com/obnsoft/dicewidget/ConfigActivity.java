@@ -17,11 +17,8 @@
 package com.obnsoft.dicewidget;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -30,8 +27,6 @@ import android.widget.TextView;
 
 public class ConfigActivity extends Activity {
 
-    private static final String PREFS_KEY_COLORS = "colors";
-    private static final String PREFS_KEY_SOUND  = "sound";
     private static final int[] GROUP_IDS = {
         R.id.group_config_dice1, R.id.group_config_dice2,
         R.id.group_config_dice3, R.id.group_config_dice4,
@@ -42,49 +37,25 @@ public class ConfigActivity extends Activity {
     };
     private static final int[] DIE_LEVELS = { 2, 18, 28, 44 };
 
-    private int[]   mDieColor = new int[4];
-    private Button      mButtonOK;
-    private CheckBox    mCheckBoxSound;
+    private MyApplication   mApp;
+    private Button          mButtonOK;
+    private CheckBox        mCheckBoxSound;
+    private int[]           mDieColor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.config);
-        boolean sound = loadConfig(this, mDieColor);
+
+        mApp = (MyApplication) getApplication();
         mButtonOK = (Button) findViewById(R.id.button_config_ok);
+        mCheckBoxSound = (CheckBox) findViewById(R.id.checkbox_config_sound);
+
+        mDieColor = mApp.getDiceColor().clone();
         for (int i = 0; i < 4; i++) {
             setDiceInfo(findViewById(GROUP_IDS[i]), mDieColor[i]);
         }
-        mCheckBoxSound = (CheckBox) findViewById(R.id.checkbox_config_sound);
-        mCheckBoxSound.setChecked(sound);
-    }
-
-    public static boolean loadConfig(Context context, int[] colors) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        String ary[] = prefs.getString(PREFS_KEY_COLORS, "0,0,-1,-1").split(",");
-        for (int i = 0; i < 4; i++) {
-            try {
-                colors[i] = Integer.parseInt(ary[i]);
-            } catch (NumberFormatException e) {
-                colors[i] = (i < 2) ? 0 : -1;
-            }
-        }
-        return prefs.getBoolean(PREFS_KEY_SOUND, false);
-    }
-
-    public static void saveConfig(Context context, int[] colors, boolean sound) {
-        SharedPreferences.Editor editor =
-            PreferenceManager.getDefaultSharedPreferences(context).edit();
-        StringBuffer buf = new StringBuffer();
-        for (int i = 0; i < 4; i++) {
-            if (i > 0) {
-                buf.append(',');
-            }
-            buf.append(colors[i]);
-        }
-        editor.putString(PREFS_KEY_COLORS, buf.toString());
-        editor.putBoolean(PREFS_KEY_SOUND, sound);
-        editor.commit();
+        mCheckBoxSound.setChecked(mApp.getSoundEnable());
     }
 
     public void onClickDice(View v) {
@@ -105,12 +76,13 @@ public class ConfigActivity extends Activity {
 
     public void onClickButton(View v) {
         if (v == mButtonOK) {
-            saveConfig(this, mDieColor, mCheckBoxSound.isChecked());
-            Intent intent = new Intent(this, MyService.class);
-            startService(intent);
+            mApp.saveConfig(mDieColor, mCheckBoxSound.isChecked());
+            MyService.kickMyService(this, false);
         }
         finish();
         if (v == findViewById(R.id.button_stats)) {
+            mApp.setYellowMode(MyApplication.YELLOW_MODE_STATS);
+            MyService.kickMyService(this, true);
             startActivity(new Intent(this, StatsActivity.class));
         }
     }
