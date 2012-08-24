@@ -31,16 +31,9 @@ import android.widget.TextView;
 
 public class StatsActivity extends ListActivity {
 
-    private static final int[] IMAGE_IDS = {
-        R.id.image_dice1, R.id.image_dice2, R.id.image_dice3, R.id.image_dice4
-    };
-    private static final int[] TEXT_IDS = {
-        R.id.text_number_white, R.id.text_number_black,
-        R.id.text_number_red,   R.id.text_number_blue,
-    };
-
-    private DateFormat mDateFormat;
-    private DateFormat mTimeFormat;
+    private MyApplication   mApp;
+    private DateFormat      mDateFormat;
+    private DateFormat      mTimeFormat;
 
     /*-----------------------------------------------------------------------*/
 
@@ -69,7 +62,8 @@ public class StatsActivity extends ListActivity {
                 holder.tvCount = (TextView) convertView.findViewById(R.id.text_shake_count);
                 holder.tvDate = (TextView) convertView.findViewById(R.id.text_shake_date);
                 for (int i = 0; i < 4; i++) {
-                    holder.ivDice[i] = (ImageView) convertView.findViewById(IMAGE_IDS[i]);
+                    holder.ivDice[i] =
+                        (ImageView) convertView.findViewById(MyApplication.IMAGE_IDS[i]);
                 }
                 convertView.setTag(holder);
             } else {
@@ -80,6 +74,15 @@ public class StatsActivity extends ListActivity {
             mStrBuf.setLength(0);
             mStrBuf.append(mDateFormat.format(time)).append('\n').append(mTimeFormat.format(time));
             holder.tvDate.setText(mStrBuf.toString());
+            for (int i = 0; i < 4; i++) {
+                if (i < 4) {
+                    holder.ivDice[i].setVisibility(View.VISIBLE);
+                    holder.ivDice[i].setImageResource(R.drawable.dice);
+                    holder.ivDice[i].getDrawable().setLevel((position + i) % 48);
+                } else {
+                    holder.ivDice[i].setVisibility(View.GONE);
+                }
+            }
             return convertView;
         }
 
@@ -96,13 +99,14 @@ public class StatsActivity extends ListActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.stats);
 
+        mApp = (MyApplication) getApplication();
         mDateFormat = android.text.format.DateFormat.getDateFormat(this);
         mTimeFormat = android.text.format.DateFormat.getTimeFormat(this);
 
-        MyAdapter adapter = new MyAdapter(this, new String[5]); // TODO
+        MyAdapter adapter = new MyAdapter(this, new String[100]); // TODO
         setListAdapter(adapter);
         for (int i = 0; i < 4; i++) {
-            TextView tv = (TextView) findViewById(TEXT_IDS[i]);
+            TextView tv = (TextView) findViewById(MyApplication.TEXT_IDS[i]);
             tv.setText(String.valueOf(i * 123)); // TODO
         }
     }
@@ -110,6 +114,8 @@ public class StatsActivity extends ListActivity {
     public void onClickButton(View v) {
         finish();
         if (v == findViewById(R.id.button_config)) {
+            mApp.setYellowMode(MyApplication.YELLOW_MODE_CONFIG);
+            MyService.kickMyService(this, true);
             startActivity(new Intent(this, ConfigActivity.class));
         }
     }

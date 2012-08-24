@@ -8,45 +8,48 @@
         android:id="@+id/text_shake_count"
         android:layout_width="60dip"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="2dip"
+        android:gravity="center"
         android:textAppearance="@android:style/TextAppearance.Large"
         />
     <LinearLayout
-        android:layout_width="136dip"
-        android:layout_height="wrap_content"
+        android:layout_width="80dip"
+        android:layout_height="34dip"
         >
         <ImageView
             android:id="@+id/image_dice1"
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:padding="1dip"
-            android:src="@drawable/dice"
             />
         <ImageView
             android:id="@+id/image_dice2"
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:padding="1dip"
-            android:src="@drawable/dice"
             />
         <ImageView
             android:id="@+id/image_dice3"
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:padding="1dip"
-            android:src="@drawable/dice"
             />
         <ImageView
             android:id="@+id/image_dice4"
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:padding="1dip"
-            android:src="@drawable/dice"
             />
     </LinearLayout>
     <TextView
         android:id="@+id/text_shake_date"
         android:layout_width="80dip"
         android:layout_height="wrap_content"
-        android:gravity="right"
+        android:layout_marginRight="2dip"
+        android:gravity="center"
         />
 </LinearLayout>

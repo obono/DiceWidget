@@ -33,30 +33,22 @@ import android.widget.RemoteViews;
 
 public class MyService extends Service {
 
-    public static final String ACTION_SHAKE  = "com.obnsoft.dicewidget.action.SHAKE";
+    public static final String ACTION_SHAKE = "com.obnsoft.dicewidget.action.SHAKE";
+    public static final String EXTRA_YELLOW = "yellow";
 
     private static final String TAG = "DiceWidget";
     private static final int LOOP_COUNT = 10;
     private static final int TIMER_INTERVAL = 50;
 
-    private static final int[] IMAGE_IDS = {
-        R.id.image_dice1, R.id.image_dice2, R.id.image_dice3, R.id.image_dice4
-    };
-    private static final int[] TEXT_IDS = {
-        R.id.text_number_white, R.id.text_number_black,
-        R.id.text_number_red,   R.id.text_number_blue,
-    };
-
     private static boolean  sIsShaking = false;
     private static Object   sIsShakingLock = new Object();
+    private static int[]    sDieLevel = new int[4];
 
-    private int[]   mDieLevel = new int[4];
-    private int[]   mDieColor = new int[4];
-    private boolean mIsSndEnable = false;
-
+    private MyApplication   mApp;
     private RemoteViews     mRemoteViews;
     private ComponentName   mComponent;
     private Random          mRandom;
+    private int[]           mDieColor;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -80,6 +72,8 @@ public class MyService extends Service {
         initialize(context);
         if (ACTION_SHAKE.equals(intent.getAction())) {
             shakeDice(context);
+        } else if (intent.getBooleanExtra(EXTRA_YELLOW, false)){
+            refreshUI(context);
         } else {
             updateDice(context, true);
             showNumbers(context);
@@ -93,16 +87,33 @@ public class MyService extends Service {
         myLog("onDestroy");
     }
 
+    public static void kickMyService(Context context, boolean yellow) {
+        Intent intent = new Intent(context, MyService.class);
+        if (yellow) {
+            intent.putExtra(EXTRA_YELLOW, true);
+        }
+        context.startService(intent);
+    }
+
     private void initialize(Context context) {
         myLog("initialize");
-        mIsSndEnable = ConfigActivity.loadConfig(context, mDieColor);
 
+        mApp = (MyApplication) getApplication();
         mRemoteViews = new RemoteViews(getPackageName(), R.layout.main);
         mComponent = new ComponentName(context, MyWidgetProvider.class);
         mRandom = new Random();
 
         mRemoteViews.setOnClickPendingIntent(R.id.group_dice,
                 PendingIntent.getService(context, 0, new Intent(ACTION_SHAKE), 0));
+
+        boolean isConfig = (mApp.getYellowMode() == MyApplication.YELLOW_MODE_CONFIG);
+        mRemoteViews.setImageViewResource(R.id.button_config, isConfig ?
+                android.R.drawable.ic_menu_preferences : android.R.drawable.ic_menu_recent_history);
+        Intent intent = new Intent(this, isConfig ? ConfigActivity.class : StatsActivity.class);
+        mRemoteViews.setOnClickPendingIntent(R.id.button_config,
+                PendingIntent.getActivity(context, 0, intent, 0));
+
+        mDieColor = mApp.getDiceColor();
         controlVisibilty(context);
     }
 
@@ -111,22 +122,15 @@ public class MyService extends Service {
         for (int i = 0; i < 4; i++) {
             if (mDieColor[i] >= 0) {
                 count[mDieColor[i]]++;
-                mRemoteViews.setViewVisibility(IMAGE_IDS[i], View.VISIBLE);
+                mRemoteViews.setViewVisibility(MyApplication.IMAGE_IDS[i], View.VISIBLE);
             } else {
-                mRemoteViews.setViewVisibility(IMAGE_IDS[i], View.GONE);
+                mRemoteViews.setViewVisibility(MyApplication.IMAGE_IDS[i], View.GONE);
             }
         }
         for (int i = 0; i < 4; i++) {
-            mRemoteViews.setViewVisibility(TEXT_IDS[i],
-                    (count[i] >= 2) ? View.VISIBLE : View.GONE);
+            mRemoteViews.setViewVisibility(
+                    MyApplication.TEXT_IDS[i], (count[i] >= 2) ? View.VISIBLE : View.GONE);
         }
-
-        boolean hoge = true;
-        mRemoteViews.setImageViewResource(R.id.button_config, hoge ?
-                android.R.drawable.ic_menu_preferences : android.R.drawable.ic_menu_recent_history);
-        Intent intent = new Intent(this, hoge ? ConfigActivity.class : StatsActivity.class);
-        mRemoteViews.setOnClickPendingIntent(R.id.button_config,
-                PendingIntent.getActivity(context, 0, intent, 0));
     }
 
     private void shakeDice(final Context context) {
@@ -137,8 +141,9 @@ public class MyService extends Service {
                     myLog("shakeDice start");
                     sIsShaking = true;
                     hideNumbers(context);
+                    boolean isSndEnable = mApp.getSoundEnable();
                     MediaPlayer player = null;
-                    if (mIsSndEnable) {
+                    if (isSndEnable) {
                         player = MediaPlayer.create(context, R.raw.sound);
                         player.setAudioStreamType(AudioManager.STREAM_MUSIC);
                         player.start();
@@ -152,7 +157,7 @@ public class MyService extends Service {
                         }
                     }
                     showNumbers(context);
-                    if (mIsSndEnable) {
+                    if (isSndEnable) {
                         player.release();
                     }
                     sIsShaking = false;
@@ -162,22 +167,22 @@ public class MyService extends Service {
         }
     }
 
-    private void updateDice(Context context, boolean upeer) {
+    private void updateDice(Context context, boolean upper) {
         for (int i = 0; i < 4; i++) {
             if (mDieColor[i] >= 0) {
-                mDieLevel[i] = mRandom.nextInt(12);
-                mRemoteViews.setInt(IMAGE_IDS[i], "setImageLevel",
-                        mDieLevel[i] + mDieColor[i] * 12);
+                sDieLevel[i] = mRandom.nextInt(12);
+                mRemoteViews.setInt(MyApplication.IMAGE_IDS[i],
+                        "setImageLevel", sDieLevel[i] + mDieColor[i] * 12);
             }
         }
-        mRemoteViews.setViewVisibility(R.id.space_top, upeer ? View.GONE : View.VISIBLE);
-        mRemoteViews.setViewVisibility(R.id.space_bottom, upeer ? View.VISIBLE : View.GONE);
+        mRemoteViews.setViewVisibility(R.id.space_top, upper ? View.GONE : View.VISIBLE);
+        mRemoteViews.setViewVisibility(R.id.space_bottom, upper ? View.VISIBLE : View.GONE);
         refreshUI(context);
     }
 
     private void hideNumbers(Context context) {
         for (int i = 0; i < 4; i++) {
-            mRemoteViews.setTextViewText(TEXT_IDS[i], null);
+            mRemoteViews.setTextViewText(MyApplication.TEXT_IDS[i], null);
         }
     }
 
@@ -185,11 +190,11 @@ public class MyService extends Service {
         int[] value = new int[4];
         for (int i = 0; i < 4; i++) {
             if (mDieColor[i] >= 0) {
-                value[mDieColor[i]] += mDieLevel[i] / 2 + 1;
+                value[mDieColor[i]] += sDieLevel[i] / 2 + 1;
             }
         }
         for (int i = 0; i < 4; i++) {
-            mRemoteViews.setTextViewText(TEXT_IDS[i], String.valueOf(value[i]));
+            mRemoteViews.setTextViewText(MyApplication.TEXT_IDS[i], String.valueOf(value[i]));
         }
         refreshUI(context);
     }
