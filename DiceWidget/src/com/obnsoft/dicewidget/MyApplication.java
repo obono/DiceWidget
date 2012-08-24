@@ -17,7 +17,13 @@
 package com.obnsoft.dicewidget;
 
 import android.app.Application;
+import android.content.ContentValues;
+import android.content.Context;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.preference.PreferenceManager;
 
 public class MyApplication extends Application {
@@ -34,15 +40,56 @@ public class MyApplication extends Application {
         R.id.text_number_red,   R.id.text_number_blue,
     };
 
+    private static final String DB_NAME         = "database.db";
+    private static final int    DB_VER          = 1;
+    private static final String DB_TBL_HISTORY  = "history";
+    private static final String DB_TBL_COUNT    = "count";
+    private static final String DB_COL_ID       = "_id";
+    private static final String DB_COL_DICE     = "dice";
+    private static final String DB_COL_TIME     = "time";
+    private static final String[] DB_COLS_COLOR = { "white", "black", "red", "blue" };
+
     private static final String PREFS_KEY_COLORS = "colors";
     private static final String PREFS_KEY_SOUND  = "sound";
     private static final String PREFS_KEY_YELLOW = "yellow";
 
     private SharedPreferences   mPrefs;
+    private SQLiteDatabase      mDB;
 
     private int[]   mDieColor = new int[4];
     private boolean mIsSndEnable;
     private int     mYellowMode;
+    private int[]   mDieCount = new int[4];
+
+    /*-----------------------------------------------------------------------*/
+
+    class MySQLiteOpenHelper extends SQLiteOpenHelper {
+
+        public MySQLiteOpenHelper(Context context, String name, int version) {
+            super(context, name, null, version);
+        }
+
+        @Override
+        public void onCreate(SQLiteDatabase db) {
+            db.execSQL("CREATE TABLE " + DB_TBL_HISTORY + "(" +
+                    DB_COL_ID   + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                    DB_COL_DICE + " INTEGER NOT NULL," +
+                    DB_COL_TIME + " INTEGER NOT NULL)");
+            db.execSQL("CREATE TABLE " + DB_TBL_HISTORY + "(" +
+                    DB_COLS_COLOR[0] + " INTEGER NOT NULL," +
+                    DB_COLS_COLOR[1] + " INTEGER NOT NULL," +
+                    DB_COLS_COLOR[2] + " INTEGER NOT NULL," +
+                    DB_COLS_COLOR[3] + " INTEGER NOT NULL)");
+            db.insert(DB_TBL_COUNT, null, getDiceCountValues());
+        }
+
+        @Override
+        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+            // Do nothing.
+        }
+    }
+
+    /*-----------------------------------------------------------------------*/
 
     @Override
     public void onCreate() {
@@ -59,6 +106,19 @@ public class MyApplication extends Application {
         }
         mIsSndEnable = mPrefs.getBoolean(PREFS_KEY_SOUND, false);
         mYellowMode = mPrefs.getInt(PREFS_KEY_YELLOW, YELLOW_MODE_CONFIG);
+
+        try{
+            mDB = new MySQLiteOpenHelper(this, DB_NAME, DB_VER).getWritableDatabase();
+        } catch(SQLiteException e) {
+            e.printStackTrace();
+            return;
+        }
+        Cursor cursor = mDB.query(DB_TBL_COUNT, null, null, null, null, null, null);
+        cursor.moveToFirst();
+        for (int i = 0; i < 4; i++) {
+            mDieCount[i] = cursor.getInt(i);
+        }
+        cursor.close();
     }
 
     public int[] getDiceColor() {
@@ -95,4 +155,48 @@ public class MyApplication extends Application {
         editor.commit();
     }
 
+    public void addShakeRecord(int[] colorAry, int[] levelAry) {
+        int diceValue = 0;
+        for (int i = 0; i < 4; i++) {
+            int value = 0xFF;
+            if (colorAry[i] >= 0) {
+                mDieCount[colorAry[i]]++;
+                value = levelAry[i];
+            }
+            diceValue |= value << (i * 8);
+        }
+
+        mDB.beginTransaction();
+        try {
+            ContentValues values = new ContentValues();
+            values.put(DB_COL_DICE, diceValue);
+            values.put(DB_COL_TIME, System.currentTimeMillis());
+            long id = mDB.insert(DB_TBL_HISTORY, null, values);
+            if (id > 100) {
+                mDB.delete(DB_TBL_HISTORY, "_id <= ?", new String[]{String.valueOf(id - 100)});
+            }
+            mDB.update(DB_TBL_COUNT, getDiceCountValues(), null, null);
+            mDB.setTransactionSuccessful();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            mDB.endTransaction();
+        }
+    }
+
+    public Cursor getStatsInfo(int[] countAry) {
+        return mDB.query(DB_TBL_HISTORY, null, null, null, null, null, null);
+    }
+
+    public int[] getStatsCount() {
+        return mDieCount;
+    }
+
+    private ContentValues getDiceCountValues() {
+        ContentValues values = new ContentValues();
+        for (int i = 0; i < 4; i++) {
+            values.put(DB_COLS_COLOR[i], mDieCount[i]);
+        }
+        return values;
+    }
 }
