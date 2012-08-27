@@ -47,6 +47,7 @@ public class MyApplication extends Application {
     private static final String DB_COL_ID       = "_id";
     private static final String DB_COL_DICE     = "dice";
     private static final String DB_COL_TIME     = "time";
+    private static final int    DB_KEEP_ROWS    = 100;
     private static final String[] DB_COLS_COLOR = { "white", "black", "red", "blue" };
 
     private static final String PREFS_KEY_COLORS = "colors";
@@ -75,12 +76,12 @@ public class MyApplication extends Application {
                     DB_COL_ID   + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                     DB_COL_DICE + " INTEGER NOT NULL," +
                     DB_COL_TIME + " INTEGER NOT NULL)");
-            db.execSQL("CREATE TABLE " + DB_TBL_HISTORY + "(" +
+            db.execSQL("CREATE TABLE " + DB_TBL_COUNT + "(" +
                     DB_COLS_COLOR[0] + " INTEGER NOT NULL," +
                     DB_COLS_COLOR[1] + " INTEGER NOT NULL," +
                     DB_COLS_COLOR[2] + " INTEGER NOT NULL," +
                     DB_COLS_COLOR[3] + " INTEGER NOT NULL)");
-            db.insert(DB_TBL_COUNT, null, getDiceCountValues());
+            db.insert(DB_TBL_COUNT, null, obtainDiceCountValues());
         }
 
         @Override
@@ -133,15 +134,24 @@ public class MyApplication extends Application {
         return mYellowMode;
     }
 
+    public int[] getDiceCount() {
+        return mDieCount;
+    }
+
+    public Cursor getShakeRecordCursor() {
+        return mDB.query(DB_TBL_HISTORY, null, null, null, null, null, DB_COL_ID + " DESC");
+    }
+
     public void saveConfig(int[] colorAry, boolean sound) {
+        mDieColor = colorAry;
+        mIsSndEnable = sound;
         SharedPreferences.Editor editor = mPrefs.edit();
         StringBuffer buf = new StringBuffer();
-        mDieColor = colorAry;
         for (int i = 0; i < 4; i++) {
             if (i > 0) {
                 buf.append(',');
             }
-            buf.append(mDieColor[i]);
+            buf.append(colorAry[i]);
         }
         editor.putString(PREFS_KEY_COLORS, buf.toString());
         editor.putBoolean(PREFS_KEY_SOUND, sound);
@@ -158,12 +168,12 @@ public class MyApplication extends Application {
     public void addShakeRecord(int[] colorAry, int[] levelAry) {
         int diceValue = 0;
         for (int i = 0; i < 4; i++) {
-            int value = 0xFF;
+            int level = 0xFF;
             if (colorAry[i] >= 0) {
                 mDieCount[colorAry[i]]++;
-                value = levelAry[i];
+                level = levelAry[i] + colorAry[i] * 12;
             }
-            diceValue |= value << (i * 8);
+            diceValue |= level << (i * 8);
         }
 
         mDB.beginTransaction();
@@ -172,10 +182,11 @@ public class MyApplication extends Application {
             values.put(DB_COL_DICE, diceValue);
             values.put(DB_COL_TIME, System.currentTimeMillis());
             long id = mDB.insert(DB_TBL_HISTORY, null, values);
-            if (id > 100) {
-                mDB.delete(DB_TBL_HISTORY, "_id <= ?", new String[]{String.valueOf(id - 100)});
+            if (id > DB_KEEP_ROWS) {
+                mDB.delete(DB_TBL_HISTORY,
+                        DB_COL_ID + " <= " + String.valueOf(id - DB_KEEP_ROWS), null);
             }
-            mDB.update(DB_TBL_COUNT, getDiceCountValues(), null, null);
+            mDB.update(DB_TBL_COUNT, obtainDiceCountValues(), null, null);
             mDB.setTransactionSuccessful();
         } catch (Exception e) {
             e.printStackTrace();
@@ -184,15 +195,7 @@ public class MyApplication extends Application {
         }
     }
 
-    public Cursor getStatsInfo(int[] countAry) {
-        return mDB.query(DB_TBL_HISTORY, null, null, null, null, null, null);
-    }
-
-    public int[] getStatsCount() {
-        return mDieCount;
-    }
-
-    private ContentValues getDiceCountValues() {
+    private ContentValues obtainDiceCountValues() {
         ContentValues values = new ContentValues();
         for (int i = 0; i < 4; i++) {
             values.put(DB_COLS_COLOR[i], mDieCount[i]);
