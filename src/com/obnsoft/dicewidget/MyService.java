@@ -157,7 +157,7 @@ public class MyService extends Service {
                         }
                     }
                     showNumbers(context);
-                    //mApp.addShakeRecord(mDieColor, sDieLevel);
+                    mApp.addShakeRecord(mDieColor, sDieLevel);
                     if (isSndEnable) {
                         player.release();
                     }

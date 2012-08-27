@@ -21,11 +21,12 @@ import java.text.DateFormat;
 import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.widget.CursorAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -37,7 +38,7 @@ public class StatsActivity extends ListActivity {
 
     /*-----------------------------------------------------------------------*/
 
-    class MyAdapter extends ArrayAdapter<String> {
+    class MyAdapter extends CursorAdapter {
 
         class ViewHolder {
             TextView    tvCount;
@@ -48,42 +49,43 @@ public class StatsActivity extends ListActivity {
         private LayoutInflater  mInflater;
         private StringBuffer    mStrBuf = new StringBuffer();
 
-        public MyAdapter(Context context, String[] objects) {
-            super(context, 0, objects);
+        public MyAdapter(Context context, Cursor cursor) {
+            super(context, cursor);
             mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         }
 
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            ViewHolder holder;
-            if (convertView == null) {
-                convertView = mInflater.inflate(R.layout.stats_item, null);
-                holder = new ViewHolder();
-                holder.tvCount = (TextView) convertView.findViewById(R.id.text_shake_count);
-                holder.tvDate = (TextView) convertView.findViewById(R.id.text_shake_date);
-                for (int i = 0; i < 4; i++) {
-                    holder.ivDice[i] =
-                        (ImageView) convertView.findViewById(MyApplication.IMAGE_IDS[i]);
-                }
-                convertView.setTag(holder);
-            } else {
-                holder = (ViewHolder) convertView.getTag();
-            }
-            holder.tvCount.setText(String.valueOf(position));
-            long time = System.currentTimeMillis();
-            mStrBuf.setLength(0);
-            mStrBuf.append(mDateFormat.format(time)).append('\n').append(mTimeFormat.format(time));
-            holder.tvDate.setText(mStrBuf.toString());
+        public View newView(Context context, Cursor cursor, ViewGroup parent) {
+            View view = mInflater.inflate(R.layout.stats_item, null);
+            ViewHolder holder = new ViewHolder();
+            holder.tvCount = (TextView) view.findViewById(R.id.text_shake_count);
+            holder.tvDate = (TextView) view.findViewById(R.id.text_shake_date);
             for (int i = 0; i < 4; i++) {
-                if (i < 4) {
+                holder.ivDice[i] = (ImageView) view.findViewById(MyApplication.IMAGE_IDS[i]);
+            }
+            view.setTag(holder);
+            return view;
+        }
+
+        @Override
+        public void bindView(View view, Context context, Cursor cursor) {
+            ViewHolder holder = (ViewHolder) view.getTag();
+            holder.tvCount.setText(String.valueOf(cursor.getInt(0)));
+            int diceValue = cursor.getInt(1);
+            for (int i = 0; i < 4; i++) {
+                int level = (diceValue >> (i * 8)) & 0xFF;
+                if (level != 0xFF) {
                     holder.ivDice[i].setVisibility(View.VISIBLE);
                     holder.ivDice[i].setImageResource(R.drawable.dice);
-                    holder.ivDice[i].getDrawable().setLevel((position + i) % 48);
+                    holder.ivDice[i].getDrawable().setLevel(level);
                 } else {
                     holder.ivDice[i].setVisibility(View.GONE);
                 }
             }
-            return convertView;
+            long time = cursor.getLong(2);
+            mStrBuf.setLength(0);
+            mStrBuf.append(mDateFormat.format(time)).append('\n').append(mTimeFormat.format(time));
+            holder.tvDate.setText(mStrBuf.toString());
         }
 
         @Override
@@ -103,21 +105,22 @@ public class StatsActivity extends ListActivity {
         mDateFormat = android.text.format.DateFormat.getDateFormat(this);
         mTimeFormat = android.text.format.DateFormat.getTimeFormat(this);
 
-        MyAdapter adapter = new MyAdapter(this, new String[100]); // TODO
+        MyAdapter adapter = new MyAdapter(this, mApp.getShakeRecordCursor());
         setListAdapter(adapter);
+        int[] countAry = mApp.getDiceCount();
         for (int i = 0; i < 4; i++) {
             TextView tv = (TextView) findViewById(MyApplication.TEXT_IDS[i]);
-            tv.setText(String.valueOf(i * 123)); // TODO
+            tv.setText(String.valueOf(countAry[i]));
         }
     }
 
     public void onClickButton(View v) {
-        finish();
         if (v == findViewById(R.id.button_config)) {
             mApp.setYellowMode(MyApplication.YELLOW_MODE_CONFIG);
             MyService.kickMyService(this, true);
             startActivity(new Intent(this, ConfigActivity.class));
         }
+        finish();
     }
 
 }

@@ -79,12 +79,12 @@ public class ConfigActivity extends Activity {
             mApp.saveConfig(mDieColor, mCheckBoxSound.isChecked());
             MyService.kickMyService(this, false);
         }
-        finish();
         if (v == findViewById(R.id.button_stats)) {
             mApp.setYellowMode(MyApplication.YELLOW_MODE_STATS);
             MyService.kickMyService(this, true);
             startActivity(new Intent(this, StatsActivity.class));
         }
+        finish();
     }
 
     private void setDiceInfo(View v, int color) {

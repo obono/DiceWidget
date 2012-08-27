@@ -44,11 +44,13 @@
         <activity
             android:name=".ConfigActivity"
             android:label="@string/config_title"
+            android:launchMode="singleInstance"
             android:configChanges="keyboard|keyboardHidden|orientation"
             />
         <activity
             android:name=".StatsActivity"
             android:label="@string/stats_title"
+            android:launchMode="singleInstance"
             android:configChanges="keyboard|keyboardHidden|orientation"
             />
     </application>
