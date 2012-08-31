@@ -74,6 +74,7 @@ public class MyService extends Service {
         } else {
             updateDice(context, true);
             showNumbers(context);
+            manageNotification(context);
         }
         stopSelf();
     }
@@ -116,10 +117,13 @@ public class MyService extends Service {
             mRemoteViews.setViewVisibility(
                     MyApplication.TEXT_IDS[i], (count[i] >= 2) ? View.VISIBLE : View.GONE);
         }
+    }
+
+    private void manageNotification(Context context) {
         if (mApp.getShowStatsIcon()) {
-            MyApplication.showNotice(this, MyApplication.NOTICE_ID_STATS, 0);
+            MyApplication.showNotice(context, MyApplication.NOTICE_ID_STATS, 0);
         } else {
-            MyApplication.hideNotice(this, MyApplication.NOTICE_ID_STATS);
+            MyApplication.hideNotice(context, MyApplication.NOTICE_ID_STATS);
         }
     }
 
@@ -148,7 +152,9 @@ public class MyService extends Service {
                     }
                     showNumbers(context);
                     long count = mApp.addShakeRecord(mDieColor, sDieLevel);
-                    MyApplication.showNotice(MyService.this, MyApplication.NOTICE_ID_STATS, count);
+                    if (mApp.getShowStatsIcon()) {
+                        MyApplication.showNotice(context, MyApplication.NOTICE_ID_STATS, count);
+                    }
                     if (isSndEnable) {
                         player.release();
                     }

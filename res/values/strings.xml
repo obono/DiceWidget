@@ -11,7 +11,9 @@
     <string name="dice_red">Red</string>
     <string name="dice_blue">Blue</string>
     <string name="config_sound">Sound</string>
+    <string name="config_stats">Confirm stats</string>
     <string name="stats_noentry">No entries</string>
     <string name="stats_counts">Counts of shaken dice</string>
     <string name="msg_double">Dice Widget is already allocated.</string>
+    <string name="msg_shook">You shook dice %d times.</string>
 </resources>

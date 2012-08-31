@@ -116,7 +116,8 @@ public class MyApplication extends Application {
         if (id == NOTICE_ID_STATS) {
             PendingIntent pIntent = PendingIntent.getActivity(context, 0,
                     new Intent(context, StatsActivity.class), Intent.FLAG_ACTIVITY_NEW_TASK);
-            String msg = (count > 0) ? String.format("You shook dice %d times.", count) : null;
+            String msg = (count > 0) ?
+                    String.format(context.getText(R.string.msg_shook).toString(), count) : null;
             notice.setLatestEventInfo(context, context.getText(R.string.stats_title), msg, pIntent);
             notice.flags |= Notification.FLAG_NO_CLEAR | Notification.FLAG_ONGOING_EVENT;
         }
@@ -157,7 +158,7 @@ public class MyApplication extends Application {
             }
         }
         mIsSndEnable = mPrefs.getBoolean(PREFS_KEY_SOUND, false);
-        mShowStatsIcon = mPrefs.getBoolean(PREFS_KEY_STATS, true);
+        mShowStatsIcon = mPrefs.getBoolean(PREFS_KEY_STATS, false);
 
         try{
             mDB = new MySQLiteOpenHelper(this, DB_NAME, DB_VER).getWritableDatabase();
