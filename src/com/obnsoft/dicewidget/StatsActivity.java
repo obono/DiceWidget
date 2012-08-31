@@ -20,7 +20,6 @@ import java.text.DateFormat;
 
 import android.app.ListActivity;
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -110,17 +109,8 @@ public class StatsActivity extends ListActivity {
         int[] countAry = mApp.getDiceCount();
         for (int i = 0; i < 4; i++) {
             TextView tv = (TextView) findViewById(MyApplication.TEXT_IDS[i]);
-            tv.setText(String.valueOf(countAry[i]));
+            tv.setText(String.valueOf(countAry[6 + i]));
         }
-    }
-
-    public void onClickButton(View v) {
-        if (v == findViewById(R.id.button_config)) {
-            mApp.setYellowMode(MyApplication.YELLOW_MODE_CONFIG);
-            MyService.kickMyService(this, true);
-            startActivity(new Intent(this, ConfigActivity.class));
-        }
-        finish();
     }
 
 }
