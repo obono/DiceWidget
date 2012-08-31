@@ -31,9 +31,20 @@ import android.widget.TextView;
 
 public class StatsActivity extends ListActivity {
 
+    private static final int[] E_IMAGE_IDS = {
+        R.id.image_eye1, R.id.image_eye2, R.id.image_eye3,
+        R.id.image_eye4, R.id.image_eye5, R.id.image_eye6,
+    };
+
+    private static final int[] E_TEXT_IDS = {
+        R.id.text_number_e1, R.id.text_number_e2, R.id.text_number_e3,
+        R.id.text_number_e4, R.id.text_number_e5, R.id.text_number_e6,
+    };
+
     private MyApplication   mApp;
     private DateFormat      mDateFormat;
     private DateFormat      mTimeFormat;
+    private Cursor          mCursor;
 
     /*-----------------------------------------------------------------------*/
 
@@ -104,13 +115,32 @@ public class StatsActivity extends ListActivity {
         mDateFormat = android.text.format.DateFormat.getDateFormat(this);
         mTimeFormat = android.text.format.DateFormat.getTimeFormat(this);
 
-        MyAdapter adapter = new MyAdapter(this, mApp.getShakeRecordCursor());
+        mCursor = mApp.getShakeRecordCursor();
+        MyAdapter adapter = new MyAdapter(this, mCursor);
         setListAdapter(adapter);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mCursor.requery();
         int[] countAry = mApp.getDiceCount();
+        for (int i = 0; i < 6; i++) {
+            ImageView iv = (ImageView) findViewById(E_IMAGE_IDS[i]);
+            iv.getDrawable().setLevel(i * 2);
+            TextView tv = (TextView) findViewById(E_TEXT_IDS[i]);
+            tv.setText(String.valueOf(countAry[i]));
+        }
         for (int i = 0; i < 4; i++) {
             TextView tv = (TextView) findViewById(MyApplication.TEXT_IDS[i]);
             tv.setText(String.valueOf(countAry[6 + i]));
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        mCursor.close();
+        super.onDestroy();
     }
 
 }

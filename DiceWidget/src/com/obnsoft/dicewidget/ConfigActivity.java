@@ -40,6 +40,7 @@ public class ConfigActivity extends Activity {
     private MyApplication   mApp;
     private Button          mButtonOK;
     private CheckBox        mCheckBoxSound;
+    private CheckBox        mCheckBoxStats;
     private int[]           mDieColor;
 
     @Override
@@ -50,12 +51,14 @@ public class ConfigActivity extends Activity {
         mApp = (MyApplication) getApplication();
         mButtonOK = (Button) findViewById(R.id.button_config_ok);
         mCheckBoxSound = (CheckBox) findViewById(R.id.checkbox_config_sound);
+        mCheckBoxStats = (CheckBox) findViewById(R.id.checkbox_config_stats);
 
         mDieColor = mApp.getDiceColor().clone();
         for (int i = 0; i < 4; i++) {
             setDiceInfo(findViewById(GROUP_IDS[i]), mDieColor[i]);
         }
         mCheckBoxSound.setChecked(mApp.getSoundEnable());
+        mCheckBoxStats.setChecked(mApp.getShowStatsIcon());
     }
 
     public void onClickDice(View v) {
@@ -76,7 +79,7 @@ public class ConfigActivity extends Activity {
 
     public void onClickButton(View v) {
         if (v == mButtonOK) {
-            mApp.saveConfig(mDieColor, mCheckBoxSound.isChecked(), false);
+            mApp.saveConfig(mDieColor, mCheckBoxSound.isChecked(), mCheckBoxStats.isChecked());
             startService(new Intent(this, MyService.class));
         }
         finish();

@@ -9,7 +9,9 @@
     <string name="dice_red">朱雀</string>
     <string name="dice_blue">青龍</string>
     <string name="config_sound">効果音</string>
+    <string name="config_stats">統計を確認</string>
     <string name="stats_noentry">項目なし</string>
     <string name="stats_counts">振られたダイスの数</string>
     <string name="msg_double">Dice Widget は既に配置されています</string>
+    <string name="msg_shook">サイコロを%d回振りました</string>
 </resources>
