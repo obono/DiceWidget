@@ -76,13 +76,8 @@ public class ConfigActivity extends Activity {
 
     public void onClickButton(View v) {
         if (v == mButtonOK) {
-            mApp.saveConfig(mDieColor, mCheckBoxSound.isChecked());
-            MyService.kickMyService(this, false);
-        }
-        if (v == findViewById(R.id.button_stats)) {
-            mApp.setYellowMode(MyApplication.YELLOW_MODE_STATS);
-            MyService.kickMyService(this, true);
-            startActivity(new Intent(this, StatsActivity.class));
+            mApp.saveConfig(mDieColor, mCheckBoxSound.isChecked(), false);
+            startService(new Intent(this, MyService.class));
         }
         finish();
     }

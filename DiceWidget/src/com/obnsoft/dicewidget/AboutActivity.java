@@ -53,7 +53,7 @@ public class AboutActivity extends Activity {
         /*  Show version information  */
         setContentView(R.layout.about);
         TextView textView = (TextView) findViewById(R.id.text_about_version);
-        textView.setText(MyWidgetProvider.getVersion(this));
+        textView.setText(MyApplication.getVersion(this));
         try {
             StringBuilder buf = new StringBuilder();
             InputStream in = getResources().openRawResource(R.raw.license);
@@ -70,7 +70,7 @@ public class AboutActivity extends Activity {
     }
 
     public void onClickButton(View v) {
-        MyWidgetProvider.hideNotice(this);
+        MyApplication.hideNotice(this, MyApplication.NOTICE_ID_ABOUT);
         finish();
     }
 

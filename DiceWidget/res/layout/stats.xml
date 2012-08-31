@@ -1,15 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="224dip"
-    android:layout_height="wrap_content"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
     android:orientation="vertical"
     >
 
-    <View
-        android:layout_width="fill_parent"
-        android:layout_height="1dip"
-        android:background="#777"
-        />
     <ListView
         android:id="@+id/android:list"
         android:layout_width="fill_parent"
@@ -19,11 +14,13 @@
     <TextView
         android:id="@+id/android:empty"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="fill_parent"
+        android:layout_weight="1"
         android:gravity="center"
         android:text="@string/stats_noentry"
         android:textAppearance="@android:style/TextAppearance.Large"
         />
+
     <View
         android:layout_width="fill_parent"
         android:layout_height="1dip"
@@ -89,35 +86,6 @@
                     />
             </LinearLayout>
         </LinearLayout>
-        <ImageButton
-            android:id="@+id/button_config"
-            android:layout_width="36dip"
-            android:layout_height="36dip"
-            android:background="@drawable/btn_config"
-            android:src="@android:drawable/ic_menu_preferences"
-            android:scaleType="fitCenter"
-            android:tint="#440"
-            android:onClick="onClickButton"
-            />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:weightSum="2"
-        android:paddingTop="4dip"
-        android:paddingLeft="2dip"
-        android:paddingRight="2dip"
-        android:background="#777"
-        >
-        <Button
-            android:layout_width="0dip"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@android:string/ok"
-            android:onClick="onClickButton"
-            />
     </LinearLayout>
 
 </LinearLayout>

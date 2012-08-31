@@ -34,7 +34,6 @@ import android.widget.RemoteViews;
 public class MyService extends Service {
 
     public static final String ACTION_SHAKE = "com.obnsoft.dicewidget.action.SHAKE";
-    public static final String EXTRA_YELLOW = "yellow";
 
     private static final String TAG = "DiceWidget";
     private static final int LOOP_COUNT = 10;
@@ -72,8 +71,6 @@ public class MyService extends Service {
         initialize(context);
         if (ACTION_SHAKE.equals(intent.getAction())) {
             shakeDice(context);
-        } else if (intent.getBooleanExtra(EXTRA_YELLOW, false)){
-            refreshUI(context);
         } else {
             updateDice(context, true);
             showNumbers(context);
@@ -87,14 +84,6 @@ public class MyService extends Service {
         myLog("onDestroy");
     }
 
-    public static void kickMyService(Context context, boolean yellow) {
-        Intent intent = new Intent(context, MyService.class);
-        if (yellow) {
-            intent.putExtra(EXTRA_YELLOW, true);
-        }
-        context.startService(intent);
-    }
-
     private void initialize(Context context) {
         myLog("initialize");
 
@@ -105,11 +94,7 @@ public class MyService extends Service {
 
         mRemoteViews.setOnClickPendingIntent(R.id.group_dice,
                 PendingIntent.getService(context, 0, new Intent(ACTION_SHAKE), 0));
-
-        boolean isConfig = (mApp.getYellowMode() == MyApplication.YELLOW_MODE_CONFIG);
-        mRemoteViews.setImageViewResource(R.id.button_config, isConfig ?
-                android.R.drawable.ic_menu_preferences : android.R.drawable.ic_menu_recent_history);
-        Intent intent = new Intent(this, isConfig ? ConfigActivity.class : StatsActivity.class);
+        Intent intent = new Intent(this, ConfigActivity.class);
         mRemoteViews.setOnClickPendingIntent(R.id.button_config,
                 PendingIntent.getActivity(context, 0, intent, 0));
 
@@ -130,6 +115,11 @@ public class MyService extends Service {
         for (int i = 0; i < 4; i++) {
             mRemoteViews.setViewVisibility(
                     MyApplication.TEXT_IDS[i], (count[i] >= 2) ? View.VISIBLE : View.GONE);
+        }
+        if (mApp.getShowStatsIcon()) {
+            MyApplication.showNotice(this, MyApplication.NOTICE_ID_STATS, 0);
+        } else {
+            MyApplication.hideNotice(this, MyApplication.NOTICE_ID_STATS);
         }
     }
 
@@ -157,7 +147,8 @@ public class MyService extends Service {
                         }
                     }
                     showNumbers(context);
-                    mApp.addShakeRecord(mDieColor, sDieLevel);
+                    long count = mApp.addShakeRecord(mDieColor, sDieLevel);
+                    MyApplication.showNotice(MyService.this, MyApplication.NOTICE_ID_STATS, count);
                     if (isSndEnable) {
                         player.release();
                     }
