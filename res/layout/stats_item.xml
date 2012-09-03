@@ -43,7 +43,7 @@
     </LinearLayout>
     <TextView
         android:id="@+id/text_shake_date"
-        android:layout_width="96dip"
+        android:layout_width="88dip"
         android:layout_height="wrap_content"
         android:gravity="center"
         />
