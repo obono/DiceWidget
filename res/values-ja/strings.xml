@@ -11,7 +11,6 @@
     <string name="config_sound">効果音</string>
     <string name="config_stats">統計を確認</string>
     <string name="stats_noentry">項目なし</string>
-    <string name="stats_counts">振られたダイスの数</string>
     <string name="msg_double">Dice Widget は既に配置されています</string>
     <string name="msg_shook">サイコロを%d回振りました</string>
     <string name="fmt_time12">a K:mm:ss</string>
