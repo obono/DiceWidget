@@ -5,7 +5,7 @@
     >
 
     <LinearLayout
-        android:layout_width="192dip"
+        android:layout_width="144dip"
         android:layout_height="fill_parent"
         android:orientation="vertical"
         android:gravity="center"
@@ -121,8 +121,9 @@
                 />
         </LinearLayout>
         <LinearLayout
-            android:layout_width="192dip"
+            android:layout_width="96dip"
             android:layout_height="16dip"
+            android:layout_marginTop="16dip"
             >
             <ImageView
                 android:layout_width="fill_parent"
@@ -136,21 +137,9 @@
                 android:layout_weight="1"
                 android:src="@drawable/frk"
                 />
-            <ImageView
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:src="@drawable/frr"
-                />
-            <ImageView
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:src="@drawable/frb"
-                />
         </LinearLayout>
         <LinearLayout
-            android:layout_width="192dip"
+            android:layout_width="96dip"
             android:layout_height="wrap_content"
             >
             <TextView
@@ -171,6 +160,28 @@
                 android:background="#9444"
                 android:textColor="#FFF"
                 />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="96dip"
+            android:layout_height="16dip"
+            >
+            <ImageView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:src="@drawable/frr"
+                />
+            <ImageView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:src="@drawable/frb"
+                />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="96dip"
+            android:layout_height="wrap_content"
+            >
             <TextView
                 android:id="@+id/text_number_red"
                 android:layout_width="fill_parent"
