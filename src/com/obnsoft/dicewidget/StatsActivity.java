@@ -17,6 +17,7 @@
 package com.obnsoft.dicewidget;
 
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 import android.app.ListActivity;
 import android.content.Context;
@@ -42,9 +43,9 @@ public class StatsActivity extends ListActivity {
     };
 
     private MyApplication   mApp;
+    private Cursor          mCursor;
     private DateFormat      mDateFormat;
     private DateFormat      mTimeFormat;
-    private Cursor          mCursor;
 
     /*-----------------------------------------------------------------------*/
 
@@ -112,9 +113,6 @@ public class StatsActivity extends ListActivity {
         setContentView(R.layout.stats);
 
         mApp = (MyApplication) getApplication();
-        mDateFormat = android.text.format.DateFormat.getDateFormat(this);
-        mTimeFormat = android.text.format.DateFormat.getTimeFormat(this);
-
         mCursor = mApp.getShakeRecordCursor();
         MyAdapter adapter = new MyAdapter(this, mCursor);
         setListAdapter(adapter);
@@ -123,6 +121,10 @@ public class StatsActivity extends ListActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        mDateFormat = android.text.format.DateFormat.getDateFormat(this);
+        int resId = android.text.format.DateFormat.is24HourFormat(this) ?
+                R.string.fmt_time24 : R.string.fmt_time12;
+        mTimeFormat = new SimpleDateFormat(getString(resId));
         mCursor.requery();
         int[] countAry = mApp.getDiceCount();
         for (int i = 0; i < 6; i++) {

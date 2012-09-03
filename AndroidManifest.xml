@@ -50,7 +50,7 @@
         <activity
             android:name=".StatsActivity"
             android:label="@string/stats_title"
-            android:configChanges="keyboard|keyboardHidden|orientation"
+            android:configChanges="keyboard|keyboardHidden"
             android:windowSoftInputMode="adjustPan"
             />
     </application>
