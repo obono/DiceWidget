@@ -4,220 +4,256 @@
 <item android:maxLevel="1">
  <layer-list>
   <item android:drawable="@drawable/frw" />
-  <item android:drawable="@drawable/eb1" />
+  <item android:drawable="@drawable/eba" />
  </layer-list>
 </item>
 <item android:maxLevel="2">
  <layer-list>
   <item android:drawable="@drawable/frw" />
-  <item android:drawable="@drawable/eb2a" />
+  <item android:drawable="@drawable/ebb" />
  </layer-list>
 </item>
 <item android:maxLevel="3">
  <layer-list>
   <item android:drawable="@drawable/frw" />
-  <item android:drawable="@drawable/eb2b" />
+  <item android:drawable="@drawable/ebc" />
  </layer-list>
 </item>
 <item android:maxLevel="4">
  <layer-list>
   <item android:drawable="@drawable/frw" />
-  <item android:drawable="@drawable/eb3a" />
+  <item android:drawable="@drawable/eba" />
+  <item android:drawable="@drawable/ebc" />
  </layer-list>
 </item>
 <item android:maxLevel="5">
  <layer-list>
   <item android:drawable="@drawable/frw" />
-  <item android:drawable="@drawable/eb3b" />
+  <item android:drawable="@drawable/eba" />
+  <item android:drawable="@drawable/ebb" />
  </layer-list>
 </item>
 <item android:maxLevel="7">
  <layer-list>
   <item android:drawable="@drawable/frw" />
-  <item android:drawable="@drawable/eb4" />
+  <item android:drawable="@drawable/ebb" />
+  <item android:drawable="@drawable/ebc" />
  </layer-list>
 </item>
 <item android:maxLevel="9">
  <layer-list>
   <item android:drawable="@drawable/frw" />
-  <item android:drawable="@drawable/eb5" />
+  <item android:drawable="@drawable/eba" />
+  <item android:drawable="@drawable/ebb" />
+  <item android:drawable="@drawable/ebc" />
  </layer-list>
 </item>
 <item android:maxLevel="10">
  <layer-list>
   <item android:drawable="@drawable/frw" />
-  <item android:drawable="@drawable/eb6a" />
+  <item android:drawable="@drawable/ebb" />
+  <item android:drawable="@drawable/ebc" />
+  <item android:drawable="@drawable/ebd" />
  </layer-list>
 </item>
 <item android:maxLevel="11">
  <layer-list>
   <item android:drawable="@drawable/frw" />
-  <item android:drawable="@drawable/eb6b" />
+  <item android:drawable="@drawable/ebb" />
+  <item android:drawable="@drawable/ebc" />
+  <item android:drawable="@drawable/ebe" />
  </layer-list>
 </item>
 
 <item android:maxLevel="13">
  <layer-list>
   <item android:drawable="@drawable/frk" />
-  <item android:drawable="@drawable/ew1" />
+  <item android:drawable="@drawable/ewa" />
  </layer-list>
 </item>
 <item android:maxLevel="14">
  <layer-list>
   <item android:drawable="@drawable/frk" />
-  <item android:drawable="@drawable/ew2a" />
+  <item android:drawable="@drawable/ewb" />
  </layer-list>
 </item>
 <item android:maxLevel="15">
  <layer-list>
   <item android:drawable="@drawable/frk" />
-  <item android:drawable="@drawable/ew2b" />
+  <item android:drawable="@drawable/ewc" />
  </layer-list>
 </item>
 <item android:maxLevel="16">
  <layer-list>
   <item android:drawable="@drawable/frk" />
-  <item android:drawable="@drawable/ew3a" />
+  <item android:drawable="@drawable/ewa" />
+  <item android:drawable="@drawable/ewc" />
  </layer-list>
 </item>
 <item android:maxLevel="17">
  <layer-list>
   <item android:drawable="@drawable/frk" />
-  <item android:drawable="@drawable/ew3b" />
+  <item android:drawable="@drawable/ewa" />
+  <item android:drawable="@drawable/ewb" />
  </layer-list>
 </item>
 <item android:maxLevel="19">
  <layer-list>
   <item android:drawable="@drawable/frk" />
-  <item android:drawable="@drawable/ew4" />
+  <item android:drawable="@drawable/ewb" />
+  <item android:drawable="@drawable/ewc" />
  </layer-list>
 </item>
 <item android:maxLevel="21">
  <layer-list>
   <item android:drawable="@drawable/frk" />
-  <item android:drawable="@drawable/ew5" />
+  <item android:drawable="@drawable/ewa" />
+  <item android:drawable="@drawable/ewb" />
+  <item android:drawable="@drawable/ewc" />
  </layer-list>
 </item>
 <item android:maxLevel="22">
  <layer-list>
   <item android:drawable="@drawable/frk" />
-  <item android:drawable="@drawable/ew6a" />
+  <item android:drawable="@drawable/ewb" />
+  <item android:drawable="@drawable/ewc" />
+  <item android:drawable="@drawable/ewd" />
  </layer-list>
 </item>
 <item android:maxLevel="23">
  <layer-list>
   <item android:drawable="@drawable/frk" />
-  <item android:drawable="@drawable/ew6b" />
+  <item android:drawable="@drawable/ewb" />
+  <item android:drawable="@drawable/ewc" />
+  <item android:drawable="@drawable/ewe" />
  </layer-list>
 </item>
 
 <item android:maxLevel="25">
  <layer-list>
   <item android:drawable="@drawable/frr" />
-  <item android:drawable="@drawable/ew1" />
+  <item android:drawable="@drawable/ewa" />
  </layer-list>
 </item>
 <item android:maxLevel="26">
  <layer-list>
   <item android:drawable="@drawable/frr" />
-  <item android:drawable="@drawable/ew2a" />
+  <item android:drawable="@drawable/ewb" />
  </layer-list>
 </item>
 <item android:maxLevel="27">
  <layer-list>
   <item android:drawable="@drawable/frr" />
-  <item android:drawable="@drawable/ew2b" />
+  <item android:drawable="@drawable/ewc" />
  </layer-list>
 </item>
 <item android:maxLevel="28">
  <layer-list>
   <item android:drawable="@drawable/frr" />
-  <item android:drawable="@drawable/ew3a" />
+  <item android:drawable="@drawable/ewa" />
+  <item android:drawable="@drawable/ewc" />
  </layer-list>
 </item>
 <item android:maxLevel="29">
  <layer-list>
   <item android:drawable="@drawable/frr" />
-  <item android:drawable="@drawable/ew3b" />
+  <item android:drawable="@drawable/ewa" />
+  <item android:drawable="@drawable/ewb" />
  </layer-list>
 </item>
 <item android:maxLevel="31">
  <layer-list>
   <item android:drawable="@drawable/frr" />
-  <item android:drawable="@drawable/ew4" />
+  <item android:drawable="@drawable/ewb" />
+  <item android:drawable="@drawable/ewc" />
  </layer-list>
 </item>
 <item android:maxLevel="33">
  <layer-list>
   <item android:drawable="@drawable/frr" />
-  <item android:drawable="@drawable/ew5" />
+  <item android:drawable="@drawable/ewa" />
+  <item android:drawable="@drawable/ewb" />
+  <item android:drawable="@drawable/ewc" />
  </layer-list>
 </item>
 <item android:maxLevel="34">
  <layer-list>
   <item android:drawable="@drawable/frr" />
-  <item android:drawable="@drawable/ew6a" />
+  <item android:drawable="@drawable/ewb" />
+  <item android:drawable="@drawable/ewc" />
+  <item android:drawable="@drawable/ewd" />
  </layer-list>
 </item>
 <item android:maxLevel="35">
  <layer-list>
   <item android:drawable="@drawable/frr" />
-  <item android:drawable="@drawable/ew6b" />
+  <item android:drawable="@drawable/ewb" />
+  <item android:drawable="@drawable/ewc" />
+  <item android:drawable="@drawable/ewe" />
  </layer-list>
 </item>
 
 <item android:maxLevel="37">
  <layer-list>
   <item android:drawable="@drawable/frb" />
-  <item android:drawable="@drawable/eb1" />
+  <item android:drawable="@drawable/eba" />
  </layer-list>
 </item>
 <item android:maxLevel="38">
  <layer-list>
   <item android:drawable="@drawable/frb" />
-  <item android:drawable="@drawable/eb2a" />
+  <item android:drawable="@drawable/ebb" />
  </layer-list>
 </item>
 <item android:maxLevel="39">
  <layer-list>
   <item android:drawable="@drawable/frb" />
-  <item android:drawable="@drawable/eb2b" />
+  <item android:drawable="@drawable/ebc" />
  </layer-list>
 </item>
 <item android:maxLevel="40">
  <layer-list>
   <item android:drawable="@drawable/frb" />
-  <item android:drawable="@drawable/eb3a" />
+  <item android:drawable="@drawable/eba" />
+  <item android:drawable="@drawable/ebc" />
  </layer-list>
 </item>
 <item android:maxLevel="41">
  <layer-list>
   <item android:drawable="@drawable/frb" />
-  <item android:drawable="@drawable/eb3b" />
+  <item android:drawable="@drawable/eba" />
+  <item android:drawable="@drawable/ebb" />
  </layer-list>
 </item>
 <item android:maxLevel="43">
  <layer-list>
   <item android:drawable="@drawable/frb" />
-  <item android:drawable="@drawable/eb4" />
+  <item android:drawable="@drawable/ebb" />
+  <item android:drawable="@drawable/ebc" />
  </layer-list>
 </item>
 <item android:maxLevel="45">
  <layer-list>
   <item android:drawable="@drawable/frb" />
-  <item android:drawable="@drawable/eb5" />
+  <item android:drawable="@drawable/eba" />
+  <item android:drawable="@drawable/ebb" />
+  <item android:drawable="@drawable/ebc" />
  </layer-list>
 </item>
 <item android:maxLevel="46">
  <layer-list>
   <item android:drawable="@drawable/frb" />
-  <item android:drawable="@drawable/eb6a" />
+  <item android:drawable="@drawable/ebb" />
+  <item android:drawable="@drawable/ebc" />
+  <item android:drawable="@drawable/ebd" />
  </layer-list>
 </item>
 <item android:maxLevel="47">
  <layer-list>
   <item android:drawable="@drawable/frb" />
-  <item android:drawable="@drawable/eb6b" />
+  <item android:drawable="@drawable/ebb" />
+  <item android:drawable="@drawable/ebc" />
+  <item android:drawable="@drawable/ebe" />
  </layer-list>
 </item>
 

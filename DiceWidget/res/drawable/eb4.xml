@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-<item android:drawable="@drawable/eb" android:top="4dip" android:bottom="20dip" android:left="4dip" android:right="20dip" />
-<item android:drawable="@drawable/eb" android:top="4dip" android:bottom="20dip" android:left="20dip" android:right="4dip" />
-<item android:drawable="@drawable/eb" android:top="20dip" android:bottom="4dip" android:left="4dip" android:right="20dip" />
-<item android:drawable="@drawable/eb" android:top="20dip" android:bottom="4dip" android:left="20dip" android:right="4dip" />
-</layer-list>

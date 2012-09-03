@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+<item android:drawable="@drawable/eb" android:top="4dip" android:bottom="20dip" android:left="12dip" android:right="12dip" />
+<item android:drawable="@drawable/eb" android:top="20dip" android:bottom="4dip" android:left="12dip" android:right="12dip" />
+</layer-list>

@@ -16,4 +16,6 @@
     <string name="stats_counts">Counts of shaken dice</string>
     <string name="msg_double">Dice Widget is already allocated.</string>
     <string name="msg_shook">You shook dice %d times.</string>
+    <string name="fmt_time12">h:mm:ss a</string>
+    <string name="fmt_time24">H:mm:ss</string>
 </resources>

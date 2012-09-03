@@ -117,7 +117,7 @@ public class MyApplication extends Application {
             PendingIntent pIntent = PendingIntent.getActivity(context, 0,
                     new Intent(context, StatsActivity.class), Intent.FLAG_ACTIVITY_NEW_TASK);
             String msg = (count > 0) ?
-                    String.format(context.getText(R.string.msg_shook).toString(), count) : null;
+                    String.format(context.getString(R.string.msg_shook), count) : null;
             notice.setLatestEventInfo(context, context.getText(R.string.stats_title), msg, pIntent);
             notice.flags |= Notification.FLAG_NO_CLEAR | Notification.FLAG_ONGOING_EVENT;
         }
