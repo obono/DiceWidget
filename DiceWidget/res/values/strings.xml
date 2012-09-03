@@ -13,7 +13,6 @@
     <string name="config_sound">Sound</string>
     <string name="config_stats">Confirm stats</string>
     <string name="stats_noentry">No entries</string>
-    <string name="stats_counts">Counts of shaken dice</string>
     <string name="msg_double">Dice Widget is already allocated.</string>
     <string name="msg_shook">You shook dice %d times.</string>
     <string name="fmt_time12">h:mm:ss a</string>
